@@ -13,10 +13,17 @@ export declare class Container {
     load(...modules: ContainerModule[]): void;
     /**
      * Create a binder to bind a service identifier to an implementation.
-     * @param id The service identifier.
-     * This is a fluent api.  Use the returned Binder object to configure the object.
+     *
+     * If the identifier is a class marked by @Injectable(), the binder will auto-bind
+     * itself while still allowing you to override its behavior with the returned binder.
+     *
+     * If a class is passed with @Injectable(), the binding will be bound to both
+     * the class and to the auto-bind identifier specified with @Injectable()
+     * @param identifier The service identifier.
+     * @returns A binder object to configure the binding.
      */
-    bind<T>(id: Identifier<T>): Binder;
+    bind<T>(identifier: Identifier<T>): Binder;
+    private _addBinder<T>(identifier, binder);
     /**
      * Create a new instance of an injectable class.
      * The class must be declared injectable using the @Injectable annotation.

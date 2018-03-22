@@ -16,7 +16,8 @@ import {
 
 import {
     isInjectable,
-    getConstructorInjections
+    getConstructorInjections,
+    getIdentifier
 } from "./injection-utils";
 
 import {
@@ -49,18 +50,35 @@ export class Container {
 
     /**
      * Create a binder to bind a service identifier to an implementation.
-     * @param id The service identifier.
-     * This is a fluent api.  Use the returned Binder object to configure the object.
+     * 
+     * If the identifier is a class marked by @Injectable(), the binder will auto-bind
+     * itself while still allowing you to override its behavior with the returned binder.
+     * 
+     * If a class is passed with @Injectable(), the binding will be bound to both
+     * the class and to the auto-bind identifier specified with @Injectable()
+     * @param identifier The service identifier.
+     * @returns A binder object to configure the binding.
      */
-    bind<T>(id: Identifier<T>): Binder {
-        const binder = new BinderImpl<T>(id);
-        let binders: BinderImpl<T>[] | undefined = this._binders.get(id);
+    bind<T>(identifier: Identifier<T>): Binder {
+        const binder = new BinderImpl<T>(identifier);
+        this._addBinder(identifier, binder);
+
+        // Check to see if this is an auto-bind injectable.
+        const autoIdentifier = getIdentifier(identifier);
+        if (autoIdentifier) {
+            this._addBinder(autoIdentifier, binder);
+        }
+
+        return binder;
+    }
+
+    private _addBinder<T>(identifier: Identifier<T>, binder: BinderImpl<T>) {
+        let binders: BinderImpl<T>[] | undefined = this._binders.get(identifier);
         if (binders == null) {
             binders = [];
-            this._binders.set(id, binders);
+            this._binders.set(identifier, binders);
         }
         binders.push(binder);
-        return binder;
     }
 
     /**
