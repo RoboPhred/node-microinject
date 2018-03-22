@@ -25,7 +25,7 @@ export interface InjectionOptions {
  * Marks this class as injectable.
  * @param autobindIdentifier The identifier this class will use when auto-bound (ie: the object is passed as the identifier to container.bind()).
  */
-export function injectable<TFunction extends Function>(autobindIdentifier?: Identifier): (target: TFunction) => void {
+export function Injectable<TFunction extends Function>(autobindIdentifier?: Identifier): (target: TFunction) => void {
     return function(target: any) {
         target[InjectableSymbol] = true;
         if (autobindIdentifier) {
@@ -39,7 +39,7 @@ export function injectable<TFunction extends Function>(autobindIdentifier?: Iden
  * @param identifier The identifier of the binding to inject.
  * @param opts Additional injection options.
  */
-export function inject(identifier: Identifier, opts?: InjectionOptions) {
+export function Inject(identifier: Identifier, opts?: InjectionOptions) {
     return function(target: any, targetKey: string, index: number) {
         let dependencies = target[ConstructorInjectionsSymbol] as InjectionData[];
         if (dependencies == null) {
@@ -58,7 +58,7 @@ export function inject(identifier: Identifier, opts?: InjectionOptions) {
  * This has no effect if the argument is not annotated with @Inject().
  * This annotation is not order sensitive.  It can come before or after @Inject().
  */
-export function optional() {
+export function Optional() {
     return function(target: any, targetKey: string, index: number) {
         let dependencies = target[ConstructorInjectionsSymbol] as InjectionData[];
         if (dependencies == null) {

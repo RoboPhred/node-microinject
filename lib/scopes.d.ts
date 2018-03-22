@@ -1,1 +1,1 @@
-export declare function singleton<TFunction extends Function>(): (target: TFunction) => void;
+export declare function Singleton<TFunction extends Function>(): (target: TFunction) => void;
