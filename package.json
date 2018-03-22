@@ -1,0 +1,35 @@
+{
+  "name": "microinject",
+  "version": "0.1.0",
+  "description": "A Tiny, standalone, library-friendly dependency injection.",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "clean": "rimraf lib",
+    "prebuild": "npm run clean",
+    "build": "tsc -p src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RoboPhred/node-microinject.git"
+  },
+  "keywords": [
+    "ioc",
+    "inversion of control",
+    "di",
+    "dependency injection",
+    "node"
+  ],
+  "author": "William Matthews",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RoboPhred/node-microinject/issues"
+  },
+  "devDependencies": {
+    "rimraf": "^2.6.2",
+    "typescript": "^2.7.2"
+  },
+  "engines": {
+    "node": ">=6.13.1"
+  }
+}
