@@ -17,7 +17,7 @@ import {
 import {
     isInjectable,
     getConstructorInjections,
-    getIdentifier
+    getAutobindIdentifiers
 } from "./injection-utils";
 
 import {
@@ -64,9 +64,9 @@ export class Container {
         this._addBinder(identifier, binder);
 
         // Check to see if this is an auto-bind injectable.
-        const autoIdentifier = getIdentifier(identifier);
-        if (autoIdentifier) {
-            this._addBinder(autoIdentifier, binder);
+        const autoIdentifiers = getAutobindIdentifiers(identifier);
+        for (let identifier of autoIdentifiers) {
+            this._addBinder(identifier, binder);
         }
 
         return binder;

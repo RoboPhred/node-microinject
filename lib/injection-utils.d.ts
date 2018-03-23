@@ -12,10 +12,10 @@ export interface InjectionData extends InjectionOptions {
  */
 export declare function isInjectable(target: any): boolean;
 /**
- * Returns the autobind identifier of the target, if any was specified.  Returns undefined if none was specified.
+ * Returns the autobind identifiers of the target.  Returns an empty array if none were specified.
  * @param target The target to test for injectability.
  */
-export declare function getIdentifier(target: any): Identifier;
+export declare function getAutobindIdentifiers(target: any): Identifier[];
 /**
  * Returns data on injections to the target constructor's arguments.  If no injections are specified, an empty array is returned.
  * This does not check the target for injectability.

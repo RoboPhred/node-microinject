@@ -30,11 +30,11 @@ export function isInjectable(target: any): boolean {
 }
 
 /**
- * Returns the autobind identifier of the target, if any was specified.  Returns undefined if none was specified.
+ * Returns the autobind identifiers of the target.  Returns an empty array if none were specified.
  * @param target The target to test for injectability.
  */
-export function getIdentifier(target: any): Identifier {
-    return target[AutobindIdentifierSymbol];
+export function getAutobindIdentifiers(target: any): Identifier[] {
+    return target[AutobindIdentifierSymbol] || [];
 }
 
 /**

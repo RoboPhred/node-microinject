@@ -7,9 +7,15 @@ export interface InjectionOptions {
 }
 /**
  * Marks this class as injectable.
+ * Optionally allows the specification of an autobind identifier.
  * @param autobindIdentifier The identifier this class will use when auto-bound (ie: the object is passed as the identifier to container.bind()).
  */
 export declare function Injectable<TFunction extends Function>(autobindIdentifier?: Identifier): (target: TFunction) => void;
+/**
+ * Marks the class with an autobind identifier.
+ * @param autobindIdentifier The identifier to automatically bind this class to when bound without additional configuration.
+ */
+export declare function AutobindTo<TFunction extends Function>(autobindIdentifier: Identifier): (target: TFunction) => void;
 /**
  * Marks the constructor argument as being injectable.
  * @param identifier The identifier of the binding to inject.

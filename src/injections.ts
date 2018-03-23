@@ -23,14 +23,27 @@ export interface InjectionOptions {
 
 /**
  * Marks this class as injectable.
+ * Optionally allows the specification of an autobind identifier.
  * @param autobindIdentifier The identifier this class will use when auto-bound (ie: the object is passed as the identifier to container.bind()).
  */
 export function Injectable<TFunction extends Function>(autobindIdentifier?: Identifier): (target: TFunction) => void {
     return function(target: any) {
         target[InjectableSymbol] = true;
         if (autobindIdentifier) {
-            target[AutobindIdentifierSymbol] = autobindIdentifier;
+            if (target[AutobindIdentifierSymbol] == null) target[AutobindIdentifierSymbol] = [];
+            target[AutobindIdentifierSymbol].push(autobindIdentifier);
         }
+    }
+}
+
+/**
+ * Marks the class with an autobind identifier.
+ * @param autobindIdentifier The identifier to automatically bind this class to when bound without additional configuration.
+ */
+export function AutobindTo<TFunction extends Function>(autobindIdentifier: Identifier): (target: TFunction) => void {
+    return function(target: any) {
+        if (target[AutobindIdentifierSymbol] == null) target[AutobindIdentifierSymbol] = [];
+        target[AutobindIdentifierSymbol].push(autobindIdentifier);
     }
 }
 
