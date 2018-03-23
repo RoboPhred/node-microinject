@@ -9,3 +9,5 @@ export const InjectableSymbol = getSymbol("Injectable");
 export const AutobindIdentifierSymbol = getSymbol("AutobindIdentifier");
 export const SingletonSymbol = getSymbol("Singleton");
 export const ConstructorInjectionsSymbol = getSymbol("ConstructorInjections");
+export const InScopeSymbol = getSymbol("InScope");
+export const AsScopeSymbol = getSymbol("AsScope");

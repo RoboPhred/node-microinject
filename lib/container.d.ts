@@ -1,4 +1,4 @@
-import { Identifier, Newable } from "./interfaces";
+import { Identifier, Newable, ScopeMap } from "./interfaces";
 import { ContainerModule } from "./module";
 import { Binder } from "./binder";
 export declare class Container {
@@ -31,7 +31,7 @@ export declare class Container {
      * @param ctor The class constructor.
      * @returns The created class.
      */
-    create<T>(ctor: Newable<T>): T;
+    create<T>(ctor: Newable<T>, scopes?: ScopeMap): T;
     /**
      * Gets the bound object for an identifier.  This may create the object if necessary depending on scope and previous creations.
      * If multiple objects are bound to the identifier, the object chosen may not be predictable.
@@ -39,14 +39,14 @@ export declare class Container {
      * @param identifier The identifier of the object to get.
      * @returns The object for the given identifier.
      */
-    get<T>(identifier: Identifier<T>): T;
+    get<T, S = any>(identifier: Identifier<T>, scopes?: ScopeMap): T;
     /**
      * Gets all bound objects for an identifier.  This may create the objects if necessary depending on scope and previous creations.
      * This method will throw IdentifierNotBoundError if no bindings exist for the identifier.
      * @param identifier The identifier of the object to get.
      * @returns An array of all objects for the given identifier.
      */
-    getAll<T>(identifier: Identifier<T>): T[];
+    getAll<T, S = any>(identifier: Identifier<T>, scopes?: ScopeMap): T[];
     /**
      * Checks if the given identifier is known to the container.
      * @param identifier The identifier to check for.

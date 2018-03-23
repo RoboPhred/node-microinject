@@ -1,6 +1,5 @@
-import { Context } from "./interfaces";
+import { Context, Scope } from "./interfaces";
 import { ScopedBinder } from "./binder";
-import { Container } from "./container";
 export interface BindingImpl {
     _getBoundValue(context: Context): any;
 }
@@ -11,12 +10,21 @@ export interface BindingImpl {
 export declare class ScopedBindingImpl implements BindingImpl, ScopedBinder {
     private _create;
     private _singleton;
-    private _singletonInstantiated;
     private _singletonValue;
-    constructor(_create: (container: Container) => any, defaultSingleton?: boolean);
+    private _singletonInitialized;
+    private _inScope;
+    private _asScope;
+    /**
+     * A map of scope-defining instances to the instance of this service for that scope.
+     */
+    private _scopeInstances;
+    constructor(_create: (context: Context) => any, defaultSingleton?: boolean);
     _getBoundValue(context: Context): any;
     inSingletonScope(): void;
     inTransientScope(): void;
+    inScope(scope: Scope): void;
+    asScope(scope: Scope): void;
+    private _checkCanSetInScope();
 }
 /**
  * A simple binding that provides a constant value.

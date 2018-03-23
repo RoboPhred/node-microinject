@@ -2,7 +2,9 @@
 import {
     Identifier,
     Newable,
-    Context
+    Context,
+    ScopeMap,
+    Scope
 } from "./interfaces";
 
 import {
@@ -88,9 +90,15 @@ export class Container {
      * @param ctor The class constructor.
      * @returns The created class.
      */
-    create<T>(ctor: Newable<T>): T {
+    create<T>(ctor: Newable<T>, scopes?: ScopeMap): T {
         if (!isInjectable(ctor)) {
             throw new Error(`The constructor "${ctor.name}" is not injectable.`);
+        }
+
+        // If no scopes specified, create a scope map to avoid repeated
+        //  map creation during dependency resolution loop.
+        if (!scopes) {
+            scopes = new Map<Scope, any>();
         }
 
         const dependencies = getConstructorInjections(ctor);
@@ -106,10 +114,10 @@ export class Container {
             }
 
             if (injectData.all) {
-                return this.getAll(injectData.identifier);
+                return this.getAll(injectData.identifier, scopes);
             }
             else {
-                return this.get(injectData.identifier);
+                return this.get(injectData.identifier, scopes);
             }
         });
 
@@ -123,13 +131,14 @@ export class Container {
      * @param identifier The identifier of the object to get.
      * @returns The object for the given identifier.
      */
-    get<T>(identifier: Identifier<T>): T {
+    get<T, S = any>(identifier: Identifier<T>, scopes?: ScopeMap): T {
         const binders = this._binders.get(identifier);
         if (binders == null) {
             throw new IdentifierNotBoundError(`No binding exists for id "${identifier}".`);
         }
 
-        return binders[0]._getBinding()._getBoundValue({ container: this });
+        if (!scopes) scopes = new Map<Scope, any>();
+        return binders[0]._getBinding()._getBoundValue({ container: this, scopes });
     }
 
     /**
@@ -138,13 +147,15 @@ export class Container {
      * @param identifier The identifier of the object to get.
      * @returns An array of all objects for the given identifier.
      */
-    getAll<T>(identifier: Identifier<T>): T[] {
+    getAll<T, S = any>(identifier: Identifier<T>, scopes?: ScopeMap): T[] {
         const binders = this._binders.get(identifier);
         if (binders == null) {
             throw new IdentifierNotBoundError(`No binding exists for id "${identifier}".`);
         }
 
-        return binders.map(x => x._getBinding()._getBoundValue({ container: this }));
+        if (!scopes) scopes = new Map<Scope, any>();
+        const context: Context = { container: this, scopes };
+        return binders.map(x => x._getBinding()._getBoundValue(context));
     }
 
     /**

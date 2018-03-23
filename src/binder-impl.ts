@@ -2,7 +2,8 @@
 import {
     Identifier,
     Newable,
-    Context
+    Context,
+    Scope
 } from "./interfaces";
 
 import {
@@ -51,7 +52,7 @@ export class BinderImpl<T = any> implements Binder {
             throw new TypeError("Target must be a constructor.");
         }
         this._ensureCanBind();
-        return this._binding = new ScopedBindingImpl(container => container.create(ctor), isSingleton(ctor));
+        return this._binding = new ScopedBindingImpl(context => context.container.create(ctor), isSingleton(ctor));
     }
 
     toDynamicValue<T>(factory: (context: Context) => T): ScopedBinder {      
@@ -59,11 +60,11 @@ export class BinderImpl<T = any> implements Binder {
             throw new TypeError("Factory must be a function.");
         }
         this._ensureCanBind();
-        return this._binding = new ScopedBindingImpl(container => factory({container}));
+        return this._binding = new ScopedBindingImpl(context => factory(context));
     }
 
     toConstantValue<T>(value: T): void {
-        this._binding = new ConstBindingImpl(value);
+        this._binding = new ScopedBindingImpl(() => value);
     }
 
     // TODO: It may be desirable to find a way of removing access to this from outside the library.
@@ -85,7 +86,7 @@ export class BinderImpl<T = any> implements Binder {
             throw new BindingConfigurationError(`Binding for ${ctor.name} was never established.  A class constructor lacking the @Injectable() annotation cannot be auto-bound.`);
         }
         // Note that this is the same behavior as this.to()
-        return this._binding = new ScopedBindingImpl(container => container.create(ctor), isSingleton(ctor));
+        return this._binding = new ScopedBindingImpl(context => context.container.create(ctor), isSingleton(ctor));
     }
 
     private _ensureCanBind() {

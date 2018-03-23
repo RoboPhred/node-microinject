@@ -17,7 +17,8 @@ describe("bindings", function () {
     let context: Context;
     beforeEach(function () {
         context = {
-            container: sinon.mock() as any
+            container: sinon.mock() as any,
+            scopes: new Map()
         };
     });
 
