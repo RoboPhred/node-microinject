@@ -94,18 +94,23 @@ export class Container {
         }
 
         const dependencies = getConstructorInjections(ctor);
-        const resolved = dependencies.map((x, i) => {
-            if (x.identifier == null) {
+        const resolved = dependencies.map((injectData, i) => {
+            if (injectData.identifier == null) {
                 throw new Error(`Constructor "${ctor.name}" parameter ${i} has injection annotation but no service identifier.`);
             }
 
-            const has = this.has(x.identifier);
+            const has = this.has(injectData.identifier);
             if (!has) {
-                if (x.optional) return null;
-                throw new IdentifierNotBoundError(`Constructor "${ctor.name}" parameter ${i} requests identifier "${x.identifier}" which is not bound.`);
+                if (injectData.optional) return injectData.all ? [] : null;
+                throw new IdentifierNotBoundError(`Constructor "${ctor.name}" parameter ${i} requests identifier "${injectData.identifier}" which is not bound.`);
             }
 
-            return this.get(x.identifier);
+            if (injectData.all) {
+                return this.getAll(injectData.identifier);
+            }
+            else {
+                return this.get(injectData.identifier);
+            }
         });
 
         return new ctor(...resolved);
