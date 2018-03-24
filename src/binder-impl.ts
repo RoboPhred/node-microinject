@@ -45,17 +45,12 @@ export class BinderImpl<T = any> implements Binder {
         return this._binding = new ScopedBindingImpl(container => container.create(ctor), isSingleton(ctor));
     }
 
-    toFactory<T>(factory: (context: Context) => T): ScopedBinder {      
+    toDynamicValue<T>(factory: (context: Context) => T): ScopedBinder {      
         if (typeof factory !== "function") {
             throw new TypeError("Factory must be a function.");
         }
         this._ensureCanBind();
         return this._binding = new ScopedBindingImpl(container => factory({container}));
-    }
-
-    toDynamicValue<T>(factory: (context: Context) => T): ScopedBinder {
-        // Note that this is identical to toFactory.
-        return this.toFactory(factory);
     }
 
     toConstantValue<T>(value: T): void {

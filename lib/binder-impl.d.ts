@@ -14,7 +14,6 @@ export declare class BinderImpl<T = any> implements Binder {
     private _binding;
     constructor(_identifier: Identifier<T>);
     to<T>(ctor: Newable<T>): ScopedBinder;
-    toFactory<T>(factory: (context: Context) => T): ScopedBinder;
     toDynamicValue<T>(factory: (context: Context) => T): ScopedBinder;
     toConstantValue<T>(value: T): void;
     _getBinding(): BindingImpl;

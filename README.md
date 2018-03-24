@@ -13,7 +13,7 @@ The API of this module is a subset of a legacy version of [InversifyJS](https://
 
 InversifyJS provided a good feature set, but failed on the first 3 requirements.  As a result, this
 project was created as an api-compatible stand-in of the subset Inversify features I was using at the time.
-Aside from the API signatures, no InversifyJS code was used in the making of this library.
+While this library uses a subset of the InversifyJS API, it is not a fork.  It has been written from the ground up.
 
 # Design philosophy
 
@@ -27,13 +27,18 @@ completely transparent to the users of the library.
 
 # Benefits over InfersifyJS
 - No monkey patching of third party classes.
+- Support of custom scopes.
 - Microinject can be used transparently to consumers of your own library.  No reflect-metadata or monkey patching required.
+- Minimialist API: No redundant api calls for varying names of the same behavior.  No more questions of "Should I use toFactory or toDynamicValue?".
 
 # Drawbacks over InversifyJS
-- Lacking in many features (advanced scoping, async resolution, activation handlers, ...)
-Some features may be added with time, if they do not interfere with the design philosophy.
+- Lacking [powerful debug tools](https://github.com/inversify/inversify-chrome-devtools).
+- No [conditional binding](https://github.com/inversify/InversifyJS/blob/master/wiki/named_bindings.md)
+- No [hierarichal containers](https://github.com/inversify/InversifyJS/blob/master/wiki/hierarchical_di.md) (migitated by microinject's support of scopes).
+- No [tagged binding](https://github.com/inversify/InversifyJS/blob/master/wiki/tagged_bindings.md).
 - No typescript-based injection-by-type.  This is a result of being unable to use reflect-metadata.
 - Less established and proven.
+
 
 # Which one should I choose?
 

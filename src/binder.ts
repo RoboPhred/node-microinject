@@ -17,13 +17,7 @@ export interface Binder {
     to<T>(construct: Newable<T>): ScopedBinder;
 
     /**
-     * Binds the service identifier to a factory function.
-     * @param factory The factory function to provide the value.
-     */
-    toFactory<T>(factory: (context: Context) => T): ScopedBinder;
-
-    /**
-     * Alias for toFactory.  Included for Inversify api compatibility.
+     * Binds the service identifier to a value factory function.
      * @param factory The factory function to provide the value.
      */
     toDynamicValue<T>(factory: (context: Context) => T): ScopedBinder;
