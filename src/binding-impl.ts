@@ -1,7 +1,8 @@
 
 import {
     Context,
-    Scope
+    Scope,
+    Newable
 } from "./interfaces";
 
 import {
@@ -15,6 +16,12 @@ import {
 import {
     Container
 } from "./container";
+
+import {
+    isSingleton,
+    getInScope,
+    getAsScope
+} from "./scope-utils";
 
 
 export interface BindingImpl {
@@ -38,8 +45,12 @@ export class ScopedBindingImpl implements BindingImpl, ScopedBinder {
      */
     private _scopeInstances = new WeakMap<any, any>();
 
-    constructor(private _create: (context: Context) => any, defaultSingleton: boolean = false) {
-        this._singleton = defaultSingleton;
+    constructor(private _create: (context: Context) => any, autoBindTarget?: Newable<any>) {
+        if (autoBindTarget) {
+            this._singleton = isSingleton(autoBindTarget);
+            this._inScope = getInScope(autoBindTarget);
+            this._asScope = getAsScope(autoBindTarget);
+        }
     }
     
     _getBoundValue(context: Context) {

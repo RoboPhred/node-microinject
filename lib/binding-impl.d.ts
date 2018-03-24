@@ -1,4 +1,4 @@
-import { Context, Scope } from "./interfaces";
+import { Context, Scope, Newable } from "./interfaces";
 import { ScopedBinder } from "./binder";
 export interface BindingImpl {
     _getBoundValue(context: Context): any;
@@ -18,7 +18,7 @@ export declare class ScopedBindingImpl implements BindingImpl, ScopedBinder {
      * A map of scope-defining instances to the instance of this service for that scope.
      */
     private _scopeInstances;
-    constructor(_create: (context: Context) => any, defaultSingleton?: boolean);
+    constructor(_create: (context: Context) => any, autoBindTarget?: Newable<any>);
     _getBoundValue(context: Context): any;
     inSingletonScope(): void;
     inTransientScope(): void;

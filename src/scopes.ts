@@ -15,15 +15,14 @@ export function Singleton<TFunction extends Function>(): (target: TFunction) => 
     }
 }
 
-// TODO: Implement the functionality of these.
-// export function InScope<TFunction extends Function>(scope: Scope): (target: TFunction) => void {
-//     return function(target: any) {
-//         target[InScopeSymbol] = scope;
-//     }
-// }
+export function InScope<TFunction extends Function>(scope: Scope): (target: TFunction) => void {
+    return function(target: any) {
+        target[InScopeSymbol] = scope;
+    }
+}
 
-// export function AsScope<TFunction extends Function>(scope: Scope): (target: TFunction) => void {
-//     return function(target: any) {
-//         target[AsScopeSymbol] = scope;
-//     }
-// }
+export function AsScope<TFunction extends Function>(scope: Scope): (target: TFunction) => void {
+    return function(target: any) {
+        target[AsScopeSymbol] = scope;
+    }
+}
