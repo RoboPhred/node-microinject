@@ -64,21 +64,18 @@ export class ScopedBindingImpl implements BindingImpl, ScopedBinder {
     }
 
     _getBoundValue(context: Context) {
-
         // The scope must be established before the value is created, so that child resolutions
         //  can make use of it.
-        // Unfortunately, this means that an object cannot both define a scope, and reference the same
-        //  previously-established scope.
-        // Another reason we need a dependency graph.
+        // However, we still want to use our current scopes for resolution.
+        let childContext = context;
         if (this._asScope) {
-            // We are acting as a scope.  Add ourself to the list of active scopes.
-            //  Make a copy, so we do not interfere with other upstream operations.
-            //  We may override another setting, as we are allowed to have nested copies
-            //  of the same scope provider.
+            // We are acting as a scope.
+            //  Make a copy of the context, and add us to the list of active scopes.
+            //  Replacing an existing scope instance is fine, as we allow nesting.
             const scopes = new Map(context.scopes);
             const scopeId = uuidv4();
             scopes.set(this._asScope, scopeId);
-            context = {
+            childContext = {
                 ...context,
                 scopes
             };
@@ -87,16 +84,21 @@ export class ScopedBindingImpl implements BindingImpl, ScopedBinder {
         let value;
         if (this._singleton) {
             if (!this._singletonInitialized) {
-                this._singletonValue = this._create(context);
+                this._singletonValue = this._create(childContext);
                 this._singletonInitialized = true;
             }
             value = this._singletonValue;
         }
         else if (this._inScope) {
-            if (!context.scopes.has(this._inScope)) {
+            // Use the parent context for determening which scope instance to use.
+            //  This stands in contrast to the context we just created for ourself if we have _asScope set.
+            //  We do not want to look in our own scope for ourself!
+            //  This lets us support nested objects with .AsScope().
+            let currentScopes = context.scopes;
+            if (!currentScopes.has(this._inScope)) {
                 throw new Error(`Cannot create object: Object requires a scope for "${this._inScope}" which is not present in the current context.`);
             }
-            const scopeKey = context.scopes.get(this._inScope);
+            const scopeKey = currentScopes.get(this._inScope);
 
             if (!this._scopeInstances.has(scopeKey)) {
                 value = this._create(context);
@@ -108,7 +110,7 @@ export class ScopedBindingImpl implements BindingImpl, ScopedBinder {
         }
         else {
             // Transient.
-            value = this._create(context);
+            value = this._create(childContext);
         }
 
         return value;
