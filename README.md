@@ -34,8 +34,8 @@ completely transparent to the users of the library.
 # Drawbacks over InversifyJS
 - Lacking [powerful debug tools](https://github.com/inversify/inversify-chrome-devtools).
 - No [conditional binding](https://github.com/inversify/InversifyJS/blob/master/wiki/named_bindings.md)
-- No [hierarichal containers](https://github.com/inversify/InversifyJS/blob/master/wiki/hierarchical_di.md) (migitated by microinject's support of scopes).
 - No [tagged binding](https://github.com/inversify/InversifyJS/blob/master/wiki/tagged_bindings.md).
+- No [hierarichal containers](https://github.com/inversify/InversifyJS/blob/master/wiki/hierarchical_di.md).
 - No typescript-based injection-by-type.  This is a result of being unable to use reflect-metadata.
 - Less established and proven.
 
@@ -60,3 +60,4 @@ Unit tests and examples are forthcomming.
 # Alternatives
 - [InversifyJS](https://github.com/inversify/InversifyJS) - Typescript-based full featured Dependency Injection.  Recommended for most application-level projects.
 - [Electrolyte](https://github.com/jaredhanson/electrolyte) - A commonjs-centric dependency injection mechanism that functions at the module level.
+- [typescript-ioc](https://www.npmjs.com/package/typescript-ioc) - Single-container global-scoped IOC using Typescript and reflect-metadata.
