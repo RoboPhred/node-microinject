@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "strict": true,
+        "experimentalDecorators": true,
+        "rootDir": "./src",
+        "outDir": "./lib",
+        "baseUrl": ".",
+        "paths": {
+            "microinject": ["../lib"]
+        },
+        "sourceMap": true
+    }
+}
