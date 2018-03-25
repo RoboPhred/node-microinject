@@ -50,7 +50,7 @@ export class ScopedBindingImpl implements BindingImpl, ScopedBinder {
     /**
      * A map of guids within our _inScope to the instance of this service for that scope.
      */
-    private _scopeInstances = new WeakMap<any, any>();
+    private _scopeInstances = new Map<any, any>();
 
     constructor(private _identifier: Identifier, private _create: (context: Context) => any, autoBindTarget?: Newable<any>) {
         if (autoBindTarget) {
@@ -85,6 +85,7 @@ export class ScopedBindingImpl implements BindingImpl, ScopedBinder {
         if (this._singleton) {
             if (!this._singletonInitialized) {
                 this._singletonValue = this._create(context);
+                this._singletonInitialized = true;
             }
             value = this._singletonValue;
         }

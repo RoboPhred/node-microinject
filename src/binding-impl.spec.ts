@@ -24,13 +24,13 @@ describe("bindings", function () {
 
     describe("@ScopedBindingImpl", function () {
         function testTransientBoundValues() {
-            it("generates a new value on each call", function () {
+            it("#_getBoundValue generates a new value on each call", function () {
                 const valueCreator = sinon.stub();
 
                 const subject = new ScopedBindingImpl(identifier, valueCreator);
 
                 for (let i = 0; i < 3; i++) {
-                    const expectedValue = `expected-value-${i}`;
+                    const expectedValue = `expected-value:${i}`;
                     valueCreator.onCall(i).returns(expectedValue);
 
                     const result = subject._getBoundValue(context);
@@ -41,27 +41,64 @@ describe("bindings", function () {
         }
 
         describe("unconfigured", function () {
-            describe("#_getBoundValue", function () {
-                testTransientBoundValues();
-            });
+            testTransientBoundValues();
         });
 
         describe("with #inTransientScope", function () {
-            describe("#_getBoundValue", function () {
-                testTransientBoundValues();
-            });
+            testTransientBoundValues();
         });
 
         describe("with #inSingletonScope", function () {
-            it("#_getBoundValue", function () {
-                const expectedValue = "expected-value-singleton";
-                const valueCreator = sinon.stub().returns(expectedValue);
+            it("#_getBoundValue returns the same object every call", function () {
+                const expectedValue = "expected-value:singleton";
+                const valueCreator = sinon.stub();
+                valueCreator.onFirstCall().returns(expectedValue);
 
                 const subject = new ScopedBindingImpl(identifier, valueCreator);
+                subject.inSingletonScope();
 
                 for (let i = 0; i < 3; i++) {
                     const result = subject._getBoundValue(context);
                     expect(result).to.equal(expectedValue);
+                }
+            });
+        });
+
+        describe("with #inScope", function() {
+            it("#_getBoundValue creates one object per scope", function() {
+                const scope = "scope-identifier";
+
+                const firstScopeId = "scope-1";
+                const firstScopeValue = "expected-value:first-scope";
+
+                const secondScopeId = "scope-2";
+                const secondScopeValue = "expected-value:second-scope";
+
+                const valueCreator = sinon.stub();
+                valueCreator.onFirstCall().returns(firstScopeValue);
+                valueCreator.onSecondCall().returns(secondScopeValue);
+
+                const subject = new ScopedBindingImpl(identifier, valueCreator);
+                subject.inScope(scope);
+
+                // First scope.
+                context = {
+                    ...context,
+                    scopes: new Map().set(scope, firstScopeId)
+                };
+                for (let i = 0; i < 3; i++) {
+                    const result = subject._getBoundValue(context)
+                    expect(result).to.equal(firstScopeValue);
+                }
+
+                // Second scope.
+                context = {
+                    ...context,
+                    scopes: new Map().set(scope, secondScopeId)
+                };
+                for (let i = 0; i < 3; i++) {
+                    const result = subject._getBoundValue(context)
+                    expect(result).to.equal(secondScopeValue);
                 }
             });
         });
