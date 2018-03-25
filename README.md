@@ -26,9 +26,8 @@ completely transparent to the users of the library.
 
 
 # Benefits over InfersifyJS
-- No monkey patching of third party classes.
-- Support of custom scopes.
-- Microinject can be used transparently to consumers of your own library.  No reflect-metadata or monkey patching required.
+- No [monkey patching of base or third party superclasses](https://github.com/inversify/InversifyJS/issues/619#issuecomment-352218311).
+- Microinject can be used transparently to consumers of your own library.  No [reflect-metadata](https://github.com/inversify/InversifyJS/issues/737) or monkey patching required.
 - Minimialist API: No redundant api calls for varying names of the same behavior.  No more questions of "Should I use toFactory or toDynamicValue?".
 
 # Drawbacks over InversifyJS
