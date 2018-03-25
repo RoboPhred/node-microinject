@@ -6,6 +6,14 @@ import {
 } from "./interfaces";
 
 import {
+    Container
+} from "./container";
+
+import {
+    BindingConfigurationError
+} from "./errors";
+
+import {
     Binder,
     ScopedBinder
 } from "./binder";
@@ -15,13 +23,14 @@ import {
 } from "./scope-utils";
 
 import {
-    Container
-} from "./container";
+    isInjectable
+} from "./injection-utils";
 
 import {
-    BindingConfigurationError
-} from "./errors";
-import { isInjectable } from "./injection-utils";
+    BindingImpl,
+    ScopedBindingImpl,
+    ConstBindingImpl
+} from "./binding-impl";
 
 
 /**
@@ -83,57 +92,5 @@ export class BinderImpl<T = any> implements Binder {
         if (this._binding != null) {
             throw new BindingConfigurationError(`Cannot reconfigure binding for ${this._identifier}: Binding already established.`);
         }
-    }
-}
-
-export abstract class BindingImpl {
-    abstract _getBoundValue(context: Context): any;
-}
-
-/**
- * A binding that is aware of scoping.
- * Currently, this is limited to the global singleton scope.
- */
-export class ScopedBindingImpl extends BindingImpl implements ScopedBinder {
-    private _singleton: boolean;
-    private _singletonInstantiated = false;
-    private _singletonValue: any = null;
-
-    constructor(private _create: (container: Container) => any, defaultSingleton: boolean = false) {
-        super();
-        this._singleton = defaultSingleton;
-    }
-    
-    _getBoundValue(context: Context) {
-        if (this._singleton) {
-            if (!this._singletonInstantiated) {
-                this._singletonValue = this._create(context.container);
-                this._singletonInstantiated = true;
-            }
-            return this._singletonValue;
-        }
-        
-        return this._create(context.container);
-    }
-
-    inSingletonScope() {
-        this._singleton = true;
-    }
-
-    inTransientScope() {
-        this._singleton = false;
-    }
-}
-
-/**
- * A simple binding that provides a constant value.
- */
-export class ConstBindingImpl extends BindingImpl {
-    constructor(private _value: any) {
-        super();
-    }
-
-    _getBoundValue(context: Context) {
-        return this._value;
     }
 }
