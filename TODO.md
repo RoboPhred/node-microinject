@@ -13,7 +13,9 @@ Particularly how to use Identifier<T> to create a Symbol that will make containe
 - Stop generating typedefs for non-exported / internal files.
 - Rework Binder/BinderImpl to prevent user access of _getBinding, _createDefaultBinding, _ensureCanBind
 - Refactor to build an object graph and plan before instantiation for infinite loop detection and tracing capability.
-
+- We are holding a lot of data around that is only needed during the buildout phase of the object graph.
+    - Consider reworking it to build a graph first, then instantiate objects based on it.
+    - This seems to be how InversifyJS does things, judging from its documentation.
 
 # 2.x
 
@@ -31,3 +33,4 @@ This allows for additional cross-cutting features:
 - Mixins, wrapped functions.
 - Remoted calls, for example over an IPC bus or microservice architecture.
 Ensure typings can understand these transformations (eg promisify).  Will require [typescript foo](https://github.com/Microsoft/TypeScript/pull/21496).
+

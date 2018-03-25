@@ -11,3 +11,4 @@ export const SingletonSymbol = getSymbol("Singleton");
 export const ConstructorInjectionsSymbol = getSymbol("ConstructorInjections");
 export const InScopeSymbol = getSymbol("InScope");
 export const AsScopeSymbol = getSymbol("AsScope");
+export const AsScopeSelfIdentifedSymbol = getSymbol("AsScopeSelfIdentified");

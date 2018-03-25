@@ -14,6 +14,7 @@ import { Container } from ".";
 
 describe("bindings", function () {
 
+    const identifier = "identifier";
     let context: Context;
     beforeEach(function () {
         context = {
@@ -27,7 +28,7 @@ describe("bindings", function () {
             it("generates a new value on each call", function () {
                 const valueCreator = sinon.stub();
 
-                const subject = new ScopedBindingImpl(valueCreator);
+                const subject = new ScopedBindingImpl(identifier, valueCreator);
 
                 for (let i = 0; i < 3; i++) {
                     const expectedValue = `expected-value-${i}`;
@@ -57,7 +58,7 @@ describe("bindings", function () {
                 const expectedValue = "expected-value-singleton";
                 const valueCreator = sinon.stub().returns(expectedValue);
 
-                const subject = new ScopedBindingImpl(valueCreator);
+                const subject = new ScopedBindingImpl(identifier, valueCreator);
 
                 for (let i = 0; i < 3; i++) {
                     const result = subject._getBoundValue(context);
