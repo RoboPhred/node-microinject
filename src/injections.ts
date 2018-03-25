@@ -37,27 +37,27 @@ export interface InjectionOptions {
 
 /**
  * Marks this class as injectable.
- * Optionally allows the specification of an autobind identifier.
- * @param autobindIdentifier The identifier this class will use when auto-bound (ie: the object is passed as the identifier to container.bind()).
+ * Optionally allows an alias to be specified.
+ * @param aliasIdentifier The identifier this class will use when auto-bound (ie: the object is passed as the identifier to container.bind()).
  */
-export function Injectable<TFunction extends Function>(autobindIdentifier?: Identifier): (target: TFunction) => void {
+export function Injectable<TFunction extends Function>(aliasIdentifier?: Identifier): (target: TFunction) => void {
     return function(target: any) {
         target[InjectableSymbol] = true;
-        if (autobindIdentifier) {
+        if (aliasIdentifier) {
             if (target[AutobindIdentifierSymbol] == null) target[AutobindIdentifierSymbol] = [];
-            target[AutobindIdentifierSymbol].push(autobindIdentifier);
+            target[AutobindIdentifierSymbol].push(aliasIdentifier);
         }
     }
 }
 
 /**
- * Marks the class with an autobind identifier.
- * @param autobindIdentifier The identifier to automatically bind this class to when bound without additional configuration.
+ * Specifies an alternate identifier to be used .
+ * @param aliasIdentifier The identifier to automatically bind this class to when bound without additional configuration.
  */
-export function AutobindTo<TFunction extends Function>(autobindIdentifier: Identifier): (target: TFunction) => void {
+export function Alias<TFunction extends Function>(aliasIdentifier: Identifier): (target: TFunction) => void {
     return function(target: any) {
         if (target[AutobindIdentifierSymbol] == null) target[AutobindIdentifierSymbol] = [];
-        target[AutobindIdentifierSymbol].push(autobindIdentifier);
+        target[AutobindIdentifierSymbol].push(aliasIdentifier);
     }
 }
 

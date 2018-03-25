@@ -1,4 +1,4 @@
-import { Newable, Context } from "./interfaces";
+import { Newable, Context, Scope } from "./interfaces";
 /**
  * An interface providing a fluent api to bind a ServiceIdentifier to an implementation.
  */
@@ -33,4 +33,15 @@ export interface ScopedBinder {
      * This overrides any @Singleton() annotation if used on an autobind class.
      */
     inTransientScope(): void;
+    /**
+     * Create one instance of the bound service per specified scope.
+     * @param scope The scope of the bound service.
+     */
+    inScope(scope: Scope): void;
+    /**
+     * Mark this service as creating a scope.
+     * If scope is not specified, the binding's identifier will be used as the scope identifier.
+     * @param scope The optional scope identifier to use.  If not provided, the binding's identifier will be used.
+     */
+    asScope(scope?: Scope): void;
 }
