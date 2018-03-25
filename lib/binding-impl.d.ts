@@ -16,7 +16,7 @@ export declare class ScopedBindingImpl implements BindingImpl, ScopedBinder {
     private _inScope;
     private _asScope;
     /**
-     * A map of scope-defining instances to the instance of this service for that scope.
+     * A map of guids within our _inScope to the instance of this service for that scope.
      */
     private _scopeInstances;
     constructor(_identifier: Identifier, _create: (context: Context) => any, autoBindTarget?: Newable<any>);
@@ -26,12 +26,4 @@ export declare class ScopedBindingImpl implements BindingImpl, ScopedBinder {
     inScope(scope: Scope): void;
     asScope(scope?: Scope): void;
     private _checkCanSetInScope();
-}
-/**
- * A simple binding that provides a constant value.
- */
-export declare class ConstBindingImpl implements BindingImpl {
-    private _value;
-    constructor(_value: any);
-    _getBoundValue(context: Context): any;
 }

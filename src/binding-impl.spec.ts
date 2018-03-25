@@ -8,9 +8,8 @@ import {
 } from "./interfaces";
 
 import {
-    ConstBindingImpl, ScopedBindingImpl
+    ScopedBindingImpl
 } from "./binding-impl";
-import { Container } from ".";
 
 describe("bindings", function () {
 
@@ -64,20 +63,6 @@ describe("bindings", function () {
                     const result = subject._getBoundValue(context);
                     expect(result).to.equal(expectedValue);
                 }
-            });
-        });
-    });
-
-    describe("@ConstBindingImpl", function () {
-        describe("#_getBoundValue", function () {
-            it("returns the constant value", function () {
-                const expectedValue = "expected-value-constant";
-
-                const subject = new ConstBindingImpl(expectedValue);
-
-                const result = subject._getBoundValue(context);
-
-                expect(result).to.equal(expectedValue);
             });
         });
     });

@@ -29,8 +29,7 @@ import {
 
 import {
     BindingImpl,
-    ScopedBindingImpl,
-    ConstBindingImpl
+    ScopedBindingImpl
 } from "./binding-impl";
 
 
