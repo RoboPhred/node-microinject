@@ -12,8 +12,8 @@ This means:
 The API of this module is a subset of a legacy version of [InversifyJS](https://github.com/inversify/InversifyJS).
 
 InversifyJS provided a good feature set, but failed on the first 3 requirements.  As a result, this
-project was created as an api-compatible stand-in of the subset Inversify features I was using at the time.
-While this library uses a subset of the InversifyJS API, it is not a fork.  It has been written from the ground up.
+project was created as an api-compatible stand-in for a subset of InversifyJS features I was using at the time.
+Despite this, it is not a fork, and has been written from the ground up.
 
 # Design philosophy
 
