@@ -7,6 +7,10 @@ Particularly how to use Identifier<T> to create a Symbol that will make containe
 # Features
 - Tagged binding.
 
+# Bugs
+- Scopes are defined before the defining object is created, so an object cannot both define a scope instance and use a previously-defined instance of the same scope.
+This can be fixed when dependency graph is investigated.
+
 # Cleanup
 - Unit test everything.
 - Ensure the engine limitation is set correctly; what nodejs versions support Map and Symbol?

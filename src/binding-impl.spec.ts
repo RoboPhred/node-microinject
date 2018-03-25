@@ -13,7 +13,7 @@ import {
 
 describe("bindings", function () {
 
-    const identifier = "identifier";
+    const identifier = "default-identifier";
     let context: Context;
     beforeEach(function () {
         context = {
@@ -100,6 +100,53 @@ describe("bindings", function () {
                     const result = subject._getBoundValue(context)
                     expect(result).to.equal(secondScopeValue);
                 }
+            });
+        });
+    });
+
+    describe("with #asScope", function() {
+        it("leaves the parent context scope unchanged", function() {
+            const valueCreator = sinon.stub();
+
+            const subject = new ScopedBindingImpl(identifier, valueCreator);
+            subject.asScope(identifier);
+
+            const scopeInstanceBeforeValueCreation = context.scopes.get(identifier);
+            subject._getBoundValue(context);
+            expect(context.scopes.get(identifier)).to.equal(scopeInstanceBeforeValueCreation);
+        });
+        
+        describe("when no scope is given", function() {
+            it("uses own identifier as the scope identifier in the child context", function() {
+                const expectedValue = "has-correct-scope";
+                const unexpectedValue = "has-wrong-scope";
+                const valueCreator = (childContext: Context) => {
+                    return childContext.scopes.has(identifier) ? expectedValue : unexpectedValue;
+                };
+
+                const subject = new ScopedBindingImpl(identifier, valueCreator);
+                subject.asScope();
+
+                const result = subject._getBoundValue(context);
+                expect(result).to.equal(expectedValue);
+            });
+        });
+
+        describe("when a scope identifier is given", function() {
+            it("uses the scope identifier in the child context", function() {
+                const scopeIdentifier = "custom-scope-identifier";
+
+                const expectedValue = "has-correct-scope";
+                const unexpectedValue = "has-wrong-scope";
+                const valueCreator = (childContext: Context) => {
+                    return childContext.scopes.has(scopeIdentifier) ? expectedValue : unexpectedValue;
+                };
+
+                const subject = new ScopedBindingImpl(identifier, valueCreator);
+                subject.asScope(scopeIdentifier);
+
+                const result = subject._getBoundValue(context);
+                expect(result).to.equal(expectedValue);
             });
         });
     });

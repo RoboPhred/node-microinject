@@ -67,8 +67,11 @@ export class ScopedBindingImpl implements BindingImpl, ScopedBinder {
 
         // The scope must be established before the value is created, so that child resolutions
         //  can make use of it.
+        // Unfortunately, this means that an object cannot both define a scope, and reference the same
+        //  previously-established scope.
+        // Another reason we need a dependency graph.
         if (this._asScope) {
-            // We are acting as a scope.  Add ourselfs to the list of active scopes.
+            // We are acting as a scope.  Add ourself to the list of active scopes.
             //  Make a copy, so we do not interfere with other upstream operations.
             //  We may override another setting, as we are allowed to have nested copies
             //  of the same scope provider.
