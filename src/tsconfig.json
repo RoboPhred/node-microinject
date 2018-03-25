@@ -5,6 +5,10 @@
         "moduleResolution": "node",
         "strict": true,
         "outDir": "../lib",
-        "declaration": true
+        "lib": [
+            "es2015"
+        ],
+        "declaration": true,
+        "sourceMap": true
     }
 }
