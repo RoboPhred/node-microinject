@@ -53,7 +53,7 @@ export class BinderImpl<T = any> implements Binder {
         this._ensureCanBind();
         return this._binding = new ScopedBindingImpl(
             this._identifier,
-            context => context.container.create(ctor),
+            context => context.container.create(ctor, context.scopes),
             ctor
         );
     }
@@ -91,7 +91,7 @@ export class BinderImpl<T = any> implements Binder {
         // Note that this is the same behavior as this.to()
         return this._binding = new ScopedBindingImpl(
             this._identifier,
-            context => context.container.create(ctor),
+            context => context.container.create(ctor, context.scopes),
             ctor
         );
     }
