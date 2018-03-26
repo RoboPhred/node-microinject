@@ -27,6 +27,7 @@ As this is intended to be used transparently by middleware libraries, it will no
 application-level IoC.
 
 # Benefits over InfersifyJS
+- Custom scope support - create services shared based on other objects further up the chain.
 - No [monkey patching of base or third party superclasses](https://github.com/inversify/InversifyJS/issues/619#issuecomment-352218311).
 - No requirement for the root node application to call [reflect-metadata](https://github.com/inversify/InversifyJS/issues/737).  No risk of interfering with modules that also use it.
 - Minimialist API: No redundant functions for varying names of the same behavior.  No more "Should I use toFactory or toDynamicValue?".
