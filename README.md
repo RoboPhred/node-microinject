@@ -2,28 +2,29 @@
 A Tiny, standalone, library-friendly dependency injection container.
 
 This was made out of a requirement to use dependency injection for a complex middleware library.  The primary 
-driving force is to allow parent libraries to be completely ignorant of its presence.
+driving force is allow a library to use dependency injection locally without forcing changes to any upstream users of the library.
 This means:
-- No requirements for the parent library to initialize reflect-metadata.
-- No throwing errors if an injectable class is derived from a non-injectable class.
-- No requirements to [monkey-patch third party super classes](https://github.com/inversify/InversifyJS/issues/619).
+- No requirements for the invoking library to initialize reflect-metadata.
+- Support dependency injection when used on classes derived from non-DI-aware classes.
+- No monkey patching anything external to the library.
 - Mimimum overhead.
+- Works if multiple libraries independently try to use it.
+- Works if node installs multiple copies of it.
 
-The API of this module is a subset of a legacy version of [InversifyJS](https://github.com/inversify/InversifyJS).
+Originally, I had used [InversifyJS](https://github.com/inversify/InversifyJS).  However, it failed against the
+first three requirements.  The original incarnation of this library was born as an api-compatible replacement to
+the subset of InversifyJS my projects were using.
+Despite this, microinject is not a fork.  It has been written from the ground up, and borrows InversifyJS conventions where appropriate.
 
-InversifyJS provided a good feature set, but failed on the first 3 requirements.  As a result, this
-project was created as an api-compatible stand-in for a subset of InversifyJS features I was using at the time.
-Despite this, it is not a fork, and has been written from the ground up.
+This incarnation of the library is once again a rewrite, as the original has been lost.  As such, this library has little real-world testing
+and no adopters to speak of.  Tests are forthcomming, but be sure to evaluate its behavior for correctness before using it in your own
+projects.
 
 # Design philosophy
 
 This library intends to remain minimalist while still covering a decent set of use cases for dependency injection.
-As this is intended to be used transparently by middleware libraries, it will not receive
-features intended for application-level IoC.
-
-It was originally created to provide a plugin architecture for third parties to add cross-cutting features, while remaining
-completely transparent to the users of the library.
-
+As this is intended to be used transparently by middleware libraries, it will not receive features intended for
+application-level IoC.
 
 # Benefits over InfersifyJS
 - No [monkey patching of base or third party superclasses](https://github.com/inversify/InversifyJS/issues/619#issuecomment-352218311).
@@ -32,7 +33,7 @@ completely transparent to the users of the library.
 
 # Drawbacks over InversifyJS
 - Lacking [powerful debug tools](https://github.com/inversify/inversify-chrome-devtools).
-- No [conditional binding](https://github.com/inversify/InversifyJS/blob/master/wiki/named_bindings.md)
+- No [conditional binding](https://github.com/inversify/InversifyJS/blob/master/wiki/named_bindings.md).
 - No [tagged binding](https://github.com/inversify/InversifyJS/blob/master/wiki/tagged_bindings.md).
 - No [property injection](https://github.com/inversify/InversifyJS/blob/master/wiki/property_injection.md).
 - No [hierarichal containers](https://github.com/inversify/InversifyJS/blob/master/wiki/hierarchical_di.md).
