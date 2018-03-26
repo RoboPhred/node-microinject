@@ -40,6 +40,7 @@ application-level IoC.
 - No typescript-based injection-by-type.  This is a result of being unable to use reflect-metadata.
 - Less established and proven.
 
+*These drawbacks are not set in stone, and additional features may be forthcomming.*
 
 # Which one should I choose?
 
