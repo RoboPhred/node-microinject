@@ -34,6 +34,10 @@ import {
     BinderImpl
 } from "./binder-impl";
 
+import {
+    identifierToString
+} from "./utils";
+
 
 export class Container {
     /**
@@ -134,7 +138,7 @@ export class Container {
     get<T, S = any>(identifier: Identifier<T>, scopes?: ScopeMap): T {
         const binders = this._binders.get(identifier);
         if (binders == null) {
-            throw new IdentifierNotBoundError(`No binding exists for id "${identifier}".`);
+            throw new IdentifierNotBoundError(`No binding exists for identifier "${identifierToString(identifier)}".`);
         }
 
         if (!scopes) scopes = new Map<Scope, any>();
@@ -150,7 +154,7 @@ export class Container {
     getAll<T, S = any>(identifier: Identifier<T>, scopes?: ScopeMap): T[] {
         const binders = this._binders.get(identifier);
         if (binders == null) {
-            throw new IdentifierNotBoundError(`No binding exists for id "${identifier}".`);
+            throw new IdentifierNotBoundError(`No binding exists for identifier "${identifierToString(identifier)}".`);
         }
 
         if (!scopes) scopes = new Map<Scope, any>();
