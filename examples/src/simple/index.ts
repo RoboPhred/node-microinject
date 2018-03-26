@@ -22,13 +22,15 @@ import ServiceLocatorModule, { ServiceLocator } from "./service-locator";
 import SingletonServiceModule, { SingletonService } from "./singleton-service";
 import MultiServiceModule, { LeftService, RightService } from "./multi-service";
 import ScopedServiceModule, { ScopeRootService } from "./scoped-service";
+import SubclassModule, { SubclassService } from "./subclass-service";
 
 const container = new Container();
 container.load(
     ServiceLocatorModule,
     SingletonServiceModule,
     MultiServiceModule,
-    ScopedServiceModule
+    ScopedServiceModule,
+    SubclassModule
 );
 
 
@@ -66,3 +68,9 @@ for (let i = 0; i < scopeRoots.length; i++) {
     const sharedIDs = root.getShareConsumers().map(x => `{ consumerId: ${x.getConsumerId()}, scopeSharedId: ${x.getScopeSharedId()} }`);
     console.log(`Scope root ${i} has these ShareConsumers: [${sharedIDs.join(", ")}]`)
 }
+
+
+// Demonstrating subclassed components
+const subclassService = container.get(SubclassService);
+subclassService.on("my-event", () => console.log("my-event raised"));
+subclassService.raiseMyEvent();
