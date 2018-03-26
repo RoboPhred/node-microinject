@@ -31,7 +31,8 @@ import {
 } from "./scope-utils";
 
 import {
-    scopeToString
+    identifierToString,
+    scopeToString,
 } from "./utils";
 
 
@@ -100,7 +101,7 @@ export class ScopedBindingImpl implements BindingImpl, ScopedBinder {
             //  This lets us support nested objects with .AsScope().
             let currentScopes = context.scopes;
             if (!currentScopes.has(this._inScope)) {
-                throw new Error(`Cannot create object: Object requires a scope for "${scopeToString(this._inScope)}" which is not present in the current context.`);
+                throw new Error(`Cannot create value for identifier "${identifierToString(this._identifier)}": Binding requires a scope for "${scopeToString(this._inScope)}" which is not present in the current context.`);
             }
             const scopeKey = currentScopes.get(this._inScope);
 
