@@ -28,8 +28,8 @@ application-level IoC.
 
 # Benefits over InfersifyJS
 - No [monkey patching of base or third party superclasses](https://github.com/inversify/InversifyJS/issues/619#issuecomment-352218311).
-- Microinject can be used transparently to consumers of your own library.  No [reflect-metadata](https://github.com/inversify/InversifyJS/issues/737) or monkey patching required.
-- Minimialist API: No redundant api calls for varying names of the same behavior.  No more questions of "Should I use toFactory or toDynamicValue?".
+- No requirement for the root node application to call [reflect-metadata](https://github.com/inversify/InversifyJS/issues/737).  No risk of interfering with modules that also use it.
+- Minimialist API: No redundant functions for varying names of the same behavior.  No more "Should I use toFactory or toDynamicValue?".
 
 # Drawbacks over InversifyJS
 - Lacking [powerful debug tools](https://github.com/inversify/inversify-chrome-devtools).
