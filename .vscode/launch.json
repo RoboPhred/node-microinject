@@ -17,6 +17,16 @@
                 "${workspaceFolder}/lib/**/*.js"
             ],
             "sourceMaps": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Simple Example",
+            "program": "${workspaceFolder}/examples/lib/simple/index.js",
+            "outFiles": [
+                "${workspaceFolder}/examples/lib/**/*.js"
+            ],
+            "sourceMaps": true
         }
     ]
 }
