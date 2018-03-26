@@ -114,7 +114,7 @@ export class Container {
             const has = this.has(injectData.identifier);
             if (!has) {
                 if (injectData.optional) return injectData.all ? [] : null;
-                throw new IdentifierNotBoundError(`Constructor "${ctor.name}" parameter ${i} requests identifier "${injectData.identifier}" which is not bound.`);
+                throw new IdentifierNotBoundError(`Constructor "${ctor.name}" parameter ${i} requests identifier "${identifierToString(injectData.identifier)}" which is not bound.`);
             }
 
             if (injectData.all) {
