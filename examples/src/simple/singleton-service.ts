@@ -15,7 +15,7 @@ export const SingletonService = Symbol("SingletonService") as Identifier<Singlet
 let singletonCtorCounter = 0;
 
 // The implementation of the service.  This usually would be elsewhere.
-//  Note the @Injectable annotation, which is required to use this class as a container-created class constructor.
+//  Note the @Injectable decorator, which is required to use this class as a container-created class constructor.
 @Injectable()
 class SingletonServiceImpl implements SingletonService {
     constructor() {
@@ -31,8 +31,8 @@ class SingletonServiceImpl implements SingletonService {
 // Export a module which binds and configures our implementation of SingletonService.
 export default new ContainerModule(bind => {
     // Specify that the service is singleton during binding.
-    //  We could also use the @Singleton() annotation on SingletonServiceImpl.
+    //  We could also use the @Singleton() decorator on SingletonServiceImpl.
     // Note that if not specified in either location, transient is used.
-    //  .inTransientScope is provided to override the annotation, if needed.
+    //  .inTransientScope is provided to override the decorator, if needed.
     bind(SingletonService).to(SingletonServiceImpl).inSingletonScope();
 });

@@ -72,7 +72,7 @@ export function Inject(identifier: Identifier, opts?: InjectionOptions) {
 /**
  * Marks an injectable constructor argument as being optional.
  * This has no effect if the argument is not annotated with @Inject().
- * This annotation is not order sensitive.  It can come before or after @Inject().
+ * This decorator is not order sensitive.  It can come before or after @Inject().
  */
 export function Optional() {
     return function(target: any, targetKey: string, index: number) {

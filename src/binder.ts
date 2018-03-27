@@ -41,7 +41,7 @@ export interface ScopedBinder {
 
     /**
      * Mark the binding as transient.  A new object will be created for every request.
-     * This overrides any @Singleton() annotation if used on an autobind class.
+     * This overrides any @Singleton() decorator if used on an identifier that would otherwise be auto-bound.
      */
     inTransientScope(): void;
 

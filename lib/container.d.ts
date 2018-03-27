@@ -31,7 +31,7 @@ export declare class Container {
     private _addBinder<T>(identifier, binder);
     /**
      * Create a new instance of an injectable class.
-     * The class must be declared injectable using the @Injectable annotation.
+     * The class must be declared injectable using the @Injectable decorator.
      * Injectable constructor arguments will be resolved.
      * @param ctor The class constructor.
      * @returns The created class.

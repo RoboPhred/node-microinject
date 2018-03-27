@@ -8,6 +8,9 @@ import {
  */
 export type Identifier<T = any> = string | symbol | AutoBoundIdentifier<T>;
 
+/**
+ * Identifiers capable of being automatically bound based on decorators.
+ */
 export type AutoBoundIdentifier<T = any> = Newable<T> | ServiceFactory<T>;
 
 /**

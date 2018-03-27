@@ -5,7 +5,7 @@ import {
 
 import {
     InjectionOptions
-} from "./injection-annotations";
+} from "./injection-decorators";
 
 import {
     InjectableSymbol,

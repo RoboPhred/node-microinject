@@ -14,7 +14,7 @@ export interface LeftService {
 export const LeftService = Symbol("LeftService") as Identifier<LeftService>;
 
 // Create another service that will also be implemented by the same implementation.
-//  This is to demonstrate annotation based multi-binding with AutobindTo.
+//  This is to demonstrate decorator based multi-binding with AutobindTo.
 export interface RightService {
     getRightValue(): number;
 }
@@ -42,8 +42,8 @@ class MultiServiceImpl implements LeftService, RightService {
 
 
 export default new ContainerModule(bind => {
-    // If the argument to bind() is a constructor, it checks for @Alias annotations
-    //  to use in addition to using the constructor itself as an alias.
+    // If the argument to bind() is a constructor, it checks for @Provides decorators
+    //  to use in addition to using the constructor itself as an identifier.
     // It is important to note that the same binding will be used for all identifiers, so
     //  only one instance will be created, and it will be used for
     //  get(MultiServiceImpl), get(LeftService), and get(RightService)

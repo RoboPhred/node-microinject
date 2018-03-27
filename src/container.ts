@@ -105,7 +105,7 @@ export class Container {
 
     /**
      * Create a new instance of an injectable class.
-     * The class must be declared injectable using the @Injectable annotation.
+     * The class must be declared injectable using the @Injectable decorator.
      * Injectable constructor arguments will be resolved.
      * @param ctor The class constructor.
      * @returns The created class.
@@ -124,7 +124,7 @@ export class Container {
         const dependencies = getConstructorInjections(ctor);
         const resolved = dependencies.map((injectData, i) => {
             if (injectData.identifier == null) {
-                throw new Error(`Constructor "${ctor.name}" parameter ${i} has injection annotation but no service identifier.`);
+                throw new Error(`Constructor "${ctor.name}" parameter ${i} has injection decorator but no service identifier.`);
             }
 
             const has = this.has(injectData.identifier);
