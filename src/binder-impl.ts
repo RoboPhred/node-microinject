@@ -3,7 +3,8 @@ import {
     Identifier,
     Newable,
     Context,
-    Scope
+    Scope,
+    ServiceFactory
 } from "./interfaces";
 
 import {
@@ -31,6 +32,14 @@ import {
     BindingImpl,
     ScopedBindingImpl
 } from "./binding-impl";
+
+import {
+    isAutoBindFactory
+} from "./binding-utils";
+
+import {
+    identifierToString
+} from "./utils";
 
 
 /**
@@ -63,7 +72,7 @@ export class BinderImpl<T = any> implements Binder {
             throw new TypeError("Factory must be a function.");
         }
         this._ensureCanBind();
-        return this._binding = new ScopedBindingImpl(this._identifier, context => factory(context));
+        return this._binding = new ScopedBindingImpl(this._identifier, factory);
     }
 
     toConstantValue<T>(value: T): void {
@@ -83,17 +92,28 @@ export class BinderImpl<T = any> implements Binder {
             throw new BindingConfigurationError(`Binding for ${this._identifier} was never established.  Auto-binding can only be used on injectable class constructors.`);
         }
         
-        const ctor: Newable<T> = this._identifier;
-        if (!isInjectable(ctor)) {
-            // This condition would throw for container.create(ctor), but we can give a more useful error message by knowing it was an auto-bind.
-            throw new BindingConfigurationError(`Binding for ${ctor.name} was never established.  A class constructor lacking the @Injectable() annotation cannot be auto-bound.`);
+        if (isInjectable(this._identifier)) {
+            const ctor: Newable<T> = this._identifier;
+            // Note that this is the same behavior as this.to()
+            return this._binding = new ScopedBindingImpl(
+                this._identifier,
+                context => context.container.create(ctor, context.scopes),
+                ctor
+            );    
         }
-        // Note that this is the same behavior as this.to()
-        return this._binding = new ScopedBindingImpl(
-            this._identifier,
-            context => context.container.create(ctor, context.scopes),
-            ctor
-        );
+        else if (isAutoBindFactory(this._identifier)) {
+            const factory = this._identifier as ServiceFactory;
+            return this._binding = new ScopedBindingImpl(
+                this._identifier,
+                factory,
+                factory
+            );
+        }
+        else {
+            // This condition would throw for container.create(ctor), but we can give a more useful error message by knowing it was an auto-bind.
+            throw new BindingConfigurationError(`Binding for identifier "${identifierToString(this._identifier)}" was never established.  Only @Factory functions or @Injectable classes may be auto-bound.`);
+        }
+        
     }
 
     private _ensureCanBind() {

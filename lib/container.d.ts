@@ -7,6 +7,11 @@ export declare class Container {
      */
     private _binders;
     /**
+     * Container to use if a binding is not find in this container.
+     */
+    private _parent;
+    parent: Container | null;
+    /**
      * Loads bindings from Inversify-style container modules.
      * @param modules The Inversify-compatible container modules to load.
      */

@@ -18,9 +18,12 @@ import {
 
 import {
     isInjectable,
-    getConstructorInjections,
-    getAutobindIdentifiers
+    getConstructorInjections
 } from "./injection-utils";
+
+import {
+    getProvidedIdentifiers
+} from "./binding-utils";
 
 import {
     isSingleton
@@ -44,6 +47,19 @@ export class Container {
      * All bindings currently registered with this container.
      */
     private _binders = new Map<Identifier, BinderImpl<any>[]>();
+
+    /**
+     * Container to use if a binding is not find in this container.
+     */
+    private _parent: Container | null = null;
+
+    get parent(): Container | null {
+        return this._parent;
+    }
+
+    set parent(value: Container | null) {
+        this._parent = value;
+    }
 
     /**
      * Loads bindings from Inversify-style container modules.
@@ -70,7 +86,7 @@ export class Container {
         this._addBinder(identifier, binder);
 
         // Check to see if this is an auto-bind injectable.
-        const autoIdentifiers = getAutobindIdentifiers(identifier);
+        const autoIdentifiers = getProvidedIdentifiers(identifier);
         for (let identifier of autoIdentifiers) {
             this._addBinder(identifier, binder);
         }
@@ -138,6 +154,7 @@ export class Container {
     get<T, S = any>(identifier: Identifier<T>, scopes?: ScopeMap): T {
         const binders = this._binders.get(identifier);
         if (binders == null) {
+            if (this._parent) return this._parent.get<T, S>(identifier, scopes);
             throw new IdentifierNotBoundError(`No binding exists for identifier "${identifierToString(identifier)}".`);
         }
 
@@ -154,12 +171,15 @@ export class Container {
     getAll<T, S = any>(identifier: Identifier<T>, scopes?: ScopeMap): T[] {
         const binders = this._binders.get(identifier);
         if (binders == null) {
+            if (this._parent) return this._parent.getAll<T, S>(identifier, scopes);
             throw new IdentifierNotBoundError(`No binding exists for identifier "${identifierToString(identifier)}".`);
         }
 
         if (!scopes) scopes = new Map<Scope, any>();
         const context: Context = { container: this, scopes };
-        return binders.map(x => x._getBinding()._getBoundValue(context));
+        const localValues = binders.map(x => x._getBinding()._getBoundValue(context));
+        const parentValues: any[] = this._parent ? this._parent.getAll<T, S>(identifier, scopes) : [];
+        return localValues.concat(parentValues);
     }
 
     /**
@@ -167,6 +187,6 @@ export class Container {
      * @param identifier The identifier to check for.
      */
     has<T>(identifier: Identifier<T>): boolean {
-        return this._binders.has(identifier);
+        return this._binders.has(identifier) || Boolean(this._parent && this._parent.has(identifier));
     }
 }

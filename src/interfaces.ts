@@ -6,7 +6,9 @@ import {
 /**
  * An object that may be used to represent and request a container-managed object.
  */
-export type Identifier<T = any> = string | symbol | T | Newable<T>;
+export type Identifier<T = any> = string | symbol | AutoBoundIdentifier<T> | any;
+
+export type AutoBoundIdentifier<T = any> = Newable<T> | ServiceFactory<T>;
 
 /**
  * An object that identifies an object creation scope.
@@ -16,10 +18,13 @@ export type Scope<T = any> = string | symbol | T | Newable<T>;
 /**
  * A constructor creating a new object of type T.
  */
-export interface Newable<T> {
+export interface Newable<T = any> {
     new(...args: any[]): T
 }
 
+export interface ServiceFactory<T = any> {
+    (context: Context): T;
+}
 
 /**
  * The context of an object creation.

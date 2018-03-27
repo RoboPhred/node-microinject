@@ -9,10 +9,10 @@ import {
     ConstructorInjectionsSymbol
 } from "./symbols";
 
+
 import {
     InjectionData
 } from "./injection-utils";
-
 
 /**
  * Options for content injections.
@@ -37,27 +37,16 @@ export interface InjectionOptions {
 
 /**
  * Marks this class as injectable.
- * Optionally allows an alias to be specified.
- * @param aliasIdentifier The identifier this class will use when auto-bound (ie: the object is passed as the identifier to container.bind()).
+ * Injectable classes can be created by a container.
+ * @param identifier An optional identifier to auto-bind this function as.  This is a shorthand for @Provide(identifier)
  */
-export function Injectable<TFunction extends Function>(aliasIdentifier?: Identifier): (target: TFunction) => void {
+export function Injectable<TFunction extends Function>(identifier?: Identifier): (target: TFunction) => void {
     return function(target: any) {
         target[InjectableSymbol] = true;
-        if (aliasIdentifier) {
+        if (identifier) {
             if (target[AutobindIdentifierSymbol] == null) target[AutobindIdentifierSymbol] = [];
-            target[AutobindIdentifierSymbol].push(aliasIdentifier);
+            target[AutobindIdentifierSymbol].push(identifier);
         }
-    }
-}
-
-/**
- * Specifies an alternate identifier to be used .
- * @param aliasIdentifier The identifier to automatically bind this class to when bound without additional configuration.
- */
-export function Alias<TFunction extends Function>(aliasIdentifier: Identifier): (target: TFunction) => void {
-    return function(target: any) {
-        if (target[AutobindIdentifierSymbol] == null) target[AutobindIdentifierSymbol] = [];
-        target[AutobindIdentifierSymbol].push(aliasIdentifier);
     }
 }
 

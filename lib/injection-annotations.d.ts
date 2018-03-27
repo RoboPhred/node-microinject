@@ -20,15 +20,10 @@ export interface InjectionOptions {
 }
 /**
  * Marks this class as injectable.
- * Optionally allows an alias to be specified.
- * @param aliasIdentifier The identifier this class will use when auto-bound (ie: the object is passed as the identifier to container.bind()).
+ * Injectable classes can be created by a container.
+ * @param identifier An optional identifier to auto-bind this function as.  This is a shorthand for @Provide(identifier)
  */
-export declare function Injectable<TFunction extends Function>(aliasIdentifier?: Identifier): (target: TFunction) => void;
-/**
- * Specifies an alternate identifier to be used .
- * @param aliasIdentifier The identifier to automatically bind this class to when bound without additional configuration.
- */
-export declare function Alias<TFunction extends Function>(aliasIdentifier: Identifier): (target: TFunction) => void;
+export declare function Injectable<TFunction extends Function>(identifier?: Identifier): (target: TFunction) => void;
 /**
  * Marks the constructor argument as being injectable.
  * @param identifier The identifier of the binding to inject.

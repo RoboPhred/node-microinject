@@ -5,7 +5,8 @@ import {
     Identifier,
     Context,
     Scope,
-    Newable
+    Newable,
+    AutoBoundIdentifier
 } from "./interfaces";
 
 import {
@@ -57,7 +58,7 @@ export class ScopedBindingImpl implements BindingImpl, ScopedBinder {
      */
     private _scopeInstances = new Map<any, any>();
 
-    constructor(private _identifier: Identifier, private _create: (context: Context) => any, autoBindTarget?: Newable<any>) {
+    constructor(private _identifier: Identifier, private _create: (context: Context) => any, autoBindTarget?: AutoBoundIdentifier) {
         if (autoBindTarget) {
             this._singleton = isSingleton(autoBindTarget);
             this._inScope = getInScope(autoBindTarget);

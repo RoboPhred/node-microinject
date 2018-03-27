@@ -5,11 +5,10 @@ import {
 
 import {
     InjectionOptions
-} from "./injections";
+} from "./injection-annotations";
 
 import {
     InjectableSymbol,
-    AutobindIdentifierSymbol,
     ConstructorInjectionsSymbol
 } from "./symbols";
 
@@ -20,21 +19,12 @@ export interface InjectionData extends InjectionOptions {
     identifier: Identifier;
 }
 
-
 /**
  * Returns a value indicating whether the target has been marked as injectable.
  * @param target The target to test for injectability.
  */
 export function isInjectable(target: any): boolean {
     return target[InjectableSymbol] === true;
-}
-
-/**
- * Returns the autobind identifiers of the target.  Returns an empty array if none were specified.
- * @param target The target to test for injectability.
- */
-export function getAutobindIdentifiers(target: any): Identifier[] {
-    return target[AutobindIdentifierSymbol] || [];
 }
 
 /**

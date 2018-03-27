@@ -6,6 +6,7 @@ function getSymbol(id: string): symbol {
 }
 
 export const InjectableSymbol = getSymbol("Injectable");
+export const IsAutoBindFactorySymbol = getSymbol("IsAutoBindFactorySymbol");
 export const AutobindIdentifierSymbol = getSymbol("AutobindIdentifier");
 export const SingletonSymbol = getSymbol("Singleton");
 export const ConstructorInjectionsSymbol = getSymbol("ConstructorInjections");

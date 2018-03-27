@@ -1,5 +1,5 @@
 import { Identifier } from "./interfaces";
-import { InjectionOptions } from "./injections";
+import { InjectionOptions } from "./injection-annotations";
 /**
  * Data associated with an injection.
  */
@@ -11,11 +11,6 @@ export interface InjectionData extends InjectionOptions {
  * @param target The target to test for injectability.
  */
 export declare function isInjectable(target: any): boolean;
-/**
- * Returns the autobind identifiers of the target.  Returns an empty array if none were specified.
- * @param target The target to test for injectability.
- */
-export declare function getAutobindIdentifiers(target: any): Identifier[];
 /**
  * Returns data on injections to the target constructor's arguments.  If no injections are specified, an empty array is returned.
  * This does not check the target for injectability.
