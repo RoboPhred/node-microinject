@@ -93,7 +93,7 @@ export class BinderImpl<T = any> implements Binder {
         }
         
         if (isInjectable(this._identifier)) {
-            const ctor: Newable<T> = this._identifier;
+            const ctor = this._identifier as Newable<T>;
             // Note that this is the same behavior as this.to()
             return this._binding = new ScopedBindingImpl(
                 this._identifier,

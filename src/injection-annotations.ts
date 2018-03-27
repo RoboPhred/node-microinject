@@ -82,7 +82,8 @@ export function Optional() {
             target[ConstructorInjectionsSymbol] = dependencies;
         }
         if (dependencies[index] == null) {
-            dependencies[index] = {identifier: undefined};
+            // @Optional can be applied before @Inject.
+            dependencies[index] = {} as any;
         }
         dependencies[index].optional = true;
     } 

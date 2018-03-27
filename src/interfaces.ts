@@ -6,7 +6,7 @@ import {
 /**
  * An object that may be used to represent and request a container-managed object.
  */
-export type Identifier<T = any> = string | symbol | AutoBoundIdentifier<T> | any;
+export type Identifier<T = any> = string | symbol | AutoBoundIdentifier<T>;
 
 export type AutoBoundIdentifier<T = any> = Newable<T> | ServiceFactory<T>;
 

@@ -2,7 +2,7 @@ import { Container } from "./container";
 /**
  * An object that may be used to represent and request a container-managed object.
  */
-export declare type Identifier<T = any> = string | symbol | AutoBoundIdentifier<T> | any;
+export declare type Identifier<T = any> = string | symbol | AutoBoundIdentifier<T>;
 export declare type AutoBoundIdentifier<T = any> = Newable<T> | ServiceFactory<T>;
 /**
  * An object that identifies an object creation scope.
