@@ -4,7 +4,7 @@ import {
     ContainerModule,
     Injectable,
     Singleton,
-    Alias
+    Provides
 } from "microinject";
 
 // Create and export an interface / identifier pair so typescript can type the service correctly.
@@ -27,8 +27,8 @@ export const RightService = "RightService" as Identifier<RightService>;
 //  the identifiers: AnnotatedServiceImpl, LeftService, and RightService.
 @Injectable()
 @Singleton()
-@Alias(LeftService)
-@Alias(RightService)
+@Provides(LeftService)
+@Provides(RightService)
 class MultiServiceImpl implements LeftService, RightService {
     getLeftValue(): number {
         return 3;
