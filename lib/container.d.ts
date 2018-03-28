@@ -2,11 +2,7 @@ import { Identifier } from "./interfaces";
 import { ContainerModule } from "./module";
 import { Binder } from "./binder";
 export declare class Container {
-    /**
-     * All bindings currently registered with this container.
-     */
-    private _binders;
-    private _planCache;
+    private _planner;
     private _resolver;
     /**
      * Container to use if a binding is not find in this container.
@@ -61,5 +57,4 @@ export declare class Container {
      * @param identifier The identifier to check for.
      */
     has<T>(identifier: Identifier<T>): boolean;
-    private _getPlan(identifier);
 }

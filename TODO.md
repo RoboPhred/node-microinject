@@ -2,11 +2,6 @@
 # Immediate tasks
 - Reimplement context argument for factory; change context to only allow .get() and .getAll() from container to divorse it from needing the entire container
 and allowing container.reset() to cut ties with it.
-- Clean up planner; give it the same treatment as the resolver.  Lots of args passed along that should be instance props of the class.
-- Rework how bindings are sent to planner.  The need to map the values of the container's binding map is nonsensical.  Should probably
-    just send an array of bindings, and let the binding hold one or more identifiers.  This will also enable me to fix the @Provides+@InScope bug.
-    Best solution is probably to make BinderImpl implement BinderData.  Could do it through read-only props.
-
 
 # Features
 - Tagged binding.
@@ -29,3 +24,5 @@ apply to the binding / auto-bound object as a whole.  This would become obvious 
 - Ensure the engine limitation is set correctly; what nodejs versions support Map and Symbol?
 - Stop generating typedefs for non-exported / internal files.
 - Rework BinderImpl to prevent user access of internal methods.
+- Clean up BinderData vs BinderImpl issues.  We currently have to pass BinderImpl to the planner in order to generate the 
+actual binding configuration as late as possible, as we do not know when the user is finished setting it up.

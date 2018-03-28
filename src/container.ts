@@ -33,10 +33,8 @@ import {
     getConstructorInjections
 } from "./injection-utils";
 
-import {
-    DependencyGraphNode,
-    createPlanForIdentifier,
-    createPlanForBinding
+import DependencyGraphPlanner, {
+    DependencyGraphNode
 } from "./planner";
 
 import DependencyGraphResolver from "./resolver";
@@ -52,13 +50,7 @@ import {
 
 
 export class Container {
-    /**
-     * All bindings currently registered with this container.
-     */
-    private _binders = new Map<Identifier, BinderImpl<any>[]>();
-
-    private _planCache = new Map<Identifier, DependencyGraphNode>();
-
+    private _planner = new DependencyGraphPlanner();
     private _resolver = new DependencyGraphResolver();
 
     /**
@@ -66,6 +58,7 @@ export class Container {
      */
     private _parent: Container | null = null;
 
+    
     get parent(): Container | null {
         return this._parent;
     }
@@ -81,8 +74,6 @@ export class Container {
     load(...modules: ContainerModule[]) {
         const bind = this.bind.bind(this);
         modules.forEach(x => x.registry(bind));
-
-        this._planCache.clear();
     }
 
     /**
@@ -106,23 +97,11 @@ export class Container {
             this._addBinder(identifier, binder);
         }
 
-        // Even thought we know what identifiers we are modifying,
-        //  we may have some new identifiers which will be
-        //  counted in an @Inject({all: true})
-        // We could try to scan for these, but we should not be
-        //  binding too much after we start to create things. 
-        this._planCache.clear();
-
         return binder;
     }
 
     private _addBinder<T>(identifier: Identifier<T>, binder: BinderImpl<T>) {
-        let binders: BinderImpl<T>[] | undefined = this._binders.get(identifier);
-        if (binders == null) {
-            binders = [];
-            this._binders.set(identifier, binders);
-        }
-        binders.push(binder);
+        this._planner.addBinding(identifier, binder)
     }
 
     /**
@@ -150,14 +129,16 @@ export class Container {
      * @returns The object for the given identifier.
      */
     get<T>(identifier: Identifier<T>): T {
-        const binders = this._binders.get(identifier);
-        if (!binders || binders.length === 0) {
-            if (this._parent) return this._parent.get(identifier);
-            throw new DependencyResolutionError(identifier, [], `No binding exists for the identifier.`);
+        if (this._planner.hasBinding(identifier)) {
+            const plan = this._planner.getPlan(identifier);
+            return this._resolver.resolveInstance(plan);
         }
 
-        const plan = this._getPlan(identifier);
-        return this._resolver.resolveInstance(plan);
+        if (this._parent) {
+            return this._parent.get(identifier);
+        }
+
+        throw new DependencyResolutionError(identifier, [], `No bindings exists for the identifier.`);
     }
 
     /**
@@ -175,25 +156,14 @@ export class Container {
     }
 
     private _getAll<T>(identifier: Identifier<T>): T[] {
-        const binders = this._binders.get(identifier);
-        if (binders == null) {
-            if (this._parent) return this._parent.getAll<T>(identifier);
-            return [];
+        const values: T[] = this._parent ? this._parent._getAll(identifier) : [];
+
+        const bindings = this._planner.getBindings(identifier);
+        if (bindings.length > 0) {
+            const plans = bindings.map(binding => this._planner.getPlan(identifier, binding));
+            values.push(...plans.map(plan => this._resolver.resolveInstance(plan)));
         }
 
-        const bindData = new Map<Identifier, BindingData[]>();
-        for(let entry of this._binders) {
-            bindData.set(entry[0], entry[1].map(x => x._getBinding()));
-        }
-
-        const plans = binders.map(x => createPlanForBinding(identifier, x._getBinding(), bindData));
-
-        // TODO: Scopes start fresh each plan.
-        const values = plans.map(x => this._resolver.resolveInstance(x));
-
-        if (this._parent) {
-            return values.concat(this._parent._getAll(identifier));
-        }
         return values;
     }
 
@@ -202,20 +172,6 @@ export class Container {
      * @param identifier The identifier to check for.
      */
     has<T>(identifier: Identifier<T>): boolean {
-        return this._binders.has(identifier) || Boolean(this._parent && this._parent.has(identifier));
-    }
-
-    private _getPlan(identifier: Identifier): DependencyGraphNode {
-        let plan = this._planCache.get(identifier);
-        if (!plan) {
-            // TODO: This is nasty.  Fix this up when planner gets its cleanup pass.
-            const bindData = new Map<Identifier, BindingData[]>();
-            for(let entry of this._binders) {
-                bindData.set(entry[0], entry[1].map(x => x._getBinding()));
-            }
-            plan = createPlanForIdentifier(identifier, bindData);
-            this._planCache.set(identifier, plan);
-        }
-        return plan;
+        return this._planner.hasBinding(identifier) || Boolean(this._parent && this._parent.has(identifier));
     }
 }

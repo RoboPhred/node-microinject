@@ -38,7 +38,12 @@ import {
 } from "./utils";
 
 import {
-    BindingData, InstanceCreatorBindingData
+    InstanceCreatorBindingData,
+    BindingData,
+    ConstBindingData,
+    FactoryBindingData,
+    ConstructorBindingData,
+    BindingDataType, 
 } from "./data";
 
 
@@ -51,6 +56,7 @@ import {
  * Care must be taken to ensure members of this class cannot be called in a contradictory manner.
  */
 export class BinderImpl<T = any> implements Binder, ScopedBinder {
+
     private _binding: BindingData | null = null;
     private _isFinalized = false;
 
@@ -151,13 +157,6 @@ export class BinderImpl<T = any> implements Binder, ScopedBinder {
         binding.defineScope = scope;
     }
 
-
-    // TODO: It may be desirable to find a way of removing access to this from outside the library.
-    _getBinding(): BindingData {
-        this._finalizeBinding();
-        return this._binding!;
-    }
-
     private _ensureBoundOrBinding(): void {
         if (!this._binding) {
             if (typeof this._identifier !== "function") {
@@ -196,5 +195,12 @@ export class BinderImpl<T = any> implements Binder, ScopedBinder {
         if (this._binding != null) {
             throw new BindingConfigurationError(`Cannot reconfigure binding for ${this._identifier}: Binding already established.`);
         }
+    }
+
+
+    // TODO: It may be desirable to find a way of removing access to this from outside the library.
+    _getBinding(): BindingData {
+        this._finalizeBinding();
+        return this._binding!;
     }
 }

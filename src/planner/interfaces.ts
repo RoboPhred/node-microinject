@@ -4,7 +4,10 @@ import {
     Newable,
     Scope
 } from "../interfaces";
-import { SingletonSymbol } from "../symbols";
+
+import {
+    SingletonSymbol
+} from "../symbols";
 
 
 export type ComponentCreatorType = "value" | "array" | "factory" | "constructor";

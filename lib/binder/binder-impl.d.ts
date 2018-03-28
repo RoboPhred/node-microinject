@@ -37,8 +37,8 @@ export declare class BinderImpl<T = any> implements Binder, ScopedBinder {
      * @param scope The optional scope identifier to use.  If not provided, the binding's identifier will be used.
      */
     asScope(scope?: Scope): void;
-    _getBinding(): BindingData;
     private _ensureBoundOrBinding();
     private _finalizeBinding();
     private _ensureCanBind();
+    _getBinding(): BindingData;
 }

@@ -1,7 +1,8 @@
 import { Identifier, Scope, Newable, Context } from "../interfaces";
 import { InjectionData } from "../injection-utils";
+export declare type BindingDataType = "value" | "factory" | "constructor";
 export interface BindingDataBase {
-    type: "value" | "factory" | "constructor";
+    type: BindingDataType;
 }
 export interface ConstBindingData extends BindingDataBase {
     type: "value";
@@ -21,4 +22,6 @@ export interface ConstructorBindingData extends InstanceCreatorBindingData {
     injections: InjectionData[];
 }
 export declare type BindingData = ConstBindingData | FactoryBindingData | ConstructorBindingData;
+export declare type ScopeableBindingData = FactoryBindingData | ConstructorBindingData;
 export declare type BindingMap = ReadonlyMap<Identifier, BindingData[]>;
+export declare function isScopeableBinding(binding: BindingData): binding is ScopeableBindingData;

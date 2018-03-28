@@ -10,8 +10,10 @@ import {
     InjectionData
 } from "../injection-utils";
 
+export type BindingDataType = "value" | "factory" | "constructor";
+
 export interface BindingDataBase {
-    type: "value" | "factory" | "constructor";
+    type: BindingDataType;
 }
 
 export interface ConstBindingData extends BindingDataBase {
@@ -36,5 +38,10 @@ export interface ConstructorBindingData extends InstanceCreatorBindingData {
 }
 
 export type BindingData = ConstBindingData | FactoryBindingData | ConstructorBindingData;
+export type ScopeableBindingData = FactoryBindingData | ConstructorBindingData;
 
 export type BindingMap = ReadonlyMap<Identifier, BindingData[]>;
+
+export function isScopeableBinding(binding: BindingData): binding is ScopeableBindingData {
+    return binding.type === "factory" || binding.type === "constructor";
+}
