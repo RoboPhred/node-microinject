@@ -20,15 +20,23 @@ export interface Newable<T = any> {
 export interface ServiceFactory<T = any> {
     (context: Context): T;
 }
+export interface ServiceLocator {
+    has(identifier: Identifier): boolean;
+    get<T>(identifier: Identifier<T>): T;
+    getAll<T>(identifier: Identifier<T>): T[];
+}
 /**
  * The context of an object creation.
  */
-export interface Context {
+export interface Context extends ServiceLocator {
     /**
-     * The container that is creating the object.
+     * The original container.
+     * Note that this container is not aware of the current scope stack.
+     * Attempting to get a scoped item will fail.
+     *
+     * To get scoped items, use Context.get() and Context.getAll()
      */
     readonly container: Container;
-    readonly scopes: ScopeMap;
 }
 export interface ScopeMap extends ReadonlyMap<Scope, any> {
     get<T>(scope: Scope<T>): T;

@@ -34,7 +34,7 @@ import {
 } from "./injection-utils";
 
 import DependencyGraphPlanner, {
-    DependencyGraphNode
+    DependencyGraphNode, FactoryComponentCreator
 } from "./planner";
 
 import DependencyGraphResolver from "./resolver";
@@ -51,14 +51,20 @@ import {
 
 export class Container {
     private _planner = new DependencyGraphPlanner();
-    private _resolver = new DependencyGraphResolver();
+    private _resolver: DependencyGraphResolver;
 
     /**
      * Container to use if a binding is not find in this container.
      */
     private _parent: Container | null = null;
 
-    
+    constructor() {
+        this._resolver = new DependencyGraphResolver({
+            factory: this._factoryResolver.bind(this)
+        });
+    }
+
+
     get parent(): Container | null {
         return this._parent;
     }
@@ -129,9 +135,15 @@ export class Container {
      * @returns The object for the given identifier.
      */
     get<T>(identifier: Identifier<T>): T {
+        return this._get(identifier);
+    }
+
+    private _get<T>(identifier: Identifier<T>, resolver?: DependencyGraphResolver): T {
+        if (!resolver) resolver = this._resolver;
+
         if (this._planner.hasBinding(identifier)) {
             const plan = this._planner.getPlan(identifier);
-            return this._resolver.resolveInstance(plan);
+            return resolver.resolveInstance(plan);
         }
 
         if (this._parent) {
@@ -141,6 +153,7 @@ export class Container {
         throw new DependencyResolutionError(identifier, [], `No bindings exists for the identifier.`);
     }
 
+
     /**
      * Gets all bound objects for an identifier.  This may create the objects if necessary depending on scope and previous creations.
      * This method will throw IdentifierNotBoundError if no bindings exist for the identifier.
@@ -148,20 +161,43 @@ export class Container {
      * @returns An array of all objects for the given identifier.
      */
     getAll<T>(identifier: Identifier<T>): T[] {
-        const values = this._getAll(identifier);
+        return this._getAll(identifier);
+    }
+
+    private _getAll<T>(identifier: Identifier<T>, resolver?: DependencyGraphResolver) {
+        const values = this._getAllNoThrow(identifier, resolver);
+
+        // This is the only point where we can throw, as we do not want an ancestor
+        //  container throwing if it has none.
+        //  Consider the case where the first and third ancestors have values, but the second does not.
         if (values.length === 0) {
             throw new DependencyResolutionError(identifier, [], `No bindings exists for the identifier.`);
         }
         return values;
     }
 
-    private _getAll<T>(identifier: Identifier<T>): T[] {
-        const values: T[] = this._parent ? this._parent._getAll(identifier) : [];
+    /**
+     * Gets an array of values bound to the identifier.
+     * If none are found, an empty array is returned.
+     * 
+     * This is used to resolve all values across all ancestors without
+     * the requirement to throw interrupting the search on an empty ancestor.
+     * 
+     * @param identifier The identifier to get services for.
+     * @param resolver The resolver to use to resolve instances of the identifier.
+     */
+    private _getAllNoThrow<T>(identifier: Identifier<T>, resolver?: DependencyGraphResolver): T[] {
+        if (!resolver) resolver = this._resolver;
+
+        // Do not pass the resolver to the parent, as it is an entirely new container
+        //  with disjoint scopes.
+        // Our scopes do not transcend containers.
+        const values: T[] = this._parent ? this._parent._getAllNoThrow(identifier) : [];
 
         const bindings = this._planner.getBindings(identifier);
         if (bindings.length > 0) {
             const plans = bindings.map(binding => this._planner.getPlan(identifier, binding));
-            values.push(...plans.map(plan => this._resolver.resolveInstance(plan)));
+            values.push(...plans.map(plan => resolver!.resolveInstance(plan)));
         }
 
         return values;
@@ -173,5 +209,37 @@ export class Container {
      */
     has<T>(identifier: Identifier<T>): boolean {
         return this._planner.hasBinding(identifier) || Boolean(this._parent && this._parent.has(identifier));
+    }
+
+        /**
+     * Resolver for factory bindings.
+     * 
+     * We need to pass an argument to the function to allow it to resolve child objects,
+     * and we need to pass it the root container as part of the InversifyJS api.
+     * 
+     * @param identifier The identifier that was resolved to the factory we are resolving.
+     * @param creator The factory component creator to be used to resolve the value.
+     * @param childResolver A resolver capable of resolving correctly scoped child objects.
+     */
+    private _factoryResolver(identifier: Identifier, creator: FactoryComponentCreator, childResolver: DependencyGraphResolver): any {
+        const container = this;
+        
+        const context: Context = {
+            container,
+
+            // "has" is simply interested if we have at least one binding for the identifier.
+            //  Scope has no bearing on its value, so it is not interested in
+            has: container.has.bind(container),
+
+            get(identifier: Identifier) {
+                return container._get(identifier, childResolver);
+            },
+
+            getAll(identifier: Identifier) {
+                return container._getAll(identifier, childResolver)
+            }
+        }
+
+        return creator.factory(context);
     }
 }
