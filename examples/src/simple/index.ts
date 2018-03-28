@@ -10,7 +10,6 @@ catch {
 }
 
 import {
-    Singleton,
     Identifier,
     Container
 } from "microinject";

@@ -1,7 +1,8 @@
+
 import {
     Identifier,
     ContainerModule,
-    Injectable
+    injectable
 } from "microinject";
 
 // Create and export an interface / identifier pair so typescript can type the service correctly.
@@ -15,8 +16,8 @@ export const SingletonService = Symbol("SingletonService") as Identifier<Singlet
 let singletonCtorCounter = 0;
 
 // The implementation of the service.  This usually would be elsewhere.
-//  Note the @Injectable decorator, which is required to use this class as a container-created class constructor.
-@Injectable()
+//  Note the @injectable decorator, which is required to use this class as a container-created class constructor.
+@injectable()
 class SingletonServiceImpl implements SingletonService {
     constructor() {
         singletonCtorCounter++;

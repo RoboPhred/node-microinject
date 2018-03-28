@@ -58,14 +58,14 @@ import { SelfIdentifiedScopeSymbol } from "../scope/symbols";
  * 
  * Care must be taken to ensure members of this class cannot be called in a contradictory manner.
  */
-export class BinderImpl<T = any> implements Binder, ScopedBinder {
+export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
 
     private _binding: BindingData | null = null;
     private _isFinalized = false;
 
     constructor(private _identifier: Identifier<T>) {}
 
-    to<T>(ctor: Newable<T>): ScopedBinder {
+    to<N extends T>(ctor: Newable<N>): ScopedBinder {
         if (typeof ctor !== "function") {
             throw new TypeError("Target must be a constructor.");
         }
@@ -79,7 +79,7 @@ export class BinderImpl<T = any> implements Binder, ScopedBinder {
         return this;
     }
 
-    toDynamicValue<T>(factory: (context: Context) => T): ScopedBinder {      
+    toDynamicValue<N extends T>(factory: (context: Context) => N): ScopedBinder {      
         if (typeof factory !== "function") {
             throw new TypeError("Factory must be a function.");
         }
@@ -93,7 +93,7 @@ export class BinderImpl<T = any> implements Binder, ScopedBinder {
         return this;
     }
 
-    toConstantValue<T>(value: T): void {
+    toConstantValue<N extends T>(value: N): void {
         this._ensureCanBind();
         this._binding = {
             type: "value",

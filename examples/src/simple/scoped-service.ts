@@ -1,9 +1,9 @@
 
 import {
     Identifier,
-    Injectable,
-    Inject,
-    ContainerModule
+    ContainerModule,
+    injectable,
+    inject,
 } from "microinject";
 
 
@@ -27,12 +27,12 @@ export const ShareConsumer = Symbol("ShareConsumer") as Identifier<ShareConsumer
 
 
 
-@Injectable()
+@injectable()
 class ScopeRootServiceImpl implements ScopeRootService {
     constructor(
-        @Inject(ShareConsumer) private _consumerA: ShareConsumer,
-        @Inject(ShareConsumer) private _consumerB: ShareConsumer,
-        @Inject(ShareConsumer) private _consumerC: ShareConsumer,
+        @inject(ShareConsumer) private _consumerA: ShareConsumer,
+        @inject(ShareConsumer) private _consumerB: ShareConsumer,
+        @inject(ShareConsumer) private _consumerC: ShareConsumer,
     ) {}
 
     getShareConsumers(): ShareConsumer[] {
@@ -49,7 +49,7 @@ class ScopeRootServiceImpl implements ScopeRootService {
 //  so we can prove they are scoped and reused. 
 let nextScopeSharedServiceIndex = 1;
 
-@Injectable()
+@injectable()
 class ScopeSharedServiceImpl implements ScopeSharedService {
     private _id: string;
     
@@ -65,12 +65,12 @@ class ScopeSharedServiceImpl implements ScopeSharedService {
 
 let nextShareConsumerIndex = 1;
 
-@Injectable()
+@injectable()
 class ShareConsumerImpl implements ShareConsumer {
     private _id: string;
 
     constructor(
-        @Inject(ScopeSharedService) private _scopedSharedService: ScopeSharedService
+        @inject(ScopeSharedService) private _scopedSharedService: ScopeSharedService
     ) {
         this._id = String(nextShareConsumerIndex++);
     }

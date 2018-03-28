@@ -10,14 +10,14 @@ import { BindingData } from "./data";
  *
  * Care must be taken to ensure members of this class cannot be called in a contradictory manner.
  */
-export declare class BinderImpl<T = any> implements Binder, ScopedBinder {
+export declare class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
     private _identifier;
     private _binding;
     private _isFinalized;
     constructor(_identifier: Identifier<T>);
-    to<T>(ctor: Newable<T>): ScopedBinder;
-    toDynamicValue<T>(factory: (context: Context) => T): ScopedBinder;
-    toConstantValue<T>(value: T): void;
+    to<N extends T>(ctor: Newable<N>): ScopedBinder;
+    toDynamicValue<N extends T>(factory: (context: Context) => N): ScopedBinder;
+    toConstantValue<N extends T>(value: N): void;
     /**
      * Mark the binding as a singleton.  Only one will be created per container.
      */

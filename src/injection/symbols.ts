@@ -10,10 +10,10 @@ function getSymbol(id: string) {
 /**
  * Symbol used as a key to mark a class as being dependency-injectable.
  */
-export const InjectableDecoratorSymbol = getSymbol("InjectableDecorator");
+export const ClassIsInjectableKey = getSymbol("InjectableDecorator");
 
 /**
  * Symbol used as a key to contain the array of InjectionData objects
  * corresponding to the class's constructor arguments.
  */
-export const ConstructorInjectionDecoratorsSymbol = getSymbol("ConstructorInjectionDecorators");
+export const ConstructorInjectionsKey = getSymbol("ConstructorInjectionDecorators");

@@ -1,7 +1,7 @@
 
 import {
-    InScopeDecoratorSymbol,
-    AsScopeDecoratorSymbol
+    AutoBindInScopeKey,
+    AutoBindAsScopeKey
 } from "./symbols";
 
 import {
@@ -10,9 +10,9 @@ import {
 
 
 export function getInScope(target: any): Scope {
-    return target[InScopeDecoratorSymbol];
+    return target[AutoBindInScopeKey];
 }
 
 export function getAsScope(target: any): Scope {
-    return target[AsScopeDecoratorSymbol];
+    return target[AutoBindAsScopeKey];
 }

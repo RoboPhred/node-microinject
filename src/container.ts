@@ -76,7 +76,7 @@ export class Container {
      * @param identifier The service identifier.
      * @returns A binder object to configure the binding.
      */
-    bind<T>(identifier: Identifier<T>): Binder {
+    bind<T>(identifier: Identifier<T>): Binder<T> {
         const binder = new BinderImpl<T>(identifier);
         this._addBinder(identifier, binder);
 

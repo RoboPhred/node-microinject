@@ -1,24 +1,28 @@
 
 import {
-    SingletonScopeSymbol,
-    InScopeDecoratorSymbol,
-    AsScopeDecoratorSymbol,
-    SelfIdentifiedScopeSymbol
+    AutoBindInScopeKey,
+    AutoBindAsScopeKey
 } from "./symbols";
+
+import {
+    SingletonScope,
+    SelfIdentifiedScope
+} from "./predefined";
 
 import {
     Scope
 } from "./interfaces";
 
-export function Singleton<TFunction extends Function>(): (target: TFunction) => void {
+
+export function singleton<TFunction extends Function>(): (target: TFunction) => void {
     return function(target: any) {
-        target[InScopeDecoratorSymbol] = SingletonScopeSymbol;
+        target[AutoBindInScopeKey] = SingletonScope;
     }
 }
 
-export function InScope<TFunction extends Function>(scope: Scope): (target: TFunction) => void {
+export function inScope<TFunction extends Function>(scope: Scope): (target: TFunction) => void {
     return function(target: any) {
-        target[InScopeDecoratorSymbol] = scope;
+        target[AutoBindInScopeKey] = scope;
     }
 }
 
@@ -26,8 +30,8 @@ export function InScope<TFunction extends Function>(scope: Scope): (target: TFun
  * Specify that this object creates a new named scope.
  * @param scope The optional scope identifier to identify the scope created by this object.  If unset, the object will be identified by the identifier of the object.
  */
-export function AsScope<TFunction extends Function>(scope?: Scope): (target: TFunction) => void {
+export function asScope<TFunction extends Function>(scope?: Scope): (target: TFunction) => void {
     return function(target: any) {
-        target[AsScopeDecoratorSymbol] = (scope !== undefined) ? scope : SelfIdentifiedScopeSymbol;
+        target[AutoBindAsScopeKey] = (scope !== undefined) ? scope : SelfIdentifiedScope;
     }
 }

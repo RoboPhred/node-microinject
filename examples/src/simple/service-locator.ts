@@ -37,5 +37,7 @@ class ServiceLocatorImpl implements ServiceLocator {
 export default new ContainerModule(bind => {
     // We have to use a transient scope if we want ServiceLocator to work in the scope
     //  of whatever asks for it.  See notes in serviceLocatorFactory.
+    // Note that transient scope is always the default.  It is explicitly used here
+    //  to call attention to the issue.
     bind(ServiceLocator).toDynamicValue(serviceLocatorFactory).inTransientScope();
 })

@@ -132,6 +132,11 @@ export default class DependencyGraphPlanner {
      * @param binding An optional binding to use for the identifier.  Useful if multiple bindings may apply.
      */
     getPlan(identifier: Identifier, binding?: BindingData): DependencyGraphNode {
+        let plan = this._planCache.get(identifier);
+        if (plan) {
+            return plan;
+        }
+
         if (!binding) {
             const rootBindings = this.getBindings(identifier);
             if (rootBindings.length === 0) {
@@ -143,10 +148,13 @@ export default class DependencyGraphPlanner {
             binding = rootBindings[0];
         }
 
-        return {
+        plan = {
             identifier,
             componentCreator: this._getComponentCreator(identifier, binding, this._rootScopeInstances)
         };
+
+        this._planCache.set(identifier, plan);
+        return plan;
     }
 
     private _getComponentCreator(identifier: Identifier, binding: BindingData, scopeInstances: ScopeInstanceMap): ComponentCreator {

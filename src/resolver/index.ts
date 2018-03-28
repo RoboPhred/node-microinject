@@ -73,7 +73,7 @@ interface ScopeableDependencyGraphNode extends DependencyGraphNode {
 }
 
 function isNodeScoped(node: DependencyGraphNode): node is ScopeableDependencyGraphNode {
-    return isComponentScopable(node.componentCreator) && node.componentCreator.containingScopeInstance != null;
+    return isComponentScopable(node.componentCreator) && node.componentCreator.containingScope != null;
 }
 
 export default class DependencyGraphResolver {

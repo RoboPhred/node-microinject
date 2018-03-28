@@ -2,11 +2,11 @@ export declare function getSymbol(name: string): symbol;
 /**
  * The key used to store the .inScope() binding configuration on an auto-bound object.
  */
-export declare const InScopeDecoratorSymbol: symbol;
+export declare const AutoBindInScopeKey: symbol;
 /**
  * The key used to store the .asScope() binding configuration on an auto-bound object.
  */
-export declare const AsScopeDecoratorSymbol: symbol;
+export declare const AutoBindAsScopeKey: symbol;
 /**
  * A placeholder scope value to indicate that the binding should establish the scope
  * identified by the primary identifier of the binding.

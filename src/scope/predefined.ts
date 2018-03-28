@@ -4,7 +4,9 @@ import {
 } from "./interfaces";
 
 import {
-    SingletonScopeSymbol
+    SingletonScopeSymbol,
+    SelfIdentifiedScopeSymbol
 } from "./symbols"
 
 export const SingletonScope = SingletonScopeSymbol as Scope;
+export const SelfIdentifiedScope = SelfIdentifiedScopeSymbol as Scope;

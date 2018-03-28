@@ -10,12 +10,12 @@ export function getSymbol(name: string) {
 /**
  * The key used to store the .inScope() binding configuration on an auto-bound object.
  */
-export const InScopeDecoratorSymbol = getSymbol("InScope");
+export const AutoBindInScopeKey = getSymbol("InScope");
 
 /**
  * The key used to store the .asScope() binding configuration on an auto-bound object.
  */
-export const AsScopeDecoratorSymbol = getSymbol("AsScope");
+export const AutoBindAsScopeKey = getSymbol("AsScope");
 
 /**
  * A placeholder scope value to indicate that the binding should establish the scope

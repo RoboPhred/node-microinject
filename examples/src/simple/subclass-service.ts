@@ -3,9 +3,9 @@ import { EventEmitter } from "events";
 
 import {
     Identifier,
-    Injectable,
-    Inject,
-    ContainerModule
+    ContainerModule,
+    injectable,
+    inject,
 } from "microinject";
 
 
@@ -43,11 +43,11 @@ const PayloadToRaiseIdent = Symbol("PayloadToRaise") as Identifier<any>;
 // This means the container is ignorant of base classes, and they do not need to be marked injectable.
 // IMPORTANT: If we did not call the constructor here, the container would not pass any arguments
 //  to the inherited constructor, as the superclass does not declare itself @Injectable() either.
-@Injectable()
+@injectable()
 class SubclassServiceImpl extends EventRaiser implements SubclassService {
     constructor(
-        @Inject(EventToRaiseIdent) eventToRaise: string,
-        @Inject(PayloadToRaiseIdent) payloadToRaise: any
+        @inject(EventToRaiseIdent) eventToRaise: string,
+        @inject(PayloadToRaiseIdent) payloadToRaise: any
     ) {
         // Call the constructor of our superclass.
         super(eventToRaise, payloadToRaise);
