@@ -57,7 +57,7 @@ const defaultDependencyResolvers: DependencyResolvers = {
                 fullStack.push(identifier);
                 throw new DependencyResolutionError(identifier, fullStack, `Cannot resolve cyclic dependency.`);
             }
-            childResolver.resolveInstance(x)
+            return childResolver.resolveInstance(x);
         });
         return new creator.ctor(...args);
     },
@@ -241,6 +241,13 @@ export default class DependencyGraphResolver {
 
     private _createNodeComponent(node: DependencyGraphNode): any {
         const component = node.componentCreator;
+
+        if (isComponentScopable(component) && component.defineScope) {
+            // We are creating this scope definition instance, so we
+            //  are the resolver that will be creating all components
+            //  that are contained within this scope instance.
+            this._ownedScopes.add(component);
+        }
 
         switch(component.type) {
             case "array": {

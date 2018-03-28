@@ -38,7 +38,7 @@ export declare class BinderImpl<T = any> implements Binder, ScopedBinder {
      */
     asScope(scope?: Scope): void;
     _getBinding(): BindingData;
-    private _createDefaultBinding();
+    private _ensureBoundOrBinding();
     private _finalizeBinding();
     private _ensureCanBind();
 }
