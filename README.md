@@ -2,7 +2,7 @@
 A Tiny, standalone, library-friendly dependency injection container.
 
 This was made out of a requirement to use dependency injection for a complex middleware library.  The primary 
-driving force is allow a library to use dependency injection locally without forcing changes to any upstream users of the library.
+driving force is to allow a library to use dependency injection locally without forcing changes to any upstream users of the library.
 This means:
 - No requirements for the invoking library to initialize reflect-metadata.
 - Support dependency injection when used on classes derived from non-DI-aware classes.
