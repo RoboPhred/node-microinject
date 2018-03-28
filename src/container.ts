@@ -1,10 +1,7 @@
 
 import {
     Identifier,
-    Newable,
-    Context,
-    ScopeMap,
-    Scope
+    Context
 } from "./interfaces";
 
 import {
@@ -12,8 +9,7 @@ import {
 } from "./module";
 
 import {
-    Binder,
-    ScopedBinder
+    Binder
 } from "./binder";
 
 import {
@@ -21,20 +17,12 @@ import {
 } from "./binder/binder-impl";
 
 import {
-    BindingData
-} from "./binder/data";
-
-import {
     getProvidedIdentifiers
 } from "./binder/utils";
 
-import {
-    isInjectable,
-    getConstructorInjections
-} from "./injection-utils";
-
 import DependencyGraphPlanner, {
-    DependencyGraphNode, FactoryComponentCreator
+    DependencyGraphNode,
+    FactoryComponentCreator
 } from "./planner";
 
 import DependencyGraphResolver from "./resolver";
@@ -42,11 +30,6 @@ import DependencyGraphResolver from "./resolver";
 import {
     DependencyResolutionError
 } from "./errors";
-
-import {
-    identifierToString
-} from "./utils";
-
 
 
 export class Container {

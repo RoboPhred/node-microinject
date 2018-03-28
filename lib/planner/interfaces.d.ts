@@ -1,4 +1,5 @@
-import { Identifier, Newable, Scope } from "../interfaces";
+import { Identifier, Newable } from "../interfaces";
+import { Scope } from "../scope";
 export declare type ComponentCreatorType = "value" | "array" | "factory" | "constructor";
 export interface ComponentCreatorBase {
     type: ComponentCreatorType;

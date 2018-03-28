@@ -1,9 +1,9 @@
 
 import {
-    SingletonSymbol,
-    InScopeSymbol,
-    AsScopeSymbol,
-    AsScopeSelfIdentifedSymbol
+    SingletonScopeSymbol,
+    InScopeDecoratorSymbol,
+    AsScopeDecoratorSymbol,
+    SelfIdentifiedScopeSymbol
 } from "./symbols";
 
 import {
@@ -12,13 +12,13 @@ import {
 
 export function Singleton<TFunction extends Function>(): (target: TFunction) => void {
     return function(target: any) {
-        target[InScopeSymbol] = SingletonSymbol;
+        target[InScopeDecoratorSymbol] = SingletonScopeSymbol;
     }
 }
 
 export function InScope<TFunction extends Function>(scope: Scope): (target: TFunction) => void {
     return function(target: any) {
-        target[InScopeSymbol] = scope;
+        target[InScopeDecoratorSymbol] = scope;
     }
 }
 
@@ -28,6 +28,6 @@ export function InScope<TFunction extends Function>(scope: Scope): (target: TFun
  */
 export function AsScope<TFunction extends Function>(scope?: Scope): (target: TFunction) => void {
     return function(target: any) {
-        target[AsScopeSymbol] = (scope !== undefined) ? scope : AsScopeSelfIdentifedSymbol;
+        target[AsScopeDecoratorSymbol] = (scope !== undefined) ? scope : SelfIdentifiedScopeSymbol;
     }
 }

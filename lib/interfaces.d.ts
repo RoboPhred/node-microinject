@@ -8,10 +8,6 @@ export declare type Identifier<T = any> = string | symbol | AutoBoundIdentifier<
  */
 export declare type AutoBoundIdentifier<T = any> = Newable<T> | ServiceFactory<T>;
 /**
- * An object that identifies an object creation scope.
- */
-export declare type Scope<T = any> = string | symbol | T | Newable<T>;
-/**
  * A constructor creating a new object of type T.
  */
 export interface Newable<T = any> {
@@ -37,7 +33,4 @@ export interface Context extends ServiceLocator {
      * To get scoped items, use Context.get() and Context.getAll()
      */
     readonly container: Container;
-}
-export interface ScopeMap extends ReadonlyMap<Scope, any> {
-    get<T>(scope: Scope<T>): T;
 }

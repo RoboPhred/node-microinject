@@ -1,10 +1,13 @@
 
 import {
     Identifier,
-    Scope,
     Newable,
     Context
 } from "../interfaces";
+
+import {
+    Scope   
+ } from "../scope";
 
 import {
     InjectionData

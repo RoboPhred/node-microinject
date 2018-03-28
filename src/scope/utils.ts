@@ -1,8 +1,7 @@
 
 import {
-    SingletonSymbol,
-    InScopeSymbol,
-    AsScopeSymbol
+    InScopeDecoratorSymbol,
+    AsScopeDecoratorSymbol
 } from "./symbols";
 
 import {
@@ -11,9 +10,9 @@ import {
 
 
 export function getInScope(target: any): Scope {
-    return target[InScopeSymbol];
+    return target[InScopeDecoratorSymbol];
 }
 
 export function getAsScope(target: any): Scope {
-    return target[AsScopeSymbol];
+    return target[AsScopeDecoratorSymbol];
 }

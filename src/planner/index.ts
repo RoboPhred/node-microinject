@@ -1,10 +1,13 @@
 
 import {
     Identifier,
-    Newable,
-    Scope,
-    ScopeMap
+    Newable
 } from "../interfaces";
+
+import {
+    Scope,
+    SingletonScope
+} from "../scope"
 
 import {
     BindingMap,
@@ -26,10 +29,6 @@ import {
 import {
     DependencyResolutionError
 } from "../errors";
-
-import {
-    SingletonSymbol
-} from "../symbols";
 
 import {
     DependencyGraphNode,
@@ -93,8 +92,8 @@ export default class DependencyGraphPlanner {
         this._bindingsForIdentifier = bindings ? new Map(bindings) : new Map();
 
         // Prepopulate our singleton scope.
-        this._rootScopeInstances.set(SingletonSymbol, {
-            definer: SingletonSymbol,
+        this._rootScopeInstances.set(SingletonScope, {
+            definer: SingletonScope,
             instances: new Map()
         });
     }

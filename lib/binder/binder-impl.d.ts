@@ -1,4 +1,5 @@
-import { Identifier, Newable, Context, Scope } from "../interfaces";
+import { Identifier, Newable, Context } from "../interfaces";
+import { Scope } from "../scope";
 import { Binder, ScopedBinder } from "./interfaces";
 import { BindingData } from "./data";
 /**

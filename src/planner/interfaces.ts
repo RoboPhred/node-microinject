@@ -1,13 +1,12 @@
 
 import {
     Identifier,
-    Newable,
-    Scope
+    Newable
 } from "../interfaces";
 
 import {
-    SingletonSymbol
-} from "../symbols";
+    Scope
+} from "../scope";
 
 
 export type ComponentCreatorType = "value" | "array" | "factory" | "constructor";

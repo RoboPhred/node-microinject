@@ -3,17 +3,18 @@ import {
     Identifier,
     Newable,
     Context,
-    Scope,
     ServiceFactory
 } from "../interfaces";
 
 import {
-    getInScope, getAsScope
-} from "../scope-utils";
+    Scope,
+    SingletonScope
+} from "../scope";
 
 import {
-    SingletonSymbol
-} from "../symbols";
+    getInScope,
+    getAsScope
+} from "../scope/utils";
 
 import {
     isInjectable, getConstructorInjections
@@ -45,6 +46,7 @@ import {
     ConstructorBindingData,
     BindingDataType, 
 } from "./data";
+import { SelfIdentifiedScopeSymbol } from "../scope/symbols";
 
 
 /**
@@ -107,7 +109,7 @@ export class BinderImpl<T = any> implements Binder, ScopedBinder {
         // Can only be an instance creator from a default binding.
         const binding = this._binding as InstanceCreatorBindingData;
         if (binding.inScope !== undefined) throw new BindingConfigurationError("Binding target scope has already been established.");
-        binding.inScope = SingletonSymbol;
+        binding.inScope = SingletonScope;
     }
 
     /**
@@ -147,7 +149,7 @@ export class BinderImpl<T = any> implements Binder, ScopedBinder {
      */
     asScope(scope?: Scope): void {
         if (!scope) {
-            scope = this._identifier;
+            scope = SelfIdentifiedScopeSymbol;
         }
 
         this._ensureBoundOrBinding();
@@ -186,7 +188,16 @@ export class BinderImpl<T = any> implements Binder, ScopedBinder {
 
         // this._binding will always be set here, but typescript cannot infer that from our setup above.
         if (this._binding && this._binding.type !== "value") {
-            if (this._binding.defineScope === undefined) this._binding.defineScope = getAsScope(this._identifier);
+            if (this._binding.defineScope === undefined) {
+                this._binding.defineScope = getAsScope(this._identifier);
+            }
+
+            // While we could handle this logic in .asScope(), we still
+            //  need it here to support the auto-bind @AsScope() decorator.
+            if (this._binding.defineScope === SelfIdentifiedScopeSymbol) {
+                this._binding.defineScope = this._identifier;
+            }
+
             if (this._binding.inScope === undefined) this._binding.inScope = getInScope(this._identifier);
         }
     }

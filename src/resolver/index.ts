@@ -1,9 +1,12 @@
 
 import {
     Identifier,
-    Scope,
     Context
 } from "../interfaces";
+
+import {
+    SingletonScope
+} from "../scope";
 
 import {
     DependencyGraphNode,
@@ -22,7 +25,6 @@ import {
 import {
     DependencyResolutionError
 } from "../errors";
-import { SingletonSymbol } from "../symbols";
 
 
 /*
@@ -206,7 +208,7 @@ export default class DependencyGraphResolver {
         //  to a scope is the resolver that resolved the instance which represents the scope.
         //  That is: the component is cached where component.containingScopeInstance was created.
 
-        if (component.containingScope === SingletonSymbol) {
+        if (component.containingScope === SingletonScope) {
             if (this._parent) {
                 // singleton is handled by root resolver.
                 return this._parent._getScopedNodeComponent(node);

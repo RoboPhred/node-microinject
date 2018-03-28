@@ -1,8 +1,12 @@
 
 import {
-    Identifier,
-    Scope
+    Identifier
 } from "./interfaces";
+
+import {
+    Scope
+} from "./scope";
+
 
 export function identifierToString(identifier: Identifier) {
     return String(identifier);
