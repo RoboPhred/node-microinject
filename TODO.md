@@ -1,8 +1,4 @@
 
-# Immediate tasks
-- Reimplement context argument for factory; change context to only allow .get() and .getAll() from container to divorse it from needing the entire container
-and allowing container.reset() to cut ties with it.
-
 # Features
 - Tagged binding.
 - Graph construction should be pluggable
