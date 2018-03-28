@@ -37,7 +37,6 @@ application-level IoC.
 - No [conditional binding](https://github.com/inversify/InversifyJS/blob/master/wiki/named_bindings.md).
 - No [tagged binding](https://github.com/inversify/InversifyJS/blob/master/wiki/tagged_bindings.md).
 - No [property injection](https://github.com/inversify/InversifyJS/blob/master/wiki/property_injection.md).
-- No [hierarichal containers](https://github.com/inversify/InversifyJS/blob/master/wiki/hierarchical_di.md).
 - No typescript-based injection-by-type.  This is a result of being unable to use reflect-metadata.
 - Less established and proven.
 

@@ -1,4 +1,13 @@
 
+# Immediate tasks
+- Reimplement context argument for factory; change context to only allow .get() and .getAll() from container to divorse it from needing the entire container
+and allowing container.reset() to cut ties with it.
+- Clean up planner; give it the same treatment as the resolver.  Lots of args passed along that should be instance props of the class.
+- Rework how bindings are sent to planner.  The need to map the values of the container's binding map is nonsensical.  Should probably
+    just send an array of bindings, and let the binding hold one or more identifiers.  This will also enable me to fix the @Provides+@InScope bug.
+    Best solution is probably to make BinderImpl implement BinderData.  Could do it through read-only props.
+
+
 # Features
 - Tagged binding.
 - Graph construction should be pluggable
@@ -10,19 +19,13 @@
 
 
 # Bugs
-- Mixing @Provides and @InScope will create a new copy per each @Provides
+- Mixing @Provides and @InScope will create a new copy per each @Provides.  This is because Identifier is the identification mechanism for
+instances within a scope, and by the time the planner sees things, each @Provides identifier shows up seperately.  @InScope should really
+apply to the binding / auto-bound object as a whole.  This would become obvious if we had an .alias() method on the binding object.
 
 
 # Cleanup
 - Unit test everything.
-- Clean up how scopes are handled and passed along.  The code is very fragile.
 - Ensure the engine limitation is set correctly; what nodejs versions support Map and Symbol?
 - Stop generating typedefs for non-exported / internal files.
-- Rework Binder/BinderImpl to prevent user access of _getBinding, _createDefaultBinding, _ensureCanBind
-- Refactor to build an object graph and plan before instantiation for infinite loop detection and tracing capability.
-- We are holding a lot of data around that is only needed during the buildout phase of the object graph.
-    - Consider reworking it to build a graph first, then instantiate objects based on it.
-    - This seems to be how InversifyJS does things, judging from its documentation.
-
-
-
+- Rework BinderImpl to prevent user access of internal methods.
