@@ -1,39 +1,25 @@
 
 import {
     Identifier
+} from "../interfaces";
+
+import {
+    InjectionOptions
 } from "./interfaces";
 
 import {
-    InjectableSymbol,
-    AutobindIdentifierSymbol,
-    ConstructorInjectionsSymbol
-} from "./symbols";
+    AutobindIdentifierSymbol
+} from "../symbols";
 
+import {
+    InjectableDecoratorSymbol,
+    ConstructorInjectionDecoratorsSymbol
+} from "./symbols";
 
 import {
     InjectionData
-} from "./injection-utils";
+} from "./utils";
 
-/**
- * Options for content injections.
- */
-export interface InjectionOptions {
-    /**
-     * If true, the injected value will be null if no viable object is found in the container
-     * If false, an error will be thrown at class creation time.
-     */
-    optional?: boolean;
-
-    /**
-     * Whether to set the variable to an array of all objects matching the identifier.
-     * If true, the value will be an array of all matching objects.
-     * If false, the first identified object will be used.
-     * 
-     * Note that 'optional' is still required to avoid throwing an error if no objects are found.
-     * If both 'optional' and 'all' are true, then an empty array will be set if no objects are found.
-     */
-    all?: boolean;
-}
 
 /**
  * Marks this class as injectable.
@@ -42,7 +28,7 @@ export interface InjectionOptions {
  */
 export function Injectable<TFunction extends Function>(identifier?: Identifier): (target: TFunction) => void {
     return function(target: any) {
-        target[InjectableSymbol] = true;
+        target[InjectableDecoratorSymbol] = true;
         if (identifier) {
             if (target[AutobindIdentifierSymbol] == null) target[AutobindIdentifierSymbol] = [];
             target[AutobindIdentifierSymbol].push(identifier);
@@ -57,10 +43,10 @@ export function Injectable<TFunction extends Function>(identifier?: Identifier):
  */
 export function Inject(identifier: Identifier, opts?: InjectionOptions) {
     return function(target: any, targetKey: string, index: number) {
-        let dependencies = target[ConstructorInjectionsSymbol] as InjectionData[];
+        let dependencies = target[ConstructorInjectionDecoratorsSymbol] as InjectionData[];
         if (dependencies == null) {
             dependencies = [];
-            target[ConstructorInjectionsSymbol] = dependencies;
+            target[ConstructorInjectionDecoratorsSymbol] = dependencies;
         }
         dependencies[index] = {
             ...(opts || {}),
@@ -76,10 +62,10 @@ export function Inject(identifier: Identifier, opts?: InjectionOptions) {
  */
 export function Optional() {
     return function(target: any, targetKey: string, index: number) {
-        let dependencies = target[ConstructorInjectionsSymbol] as InjectionData[];
+        let dependencies = target[ConstructorInjectionDecoratorsSymbol] as InjectionData[];
         if (dependencies == null) {
             dependencies = [];
-            target[ConstructorInjectionsSymbol] = dependencies;
+            target[ConstructorInjectionDecoratorsSymbol] = dependencies;
         }
         if (dependencies[index] == null) {
             // @Optional can be applied before @Inject.

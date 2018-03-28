@@ -1,6 +1,6 @@
 import { Identifier, Newable, Context } from "../interfaces";
 import { Scope } from "../scope";
-import { InjectionData } from "../injection-utils";
+import { InjectionData } from "../injection/utils";
 export declare type BindingDataType = "value" | "factory" | "constructor";
 export interface BindingDataBase {
     type: BindingDataType;

@@ -1,5 +1,5 @@
-import { Identifier } from "./interfaces";
-import { InjectionOptions } from "./injection-decorators";
+import { Identifier } from "../interfaces";
+import { InjectionOptions } from "./interfaces";
 /**
  * Data associated with an injection.
  */

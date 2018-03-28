@@ -2,7 +2,7 @@
 export * from "./interfaces";
 
 export * from "./binder";
-export * from "./injection-decorators";
+export * from "./injection";
 export * from "./scope";
 
 export * from "./container";

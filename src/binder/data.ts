@@ -11,7 +11,7 @@ import {
 
 import {
     InjectionData
-} from "../injection-utils";
+} from "../injection/utils";
 
 export type BindingDataType = "value" | "factory" | "constructor";
 

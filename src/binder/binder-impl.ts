@@ -17,8 +17,9 @@ import {
 } from "../scope/utils";
 
 import {
-    isInjectable, getConstructorInjections
-} from "../injection-utils";
+    isInjectable,
+    getConstructorInjections
+} from "../injection/utils";
 
 import {
     identifierToString

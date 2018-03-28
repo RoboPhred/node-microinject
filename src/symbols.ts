@@ -5,7 +5,5 @@ export function getSymbol(id: string): symbol {
     return Symbol.for(`github:robophred/microinject::${id}`);
 }
 
-export const InjectableSymbol = getSymbol("Injectable");
 export const IsAutoBindFactorySymbol = getSymbol("IsAutoBindFactorySymbol");
 export const AutobindIdentifierSymbol = getSymbol("AutobindIdentifier");
-export const ConstructorInjectionsSymbol = getSymbol("ConstructorInjections");

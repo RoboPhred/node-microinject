@@ -1,15 +1,15 @@
 
 import {
     Identifier
-} from "./interfaces";
+} from "../interfaces";
 
 import {
     InjectionOptions
-} from "./injection-decorators";
+} from "./interfaces";
 
 import {
-    InjectableSymbol,
-    ConstructorInjectionsSymbol
+    InjectableDecoratorSymbol,
+    ConstructorInjectionDecoratorsSymbol
 } from "./symbols";
 
 /**
@@ -24,7 +24,7 @@ export interface InjectionData extends InjectionOptions {
  * @param target The target to test for injectability.
  */
 export function isInjectable(target: any): boolean {
-    return target[InjectableSymbol] === true;
+    return target[InjectableDecoratorSymbol] === true;
 }
 
 /**
@@ -33,5 +33,5 @@ export function isInjectable(target: any): boolean {
  * @param target The target to obtain constructor injections for.
  */
 export function getConstructorInjections(target: any): InjectionData[] {
-    return (target[ConstructorInjectionsSymbol] || []);
+    return (target[ConstructorInjectionDecoratorsSymbol] || []);
 }

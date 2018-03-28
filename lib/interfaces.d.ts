@@ -26,7 +26,7 @@ export interface ServiceLocator {
  */
 export interface Context extends ServiceLocator {
     /**
-     * The original container.
+     * The container at the root of this instantiation.
      * Note that this container is not aware of the current scope stack.
      * Attempting to get a scoped item will fail.
      *

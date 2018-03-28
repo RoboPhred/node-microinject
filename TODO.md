@@ -3,7 +3,7 @@
 - Tagged binding.
 - Graph construction should be pluggable
     - Allows cleaner code and easier addition of additional binding features, such as tagged or conditional bindings.
-- Take dependency graph and run it against pluggable / swappable resolver.  This allows for additional cross-cutting features:
+- Explore alternate dependency graph resolvers for different use cases
     - Mixins, wrapped functions.
     - Remoted calls, for example over an IPC bus or microservice architecture.
     - Ensure typings can understand these transformations (eg promisify).  Will require [typescript foo](https://github.com/Microsoft/TypeScript/pull/21496).
