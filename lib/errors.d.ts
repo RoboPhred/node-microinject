@@ -1,6 +1,7 @@
-export declare class IdentifierNotBoundError extends Error {
-    constructor(message: string);
-}
-export declare class BindingConfigurationError extends Error {
-    constructor(message: string);
+import { Identifier } from "./interfaces";
+export declare class DependencyResolutionError extends Error {
+    code: string;
+    identifier: Identifier;
+    path: Identifier[];
+    constructor(identifier: Identifier, path: Identifier[], message?: string);
 }

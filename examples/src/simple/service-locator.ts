@@ -25,11 +25,12 @@ class ServiceLocatorImpl implements ServiceLocator {
     constructor(private _context: Context) {}
 
     get<T>(identifier: Identifier<T>): T {
-        // NOTE: Requiring the user to pass scopes around is a Bad Thing.
-        //  It is easy to forget or corrupt.
-        // TODO: Refactor Container so that scope is kept internally,
-        //  probably by passing wrappers to Container through context.
-        return this._context.container.get(identifier, this._context.scopes);
+        // Important note: We need to use context.get() in order
+        //  to support scoped bindings.
+        // context.container is the root container and has no concept
+        //  of scope, so context.container.get() will not be aware of any scope
+        //  that this ServiceLocator was requested in.
+        return this._context.get(identifier);
     }
 }
 
