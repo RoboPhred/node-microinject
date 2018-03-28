@@ -1,4 +1,4 @@
-import { Identifier, ServiceFactory } from "./interfaces";
+import { Identifier, ServiceFactory } from "../interfaces";
 /**
  * Marks the function as a factory function when auto-binding.
  * @param identifier An optional identifier to auto-bind this function as.  This is a shorthand for @Provide(identifier)

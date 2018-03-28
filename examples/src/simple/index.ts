@@ -40,10 +40,9 @@ const leftService = container.get(LeftService);
 console.log("leftService.getLeftValue() returns " + leftService.getLeftValue());
 
 // Playing around with the service locator.
-const serviceLocator = container.get(ServiceLocator);
-const rightService = serviceLocator.get(RightService);
-
-console.log("leftValue + rightValue =", leftService.getLeftValue() + rightService.getRightValue());
+// const serviceLocator = container.get(ServiceLocator);
+// const rightService = serviceLocator.get(RightService);
+//console.log("leftValue + rightValue =", leftService.getLeftValue() + rightService.getRightValue());
 
 
 // Showing that singleton functionality works.

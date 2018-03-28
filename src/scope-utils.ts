@@ -10,10 +10,6 @@ import {
 } from "./interfaces";
 
 
-export function isSingleton(target: any): boolean {
-    return target[SingletonSymbol] === true;
-}
-
 export function getInScope(target: any): Scope {
     return target[InScopeSymbol];
 }

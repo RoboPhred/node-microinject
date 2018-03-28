@@ -1,12 +1,12 @@
 
 import {
     Identifier
-} from "./interfaces";
+} from "../interfaces";
 
 import {
     IsAutoBindFactorySymbol,
     AutobindIdentifierSymbol
-} from "./symbols";
+} from "../symbols";
 
 
 export function isAutoBindFactory(target: any): boolean {

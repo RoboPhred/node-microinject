@@ -29,7 +29,9 @@ class ServiceLocatorImpl implements ServiceLocator {
         //  It is easy to forget or corrupt.
         // TODO: Refactor Container so that scope is kept internally,
         //  probably by passing wrappers to Container through context.
-        return this._context.container.get(identifier, this._context.scopes);
+        //return this._context.container.get(identifier, this._context.scopes);
+
+        throw new Error("Not Implemented: factory context.");
     }
 }
 

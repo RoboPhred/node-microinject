@@ -2,12 +2,12 @@
 import {
     Identifier,
     ServiceFactory
-} from "./interfaces";
+} from "../interfaces";
 
 import {
     IsAutoBindFactorySymbol,
     AutobindIdentifierSymbol
-} from "./symbols";
+} from "../symbols";
 
 
 /**

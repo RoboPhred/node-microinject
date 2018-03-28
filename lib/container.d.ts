@@ -1,4 +1,4 @@
-import { Identifier, Newable, ScopeMap } from "./interfaces";
+import { Identifier } from "./interfaces";
 import { ContainerModule } from "./module";
 import { Binder } from "./binder";
 export declare class Container {
@@ -6,6 +6,8 @@ export declare class Container {
      * All bindings currently registered with this container.
      */
     private _binders;
+    private _planCache;
+    private _resolver;
     /**
      * Container to use if a binding is not find in this container.
      */
@@ -30,13 +32,14 @@ export declare class Container {
     bind<T>(identifier: Identifier<T>): Binder;
     private _addBinder<T>(identifier, binder);
     /**
-     * Create a new instance of an injectable class.
-     * The class must be declared injectable using the @Injectable decorator.
-     * Injectable constructor arguments will be resolved.
-     * @param ctor The class constructor.
-     * @returns The created class.
+     * Clears out knowledge of all resolved identifiers and scopes.
+     * Previously resolved objects and factory bindings will still
+     * continue to work normally off the old data.
+     *
+     * This does not clear the container's bindings.  All previously
+     * configured bindings remain configured.
      */
-    create<T>(ctor: Newable<T>, scopes?: ScopeMap): T;
+    reset(): void;
     /**
      * Gets the bound object for an identifier.  This may create the object if necessary depending on scope and previous creations.
      * If multiple objects are bound to the identifier, the object chosen may not be predictable.
@@ -44,17 +47,19 @@ export declare class Container {
      * @param identifier The identifier of the object to get.
      * @returns The object for the given identifier.
      */
-    get<T, S = any>(identifier: Identifier<T>, scopes?: ScopeMap): T;
+    get<T>(identifier: Identifier<T>): T;
     /**
      * Gets all bound objects for an identifier.  This may create the objects if necessary depending on scope and previous creations.
      * This method will throw IdentifierNotBoundError if no bindings exist for the identifier.
      * @param identifier The identifier of the object to get.
      * @returns An array of all objects for the given identifier.
      */
-    getAll<T, S = any>(identifier: Identifier<T>, scopes?: ScopeMap): T[];
+    getAll<T>(identifier: Identifier<T>): T[];
+    private _getAll<T>(identifier);
     /**
      * Checks if the given identifier is known to the container.
      * @param identifier The identifier to check for.
      */
     has<T>(identifier: Identifier<T>): boolean;
+    private _getPlan(identifier);
 }

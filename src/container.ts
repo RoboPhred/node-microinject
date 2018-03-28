@@ -17,29 +17,38 @@ import {
 } from "./binder";
 
 import {
+    BinderImpl
+} from "./binder/binder-impl";
+
+import {
+    BindingData
+} from "./binder/data";
+
+import {
+    getProvidedIdentifiers
+} from "./binder/utils";
+
+import {
     isInjectable,
     getConstructorInjections
 } from "./injection-utils";
 
 import {
-    getProvidedIdentifiers
-} from "./binding-utils";
+    DependencyGraphNode,
+    createPlanForIdentifier,
+    createPlanForBinding
+} from "./planner";
+
+import DependencyGraphResolver from "./resolver";
 
 import {
-    isSingleton
-} from "./scope-utils";
-
-import {
-    IdentifierNotBoundError
+    DependencyResolutionError
 } from "./errors";
-
-import {
-    BinderImpl
-} from "./binder-impl";
 
 import {
     identifierToString
 } from "./utils";
+
 
 
 export class Container {
@@ -47,6 +56,10 @@ export class Container {
      * All bindings currently registered with this container.
      */
     private _binders = new Map<Identifier, BinderImpl<any>[]>();
+
+    private _planCache = new Map<Identifier, DependencyGraphNode>();
+
+    private _resolver = new DependencyGraphResolver();
 
     /**
      * Container to use if a binding is not find in this container.
@@ -68,6 +81,8 @@ export class Container {
     load(...modules: ContainerModule[]) {
         const bind = this.bind.bind(this);
         modules.forEach(x => x.registry(bind));
+
+        this._planCache.clear();
     }
 
     /**
@@ -91,6 +106,13 @@ export class Container {
             this._addBinder(identifier, binder);
         }
 
+        // Even thought we know what identifiers we are modifying,
+        //  we may have some new identifiers which will be
+        //  counted in an @Inject({all: true})
+        // We could try to scan for these, but we should not be
+        //  binding too much after we start to create things. 
+        this._planCache.clear();
+
         return binder;
     }
 
@@ -104,44 +126,20 @@ export class Container {
     }
 
     /**
-     * Create a new instance of an injectable class.
-     * The class must be declared injectable using the @Injectable decorator.
-     * Injectable constructor arguments will be resolved.
-     * @param ctor The class constructor.
-     * @returns The created class.
+     * Clears out knowledge of all resolved identifiers and scopes.
+     * Previously resolved objects and factory bindings will still
+     * continue to work normally off the old data.
+     * 
+     * This does not clear the container's bindings.  All previously
+     * configured bindings remain configured.
      */
-    create<T>(ctor: Newable<T>, scopes?: ScopeMap): T {
-        if (!isInjectable(ctor)) {
-            throw new Error(`The constructor "${ctor.name}" is not injectable.`);
-        }
+    reset() {
+        // Clearing the entire scope stack is as simple as getting
+        //  a new graph resolver.
+        this._resolver = new DependencyGraphResolver();
 
-        // If no scopes specified, create a scope map to avoid repeated
-        //  map creation during dependency resolution loop.
-        if (!scopes) {
-            scopes = new Map<Scope, any>();
-        }
-
-        const dependencies = getConstructorInjections(ctor);
-        const resolved = dependencies.map((injectData, i) => {
-            if (injectData.identifier == null) {
-                throw new Error(`Constructor "${ctor.name}" parameter ${i} has injection decorator but no service identifier.`);
-            }
-
-            const has = this.has(injectData.identifier);
-            if (!has) {
-                if (injectData.optional) return injectData.all ? [] : null;
-                throw new IdentifierNotBoundError(`Constructor "${ctor.name}" parameter ${i} requests identifier "${identifierToString(injectData.identifier)}" which is not bound.`);
-            }
-
-            if (injectData.all) {
-                return this.getAll(injectData.identifier, scopes);
-            }
-            else {
-                return this.get(injectData.identifier, scopes);
-            }
-        });
-
-        return new ctor(...resolved);
+        // No need to clear the cached plans.  Bindings are kept,
+        //  so the plans are still valid.
     }
 
     /**
@@ -151,15 +149,15 @@ export class Container {
      * @param identifier The identifier of the object to get.
      * @returns The object for the given identifier.
      */
-    get<T, S = any>(identifier: Identifier<T>, scopes?: ScopeMap): T {
+    get<T>(identifier: Identifier<T>): T {
         const binders = this._binders.get(identifier);
-        if (binders == null) {
-            if (this._parent) return this._parent.get<T, S>(identifier, scopes);
-            throw new IdentifierNotBoundError(`No binding exists for identifier "${identifierToString(identifier)}".`);
+        if (!binders || binders.length === 0) {
+            if (this._parent) return this._parent.get(identifier);
+            throw new DependencyResolutionError(identifier, [], `No binding exists for the identifier.`);
         }
 
-        if (!scopes) scopes = new Map<Scope, any>();
-        return binders[0]._getBinding()._getBoundValue({ container: this, scopes });
+        const plan = this._getPlan(identifier);
+        return this._resolver.resolveInstance(plan);
     }
 
     /**
@@ -168,18 +166,35 @@ export class Container {
      * @param identifier The identifier of the object to get.
      * @returns An array of all objects for the given identifier.
      */
-    getAll<T, S = any>(identifier: Identifier<T>, scopes?: ScopeMap): T[] {
+    getAll<T>(identifier: Identifier<T>): T[] {
+        const values = this._getAll(identifier);
+        if (values.length === 0) {
+            throw new DependencyResolutionError(identifier, [], `No bindings exists for the identifier.`);
+        }
+        return values;
+    }
+
+    private _getAll<T>(identifier: Identifier<T>): T[] {
         const binders = this._binders.get(identifier);
         if (binders == null) {
-            if (this._parent) return this._parent.getAll<T, S>(identifier, scopes);
-            throw new IdentifierNotBoundError(`No binding exists for identifier "${identifierToString(identifier)}".`);
+            if (this._parent) return this._parent.getAll<T>(identifier);
+            return [];
         }
 
-        if (!scopes) scopes = new Map<Scope, any>();
-        const context: Context = { container: this, scopes };
-        const localValues = binders.map(x => x._getBinding()._getBoundValue(context));
-        const parentValues: any[] = this._parent ? this._parent.getAll<T, S>(identifier, scopes) : [];
-        return localValues.concat(parentValues);
+        const bindData = new Map<Identifier, BindingData[]>();
+        for(let entry of this._binders) {
+            bindData.set(entry[0], entry[1].map(x => x._getBinding()));
+        }
+
+        const plans = binders.map(x => createPlanForBinding(identifier, x._getBinding(), bindData));
+
+        // TODO: Scopes start fresh each plan.
+        const values = plans.map(x => this._resolver.resolveInstance(x));
+
+        if (this._parent) {
+            return values.concat(this._parent._getAll(identifier));
+        }
+        return values;
     }
 
     /**
@@ -188,5 +203,19 @@ export class Container {
      */
     has<T>(identifier: Identifier<T>): boolean {
         return this._binders.has(identifier) || Boolean(this._parent && this._parent.has(identifier));
+    }
+
+    private _getPlan(identifier: Identifier): DependencyGraphNode {
+        let plan = this._planCache.get(identifier);
+        if (!plan) {
+            // TODO: This is nasty.  Fix this up when planner gets its cleanup pass.
+            const bindData = new Map<Identifier, BindingData[]>();
+            for(let entry of this._binders) {
+                bindData.set(entry[0], entry[1].map(x => x._getBinding()));
+            }
+            plan = createPlanForIdentifier(identifier, bindData);
+            this._planCache.set(identifier, plan);
+        }
+        return plan;
     }
 }

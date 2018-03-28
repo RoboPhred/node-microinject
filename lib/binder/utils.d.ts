@@ -1,4 +1,4 @@
-import { Identifier } from "./interfaces";
+import { Identifier } from "../interfaces";
 export declare function isAutoBindFactory(target: any): boolean;
 /**
  * Returns the autobind identifiers of the target.  Returns an empty array if none were specified.

@@ -1,4 +1,4 @@
-import { Newable, Context, Scope } from "./interfaces";
+import { Newable, Context, Scope } from "../interfaces";
 /**
  * An interface providing a fluent api to bind a ServiceIdentifier to an implementation.
  */

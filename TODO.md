@@ -1,11 +1,17 @@
 
-# Documentation
-- Examples.
-Particularly how to use Identifier<T> to create a Symbol that will make container.get() return the desired type.
-
-
 # Features
 - Tagged binding.
+- Graph construction should be pluggable
+    - Allows cleaner code and easier addition of additional binding features, such as tagged or conditional bindings.
+- Take dependency graph and run it against pluggable / swappable resolver.  This allows for additional cross-cutting features:
+    - Mixins, wrapped functions.
+    - Remoted calls, for example over an IPC bus or microservice architecture.
+    - Ensure typings can understand these transformations (eg promisify).  Will require [typescript foo](https://github.com/Microsoft/TypeScript/pull/21496).
+
+
+# Bugs
+- Mixing @Provides and @InScope will create a new copy per each @Provides
+
 
 # Cleanup
 - Unit test everything.
@@ -18,20 +24,5 @@ Particularly how to use Identifier<T> to create a Symbol that will make containe
     - Consider reworking it to build a graph first, then instantiate objects based on it.
     - This seems to be how InversifyJS does things, judging from its documentation.
 
-# 2.x
 
-Rework to build a dependency graph before creating objects.
-- Allows for cycle detection.
-- Allows easier scoping, might allow to work without WeakMap.
-- Allow graph to be requested without construction, for example to generate design documents or service bus architecture (see 'remoted calls' below).
-
-Graph construction should be pluggable
-- Allows cleaner code and easier addition of additional binding features, such as 
-tagged or conditional bindings.
-
-Take dependency graph and run it against pluggable / swappable resolver.
-This allows for additional cross-cutting features:
-- Mixins, wrapped functions.
-- Remoted calls, for example over an IPC bus or microservice architecture.
-Ensure typings can understand these transformations (eg promisify).  Will require [typescript foo](https://github.com/Microsoft/TypeScript/pull/21496).
 
