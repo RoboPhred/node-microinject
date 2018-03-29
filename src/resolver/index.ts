@@ -75,6 +75,9 @@ interface ScopeableDependencyGraphNode extends DependencyGraphNode {
 function isNodeScoped(node: DependencyGraphNode): node is ScopeableDependencyGraphNode {
     return isComponentScopable(node.componentCreator) && node.componentCreator.containingScope != null;
 }
+function isNodeScopeCreator(node: DependencyGraphNode): node is ScopeableDependencyGraphNode {
+    return isComponentScopable(node.componentCreator) && node.componentCreator.defineScope != null;
+}
 
 export default class DependencyGraphResolver {
     /**
@@ -95,13 +98,8 @@ export default class DependencyGraphResolver {
     private _instantiationSet = new Map<ComponentCreator, DependencyGraphNode>();
 
     /**
-     * The component creators for scope-definining components that we
-     * are an authority on.
-     * Only we should be caching components that point to
-     *  these with containingScopeInstance.
+     * Components scoped to scope definers specified in our _ownedScopes.
      */
-    private _ownedScopes = new Set<ComponentCreator>();
-
     // Note: Right now, we are relying on the planner using object reference equality when
     //  specifying ComponentCreators that should be the same component instance.
     private _scopedComponents: Map<ComponentCreator, any> = new Map();
@@ -117,7 +115,7 @@ export default class DependencyGraphResolver {
     private _parent?: DependencyGraphResolver | null = null;
 
 
-    constructor(resolvers?: Partial<DependencyResolvers>) {
+    constructor(resolvers?: Partial<DependencyResolvers>, private _ownedScope?: ScopeableComponentCreator) {
         // Make sure to fill in any resolvers that the user didn't specify.
         this._resolvers = {...defaultDependencyResolvers, ...(resolvers || {})};
     }
@@ -172,12 +170,15 @@ export default class DependencyGraphResolver {
 
     resolveInstance<T = any>(node: DependencyGraphNode): T {
         this._instantiationStack.push(node);
+        this._instantiationSet.set(node.componentCreator, node);
+
         let value;
         try {
             value = this._getNodeComponent(node);
         }
         finally {
             this._instantiationStack.pop();
+            this._instantiationSet.delete(node.componentCreator);
         }
         return value;
     }
@@ -186,8 +187,27 @@ export default class DependencyGraphResolver {
         const component = node.componentCreator;
         
         if (isNodeScoped(node)) {
-            // Scoped components have special handling.
+            // If the component is in a scope, we need to find the resolver that owns the scope.
             return this._getScopedNodeComponent(node);
+        }
+        else if (isNodeScopeCreator(node) && node.componentCreator !== this._ownedScope) {
+            // TODO: Getting messy, what with the stack anti-manipulation and this code copied twice.
+            // If the component defines a scope, create a resolver to represent the scope.
+            //  This is needed so multiple instances of scope definers do not share the same scoped component pool.
+
+            // Remove from the stack, as the child resolver will have it in its own stack.
+            this._instantiationStack.pop();
+            this._instantiationSet.delete(node.componentCreator);
+
+            const scopeResolver = new DependencyGraphResolver(this._resolvers, node.componentCreator);
+            scopeResolver._parent = this;
+            const value = scopeResolver.resolveInstance(node);
+
+            // Re-add to stack because we expect to pop it again...
+            this._instantiationStack.push(node);
+            this._instantiationSet.set(node.componentCreator, node);
+
+            return value;
         }
         else {
             // Transient or value.
@@ -218,7 +238,7 @@ export default class DependencyGraphResolver {
         else if (!containingComponent) {
             throw new Error("_getScopedNodeComponent called on a scoped component without a containingScopeInstance.");
         }
-        else if (!this._ownedScopes.has(containingComponent)) {
+        else if (containingComponent !== this._ownedScope) {
             // We do not own this instance, check the parent.
             if (!this._parent) {
                 throw new Error(`Could not find owner for scoped component "${identifierToString(node.identifier)}".`);
@@ -235,7 +255,17 @@ export default class DependencyGraphResolver {
         }
 
         // Did not create it yet.  Create and store it now.
-        const instance = this._createNodeComponent(node);
+        let instance: any;
+        if (isNodeScopeCreator(node) && node.componentCreator !== this._ownedScope) {
+            // If the component defines a scope, create a resolver to represent the scope.
+            //  This is needed so multiple instances of scope definers do not share the same scoped component pool.
+            const scopeResolver = new DependencyGraphResolver(this._resolvers, node.componentCreator);
+            instance = scopeResolver.resolveInstance(node);
+        }
+        else {
+            instance = this._createNodeComponent(node);
+        }
+
         this._scopedComponents.set(component, instance);
 
         return instance;
@@ -243,13 +273,6 @@ export default class DependencyGraphResolver {
 
     private _createNodeComponent(node: DependencyGraphNode): any {
         const component = node.componentCreator;
-
-        if (isComponentScopable(component) && component.defineScope) {
-            // We are creating this scope definition instance, so we
-            //  are the resolver that will be creating all components
-            //  that are contained within this scope instance.
-            this._ownedScopes.add(component);
-        }
 
         switch(component.type) {
             case "array": {

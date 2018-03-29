@@ -3,6 +3,7 @@ import { Scope } from "../scope";
 export declare type ComponentCreatorType = "value" | "array" | "factory" | "constructor";
 export interface ComponentCreatorBase {
     type: ComponentCreatorType;
+    componentId: string;
 }
 export interface ValueComponentCreator extends ComponentCreatorBase {
     type: "value";

@@ -1,4 +1,6 @@
 
+import { v4 as uuidv4 } from "uuid";
+
 import {
     Identifier,
     Newable
@@ -180,6 +182,7 @@ export default class DependencyGraphPlanner {
         if (binding.type === "value") {
             return {
                 type: "value",
+                componentId: uuidv4(),
                 value: binding.value
             };
         }
@@ -199,6 +202,7 @@ export default class DependencyGraphPlanner {
     private _createFactoryCreator(identifier: Identifier, binding: FactoryBindingData, scopeInstances: ScopeInstanceMap): FactoryComponentCreator {
         const componentCreator: ComponentCreator = {
             type: "factory",
+            componentId: uuidv4(),
             factory: binding.factory
         };
 
@@ -218,6 +222,7 @@ export default class DependencyGraphPlanner {
 
         const componentCreator: ConstructorComponentCreator = {
             type: "constructor",
+            componentId: uuidv4(),
             ctor,
             args: ctorArgs
         };
@@ -247,11 +252,12 @@ export default class DependencyGraphPlanner {
                 //  This is even the case when we are optional and no bindings were found.
                 dependencyCreator = {
                     type: "array",
+                    componentId: uuidv4(),
                     values: dependencyBindings.map(binding => ({
                         identifier: dependencyIdentifier,
                         componentCreator: this._getComponentCreator(dependencyIdentifier, binding, childScopeInstances)
                     }))
-                }
+                };
             }
             else if (dependencyBindings.length === 0) {
                 // No matching bindings.
@@ -259,6 +265,7 @@ export default class DependencyGraphPlanner {
                     // We are not an all / array, so the return value for optional is null.
                     dependencyCreator = {
                         type: "value",
+                        componentId: uuidv4(),
                         value: null
                     };
                 }

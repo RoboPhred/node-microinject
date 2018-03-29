@@ -6,6 +6,7 @@ export interface DependencyResolvers {
     value: (identifier: Identifier, creator: ValueComponentCreator, childResolver: DependencyGraphResolver) => any;
 }
 export default class DependencyGraphResolver {
+    private _ownedScope;
     /**
      * The set of functions used to resolve the various component types.
      */
@@ -21,12 +22,8 @@ export default class DependencyGraphResolver {
      */
     private _instantiationSet;
     /**
-     * The component creators for scope-definining components that we
-     * are an authority on.
-     * Only we should be caching components that point to
-     *  these with containingScopeInstance.
+     * Components scoped to scope definers specified in our _ownedScopes.
      */
-    private _ownedScopes;
     private _scopedComponents;
     /**
      * The parent resolver.
@@ -36,7 +33,7 @@ export default class DependencyGraphResolver {
      * This is set on the child by the parent, to keep it out of the public constructor.
      */
     private _parent?;
-    constructor(resolvers?: Partial<DependencyResolvers>);
+    constructor(resolvers?: Partial<DependencyResolvers>, _ownedScope?: FactoryComponentCreator | ConstructorComponentCreator | undefined);
     /**
      * Returns a value indicating whether we are presently trying to resolve
      * the value of the given node.
