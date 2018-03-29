@@ -105,7 +105,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
      * Mark the binding as a singleton.  Only one will be created per container.
      */
     inSingletonScope(): void {
-        this._ensureBoundOrBinding();
+        this._ensureOrAutoBind();
 
         // Can only be an instance creator from a default binding.
         const binding = this._binding as InstanceCreatorBindingData;
@@ -118,7 +118,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
      * This overrides any @Singleton() decorator if used on an identifier that would otherwise be auto-bound.
      */
     inTransientScope(): void {
-        this._ensureBoundOrBinding();
+        this._ensureOrAutoBind();
 
         // Can only be an instance creator from a default binding.
         const binding = this._binding as InstanceCreatorBindingData;
@@ -135,7 +135,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
             throw new TypeError("Scope must be provided.");
         }
 
-        this._ensureBoundOrBinding();
+        this._ensureOrAutoBind();
 
         // Can only be an instance creator from a default binding.
         const binding = this._binding as InstanceCreatorBindingData;
@@ -153,14 +153,14 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
             scope = SelfIdentifiedScopeSymbol;
         }
 
-        this._ensureBoundOrBinding();
+        this._ensureOrAutoBind();
 
         const binding = this._binding as InstanceCreatorBindingData;
         if (binding.defineScope !== undefined) throw new BindingConfigurationError("Binding scope creation has already been established.");
         binding.defineScope = scope;
     }
 
-    private _ensureBoundOrBinding(): void {
+    private _ensureOrAutoBind(): void {
         if (!this._binding) {
             if (typeof this._identifier !== "function") {
                 throw new BindingConfigurationError(`Binding for ${this._identifier} was never established.  Auto-binding can only be used on injectable class constructors.`);
@@ -185,12 +185,36 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         if (this._isFinalized) return;
         this._isFinalized = true;
         
-        this._ensureBoundOrBinding();
+        this._ensureOrAutoBind();
 
-        // this._binding will always be set here, but typescript cannot infer that from our setup above.
-        if (this._binding && this._binding.type !== "value") {
+        // This will never happen, but we cannot tell typescript that
+        //  _ensureOrAutoBind always creates a binding.  Especially as it does it
+        //  in an offhand way through .to and .toDynamicValue
+        if (!this._binding) return;
+
+        // The auto-bind setting source could be multiple things here:
+        //  this._identifier if we never had a .to()
+        //  this._binding[ctor|factory] if we had a .to() or .toDynamicValue
+        // _ensureOrAutoBind will turn the first form into the second, so we just have
+        //  to check the binding type to find the auto bind source.
+        let autoBindSource: any;
+        switch(this._binding.type) {
+            case "constructor": {
+                autoBindSource = this._binding.ctor;
+            }; break;
+            case "factory": {
+                autoBindSource = this._binding.factory;
+            }; break;
+            default: {
+                autoBindSource = null;
+            }; break;
+        }
+
+        // Again we are checking binding.type to make typescript happy.
+        //  It will always not be value due to the switch statement above.
+        if (autoBindSource && this._binding.type !== "value") {
             if (this._binding.defineScope === undefined) {
-                this._binding.defineScope = getAsScope(this._identifier);
+                this._binding.defineScope = getAsScope(autoBindSource);
             }
 
             // While we could handle this logic in .asScope(), we still
@@ -199,7 +223,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
                 this._binding.defineScope = this._identifier;
             }
 
-            if (this._binding.inScope === undefined) this._binding.inScope = getInScope(this._identifier);
+            if (this._binding.inScope === undefined) this._binding.inScope = getInScope(autoBindSource);
         }
     }
 
