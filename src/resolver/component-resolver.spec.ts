@@ -78,6 +78,7 @@ describe("defaultComponentResolvers", function() {
         // constructors are just functions, so we can use a stub for them.
         const constructorStub: SinonStub & Newable = stub() as any;
         const identifier: Identifier = Symbol("ctor-identifier");
+        
         const partialCtorCreator = {
             // Explicitly tag type to make TS happy when building the real creator.
             type: "constructor" as "constructor",
@@ -99,6 +100,10 @@ describe("defaultComponentResolvers", function() {
         });
 
         it.skip("resolves arguments", function() {
+
+        });
+
+        it.skip("passes the resolved arguments to the constructor", function() {
 
         });
 
