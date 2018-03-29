@@ -58,5 +58,7 @@ export default class DependencyGraphResolver {
     private _getNodeComponent(node);
     private _getScopedNodeComponent(node);
     private _createNodeComponent(node);
+    private _createScopeRootNodeComponent(node);
+    private _createLocalNodeComponent(node);
     private _createChildResolver();
 }
