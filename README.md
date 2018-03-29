@@ -9,7 +9,7 @@ This means:
 - No monkey patching anything external to the library.
 - Mimimum overhead.
 - Works if multiple libraries independently try to use it.
-- Works if node installs multiple copies of it.
+- Works if npm installs multiple copies of the library.
 
 Originally, I had used [InversifyJS](https://github.com/inversify/InversifyJS).  However, it failed against the
 first three requirements.  The original incarnation of this library was born as an api-compatible replacement to
