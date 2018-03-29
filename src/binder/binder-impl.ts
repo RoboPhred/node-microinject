@@ -105,7 +105,8 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
      * Mark the binding as a singleton.  Only one will be created per container.
      */
     inSingletonScope(): void {
-        this._ensureOrAutoBind();
+        this._tryAutoBind();
+        this._ensureScopeable();
 
         // Can only be an instance creator from a default binding.
         const binding = this._binding as InstanceCreatorBindingData;
@@ -118,7 +119,8 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
      * This overrides any @Singleton() decorator if used on an identifier that would otherwise be auto-bound.
      */
     inTransientScope(): void {
-        this._ensureOrAutoBind();
+        this._tryAutoBind();
+        this._ensureScopeable();
 
         // Can only be an instance creator from a default binding.
         const binding = this._binding as InstanceCreatorBindingData;
@@ -135,7 +137,8 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
             throw new TypeError("Scope must be provided.");
         }
 
-        this._ensureOrAutoBind();
+        this._tryAutoBind();
+        this._ensureScopeable();
 
         // Can only be an instance creator from a default binding.
         const binding = this._binding as InstanceCreatorBindingData;
@@ -153,17 +156,18 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
             scope = SelfIdentifiedScopeSymbol;
         }
 
-        this._ensureOrAutoBind();
+        this._tryAutoBind();
+        this._ensureScopeable();
 
         const binding = this._binding as InstanceCreatorBindingData;
         if (binding.defineScope !== undefined) throw new BindingConfigurationError("Binding scope creation has already been established.");
         binding.defineScope = scope;
     }
 
-    private _ensureOrAutoBind(): void {
+    private _tryAutoBind(): void {
         if (!this._binding) {
             if (typeof this._identifier !== "function") {
-                throw new BindingConfigurationError(`Binding for ${this._identifier} was never established.  Auto-binding can only be used on injectable class constructors.`);
+                throw new BindingConfigurationError(`Binding for ${identifierToString(this._identifier)} was never established.  Auto-binding can only be used on injectable class constructors.`);
             }
             
             if (isInjectable(this._identifier)) {
@@ -181,11 +185,17 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         }
     }
 
+    private _ensureScopeable() {
+        if (!this._binding || this._binding.type === "value") {
+            throw new BindingConfigurationError("Value bindings cannot be scoped.");
+        }
+    }
+
     private _finalizeBinding() {
         if (this._isFinalized) return;
         this._isFinalized = true;
         
-        this._ensureOrAutoBind();
+        this._tryAutoBind();
 
         // This will never happen, but we cannot tell typescript that
         //  _ensureOrAutoBind always creates a binding.  Especially as it does it
@@ -223,13 +233,13 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
                 this._binding.defineScope = this._identifier;
             }
 
-            if (this._binding.inScope === undefined) this._binding.inScope = getInScope(autoBindSource);
+            if (this._binding.inScope === undefined) this._binding.inScope = getInScope(autoBindSource) || null;
         }
     }
 
     private _ensureCanBind() {
         if (this._binding != null) {
-            throw new BindingConfigurationError(`Cannot reconfigure binding for ${this._identifier}: Binding already established.`);
+            throw new BindingConfigurationError(`Cannot reconfigure binding for ${identifierToString(this._identifier)}: Binding already established.`);
         }
     }
 

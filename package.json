@@ -11,7 +11,7 @@
     "watch:build": "tsc -p src -w",
     "watch:test": "mocha --require ./mocha.env.js --watch ./lib/**/*.spec.js",
     "watch": "concurrently \"npm run watch:build\" \"npm run watch:test\"",
-    "test": "mocha --require ./mocha.env.js ./lib/**.spec.js",
+    "test": "mocha --require ./mocha.env.js ./lib/**/**.spec.js ./lib/**/tests/**/*.js",
     "examples:clean": "rimraf examples/lib",
     "preexamples:build": "npm run examples:clean",
     "examples:build": "tsc -p examples"
