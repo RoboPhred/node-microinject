@@ -25,7 +25,10 @@ import DependencyGraphPlanner, {
     FactoryComponentCreator
 } from "./planner";
 
-import DependencyGraphResolver from "./resolver";
+import {
+    DependencyGraphResolver,
+    BasicDependencyGraphResolver
+} from "./resolver";
 
 import {
     DependencyResolutionError
@@ -34,7 +37,7 @@ import {
 
 export class Container {
     private _planner = new DependencyGraphPlanner();
-    private _resolver: DependencyGraphResolver;
+    private _resolver: BasicDependencyGraphResolver;
 
     /**
      * Container to use if a binding is not find in this container.
@@ -42,7 +45,7 @@ export class Container {
     private _parent: Container | null = null;
 
     constructor() {
-        this._resolver = new DependencyGraphResolver({
+        this._resolver = new BasicDependencyGraphResolver({
             factory: this._factoryResolver.bind(this)
         });
     }
@@ -104,7 +107,7 @@ export class Container {
     reset() {
         // Clearing the entire scope stack is as simple as getting
         //  a new graph resolver.
-        this._resolver = new DependencyGraphResolver();
+        this._resolver = new BasicDependencyGraphResolver();
 
         // No need to clear the cached plans.  Bindings are kept,
         //  so the plans are still valid.
@@ -194,7 +197,7 @@ export class Container {
         return this._planner.hasBinding(identifier) || Boolean(this._parent && this._parent.has(identifier));
     }
 
-        /**
+    /**
      * Resolver for factory bindings.
      * 
      * We need to pass an argument to the function to allow it to resolve child objects,

@@ -71,14 +71,14 @@ export declare class Container {
      */
     has<T>(identifier: Identifier<T>): boolean;
     /**
- * Resolver for factory bindings.
- *
- * We need to pass an argument to the function to allow it to resolve child objects,
- * and we need to pass it the root container as part of the InversifyJS api.
- *
- * @param identifier The identifier that was resolved to the factory we are resolving.
- * @param creator The factory component creator to be used to resolve the value.
- * @param childResolver A resolver capable of resolving correctly scoped child objects.
- */
+     * Resolver for factory bindings.
+     *
+     * We need to pass an argument to the function to allow it to resolve child objects,
+     * and we need to pass it the root container as part of the InversifyJS api.
+     *
+     * @param identifier The identifier that was resolved to the factory we are resolving.
+     * @param creator The factory component creator to be used to resolve the value.
+     * @param childResolver A resolver capable of resolving correctly scoped child objects.
+     */
     private _factoryResolver(identifier, creator, childResolver);
 }

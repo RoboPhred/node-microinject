@@ -1,4 +1,7 @@
 
+# develop
+- Report the correct identifier in question when throwing over a circular dependency found in a constructor argument.
+
 # 0.3.1
 - Fix auto-binding not attempting to use decorator data from the target of the binding, such as in ```bind(identifier).to(autoBindableTarget)```
 - Fix asScope bindings falling back to being singleton scopes when in an injected constructor argument.
