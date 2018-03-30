@@ -5,15 +5,16 @@ import sinonChai = require("sinon-chai");
 chaiUse(sinonChai);
 
 import {
-    SinonSpy,
+    SinonStub,
     stub,
     spy,
-    SinonStub
+    match
 } from "sinon";
 
 
 import {
-    Identifier, Newable
+    Identifier,
+    Newable
 } from "../interfaces";
 
 import {
@@ -30,11 +31,17 @@ import {
 import {
     defaultComponentResolvers
 } from "./component-resolver";
+import { DependencyResolutionError } from "..";
 
 
 type StubDependencyGraphResolver = {
     [key in keyof DependencyGraphResolver]: SinonStub
 };
+
+interface ConstructorDependencyGraphNode {
+    identifier: Identifier,
+    componentCreator: ConstructorComponentCreator
+}
 
 describe("defaultComponentResolvers", function() {
     const stubResolver: StubDependencyGraphResolver = {
@@ -72,8 +79,8 @@ describe("defaultComponentResolvers", function() {
     });
 
     describe(".ctor", function() {
-        const FirstArgIdent: Identifier = Symbol("first-arg");
-        const SecondArgIdent: Identifier = Symbol("second-arg");
+        const firstArgIdent: Identifier = Symbol("first-arg");
+        const secondArgIdent: Identifier = Symbol("second-arg");
 
         // constructors are just functions, so we can use a stub for them.
         const constructorStub: SinonStub & Newable = stub() as any;
@@ -94,21 +101,100 @@ describe("defaultComponentResolvers", function() {
             return defaultComponentResolvers.ctor(identifier, creator, stubResolver);
         }
 
+        beforeEach(function() {
+            constructorStub.reset();
+        });
+
         it("invokes the constructor", function() {
             invokeResolver([]);
+            expect(constructorStub).calledOnce;
             expect(constructorStub).calledWithNew;
         });
 
-        it.skip("resolves arguments", function() {
+        it("resolves arguments", function() {
+            const firstArg: DependencyGraphNode = {
+                identifier: Symbol("first-arg-identifier"),
+                componentCreator: {
+                    type: "value",
+                    componentId: "first-arg-value",
+                    value: Symbol("first-arg-value")
+                }
+            }
+            const secondArg: DependencyGraphNode = {
+                identifier: Symbol("second-arg-identifier"),
+                componentCreator: {
+                    type: "value",
+                    componentId: "first-arg-value",
+                    value: Symbol("second-arg-value")
+                }
+            };
 
+            invokeResolver([firstArg, secondArg]);
+
+            expect(stubResolver.resolveInstance).calledTwice;
+            expect(stubResolver.resolveInstance.firstCall).calledWith(firstArg);
+            expect(stubResolver.resolveInstance.secondCall).calledWith(secondArg);
         });
 
-        it.skip("passes the resolved arguments to the constructor", function() {
+        it("passes the resolved arguments to the constructor", function() {
+            const firstArgValue = Symbol("first-arg-value");
+            const firstArg: DependencyGraphNode = {
+                identifier: Symbol("first-arg-identifier"),
+                componentCreator: {
+                    type: "value",
+                    componentId: "first-arg-value",
+                    value: firstArgValue
+                }
+            }
 
+            const secondArgValue = Symbol("second-arg-value");
+            const secondArg: DependencyGraphNode = {
+                identifier: Symbol("second-arg-identifier"),
+                componentCreator: {
+                    type: "value",
+                    componentId: "first-arg-value",
+                    value: secondArgValue
+                }
+            };
+
+            stubResolver.resolveInstance.withArgs(firstArg).returns(firstArgValue);
+            stubResolver.resolveInstance.withArgs(secondArg).returns(secondArgValue);
+
+            invokeResolver([firstArg, secondArg]);
+
+            expect(constructorStub).calledWith(firstArgValue, secondArgValue);
         });
 
-        it.skip("throws on circular dependencies", function() {
+        it("throws on circular dependencies", function() {
+            const classA: ConstructorDependencyGraphNode = {
+                identifier: Symbol("class-a"),
+                componentCreator: {
+                    type: "constructor",
+                    componentId: "class-a",
+                    ctor: stub() as any,
+                    args: []
+                }
+            };
+            const classB: ConstructorDependencyGraphNode = {
+                identifier: Symbol("class-b"),
+                componentCreator: {
+                    type: "constructor",
+                    componentId: "class-b",
+                    ctor: stub() as any,
+                    args: [classA]
+                }
+            };
+            classA.componentCreator.args.push(classB);
 
+            // Simulate resolving class B, when requested by class A.
+            //  class B will then request class A, and we expect this to error.
+            stubResolver.isResolving.withArgs(classA).returns(true);
+            stubResolver.isResolving.withArgs(classB).returns(true);
+            stubResolver.getResolveStack.returns([classA, classB]);
+
+            expect(
+                () => defaultComponentResolvers.ctor(identifier, classB.componentCreator, stubResolver)
+            ).to.throw(DependencyResolutionError, /cyclic/);
         });
     });
 
