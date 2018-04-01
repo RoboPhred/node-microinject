@@ -4,6 +4,7 @@ import {
 } from "../interfaces";
 
 import {
+    DependencyNode,
     ConstDependencyNode,
     FactoryDependencyNode,
     ConstructorDependencyNode,
@@ -58,7 +59,25 @@ export const defaultComponentResolvers: ComponentResolvers = {
         }
 
         function resolveInjectedArg(injection: DependencyInjection): any {
-            // TODO: resolve single vs all, handle optional.
+            // Bit weird to have to de-array the array here,
+            //  based on injection config, but it is a result
+            //  of the decision to fuze DependencyNode with Binding
+            //  and typescript getting angry when trying to widen
+            //  DependencyNode.type to include array.
+            // Array should probably be re-introduced as a DependencyNode type,
+            //  and the typescript typings issue fixed or worked around.
+
+            // Validation, optional, and so on should have been handled by the planner.
+            const instances = injection.nodes.map(resolveInjectionInstance);
+            if (injection.all) {
+                return instances;
+            }
+            else if (injection.optional && instances.length === 0) {
+                return null;
+            }
+            else {
+                return instances[0];
+            }
         }
         
         const args = creator.injectionNodes.map(resolveInjectedArg);

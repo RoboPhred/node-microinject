@@ -85,15 +85,22 @@ describe("defaultComponentResolvers", function() {
         const partialCtorCreator = {
             // Explicitly tag type to make TS happy when building the real creator.
             type: "constructor" as "constructor",
-            componentId: "ctor-component-id",
+            identifier,
+            instanceId: "ctor-instance-id",
             ctor: constructorStub
         };
 
         function invokeResolver(args: DependencyNode[]) {
-            const creator: ConstructorComponentCreator = {
+            const creator: ConstructorDependencyNode = {
                 ...partialCtorCreator,
-                args
-            }
+                injections: args.map(arg => ({
+                    identifier: arg.identifier
+                })),
+                injectionNodes: args.map(arg => ({
+                    identifier: arg.identifier,
+                    nodes: [arg]
+                }))
+            };
             return defaultComponentResolvers.ctor(identifier, creator, stubResolver);
         }
 
@@ -108,21 +115,17 @@ describe("defaultComponentResolvers", function() {
         });
 
         it("resolves arguments", function() {
-            const firstArg: DependencyNode = {
+            const firstArg: ConstDependencyNode = {
+                type: "value",
                 identifier: Symbol("first-arg-identifier"),
-                componentCreator: {
-                    type: "value",
-                    componentId: "first-arg-value",
-                    value: Symbol("first-arg-value")
-                }
+                instanceId: "first-arg-value",
+                value: Symbol("first-arg-value")
             }
-            const secondArg: DependencyNode = {
+            const secondArg: ConstDependencyNode = {
+                type: "value",
                 identifier: Symbol("second-arg-identifier"),
-                componentCreator: {
-                    type: "value",
-                    componentId: "first-arg-value",
-                    value: Symbol("second-arg-value")
-                }
+                instanceId: "second-arg-value",
+                value: Symbol("second-arg-value")
             };
 
             invokeResolver([firstArg, secondArg]);
@@ -135,22 +138,18 @@ describe("defaultComponentResolvers", function() {
         it("passes the resolved arguments to the constructor", function() {
             const firstArgValue = Symbol("first-arg-value");
             const firstArg: DependencyNode = {
+                type: "value",
                 identifier: Symbol("first-arg-identifier"),
-                componentCreator: {
-                    type: "value",
-                    componentId: "first-arg-value",
-                    value: firstArgValue
-                }
+                instanceId: "first-arg-value",
+                value: firstArgValue
             }
 
             const secondArgValue = Symbol("second-arg-value");
             const secondArg: DependencyNode = {
+                type: "value",
                 identifier: Symbol("second-arg-identifier"),
-                componentCreator: {
-                    type: "value",
-                    componentId: "first-arg-value",
-                    value: secondArgValue
-                }
+                instanceId: "second-arg-value",
+                value: secondArgValue
             };
 
             stubResolver.resolveInstance.withArgs(firstArg).returns(firstArgValue);
@@ -162,25 +161,34 @@ describe("defaultComponentResolvers", function() {
         });
 
         it("throws on circular dependencies", function() {
-            const classA: ConstructorDependencyGraphNode = {
+            const classA: ConstructorDependencyNode = {
+                type: "constructor",
                 identifier: Symbol("class-a"),
-                componentCreator: {
-                    type: "constructor",
-                    componentId: "class-a",
-                    ctor: stub() as any,
-                    args: []
-                }
+                instanceId: "class-a",
+                ctor: stub() as any,
+                injections: [],
+                injectionNodes: []
             };
-            const classB: ConstructorDependencyGraphNode = {
+            const classB: ConstructorDependencyNode = {
+                type: "constructor",
                 identifier: Symbol("class-b"),
-                componentCreator: {
-                    type: "constructor",
-                    componentId: "class-b",
-                    ctor: stub() as any,
-                    args: [classA]
-                }
+                    instanceId: "class-b",
+                ctor: stub() as any,
+                injections: [{
+                    identifier: classA.identifier
+                }],
+                injectionNodes: [{
+                    identifier: classA.identifier,
+                    nodes: [{...classA}]
+                }]
             };
-            classA.componentCreator.args.push(classB);
+            classA.injections.push({
+                identifier: classB.identifier
+            });
+            classA.injectionNodes.push({
+                identifier: classB.identifier,
+                nodes: [{...classB}]
+            });
 
             // Simulate resolving class B, when requested by class A.
             //  class B will then request class A, and we expect this to error.
@@ -189,7 +197,7 @@ describe("defaultComponentResolvers", function() {
             stubResolver.getResolveStack.returns([classA, classB]);
 
             expect(
-                () => defaultComponentResolvers.ctor(identifier, classB.componentCreator, stubResolver)
+                () => defaultComponentResolvers.ctor(identifier, classB, stubResolver)
             ).to.throw(DependencyResolutionError, /cyclic/);
         });
     });
@@ -197,15 +205,16 @@ describe("defaultComponentResolvers", function() {
     describe(".value", function() {
         const identifier: Identifier = Symbol("value-identifier");
         const returnValue = Symbol("return-value");
-        const valueCreator: ValueComponentCreator = {
+        const valueNode: ConstDependencyNode = {
             type: "value",
-            componentId: "value-component-id",
+            identifier,
+            instanceId: "value-component-id",
             value: returnValue
         };
 
         let resolvedValue: any;
         before(function() {
-            resolvedValue = defaultComponentResolvers.const(identifier, valueCreator, stubResolver);
+            resolvedValue = defaultComponentResolvers.const(identifier, valueNode, stubResolver);
         });
 
         it("returns the value result", function() {
