@@ -61,17 +61,11 @@ interface ScopeInstance {
 }
 type ScopeInstanceMap = Map<Scope, ScopeInstance>;
 
+export interface BindingResolver {
+    (identifier: Identifier): Binding[];
+}
 
 export class DependencyGraphPlanner {
-    /**
-     * Bindings keyed by identifiers.
-     */
-    // Keeping BinderImpl for now to simplify the transition
-    //  Need to rethink the relationship.  Probably have BinderImpl implement BindingData
-    //  Cannot do this right now as Binding.inScope() function conflicts with BindingData.inScope property
-    private _bindingsForIdentifier: Map<Identifier, BinderImpl[]>;
-    //private _bindingsForIdentifier: Map<Identifier, BindingData[]>;
-
     private _planCache = new Map<Identifier, DependencyGraphNode>();
 
     /**
@@ -85,42 +79,15 @@ export class DependencyGraphPlanner {
     private _rootScopeInstances: ScopeInstanceMap = new Map();
 
 
-    constructor(bindings?: BindingMap) {
-        this._bindingsForIdentifier = bindings ? new Map(bindings) : new Map();
+    constructor(
+        private _bindingResolver: BindingResolver
+    ) {
 
         // Prepopulate our singleton scope.
         this._rootScopeInstances.set(SingletonScope, {
             definer: SingletonScope,
             instances: new Map()
         });
-    }
-
-    addBinding(identifier: Identifier, binding: BinderImpl | BinderImpl[]) {
-        let bindings = this._bindingsForIdentifier.get(identifier);
-        if (!bindings) {
-            bindings = [];
-            this._bindingsForIdentifier.set(identifier, bindings);
-        }
-        if (Array.isArray(binding)) {
-            bindings.push(...binding);
-        }
-        else {
-            bindings.push(binding);
-        }
-
-        // We need to clear everthing, as a cached plan might involve an @Inject({all: true}) injection,
-        //  so this new identifier might be a candidate for injection in a previous plan.
-        this._planCache.clear();
-    }
-
-    getBindings(identifier: Identifier): Binding[] {
-        // TODO: can perform filtering here for conditional bindings.
-        return (this._bindingsForIdentifier.get(identifier) || []).map(x => x._getBinding());
-    }
-
-    hasBinding(identifier: Identifier): boolean {
-        const bindings = this._bindingsForIdentifier.get(identifier);
-        return bindings != null && bindings.length > 0;
     }
 
     /**
@@ -135,7 +102,7 @@ export class DependencyGraphPlanner {
         }
 
         if (!binding) {
-            const rootBindings = this.getBindings(identifier);
+            const rootBindings = this._getBindings(identifier);
             if (rootBindings.length === 0) {
                 throw new DependencyResolutionError(identifier, [], "No bindings exist for the given identifier.");
             }
@@ -152,6 +119,10 @@ export class DependencyGraphPlanner {
 
         this._planCache.set(identifier, plan);
         return plan;
+    }
+
+    private _getBindings(identifier: Identifier): Binding[] {
+        return this._bindingResolver(identifier);
     }
 
     private _getComponentCreator(identifier: Identifier, binding: Binding, scopeInstances: ScopeInstanceMap): ComponentCreator {
@@ -237,7 +208,7 @@ export class DependencyGraphPlanner {
 
             let dependencyCreator: ComponentCreator;
 
-            const dependencyBindings = this.getBindings(dependencyIdentifier);
+            const dependencyBindings = this._getBindings(dependencyIdentifier);
             if (all) {
                 if (!optional && dependencyBindings.length === 0) {
                     throw new DependencyResolutionError(dependencyIdentifier, this._stack, `No bindings exist for the required argument at position ${i} of bound constructor "${ctor.name}".`);

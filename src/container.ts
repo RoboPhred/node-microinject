@@ -17,6 +17,10 @@ import {
 } from "./binder/binder-impl";
 
 import {
+    Binding
+} from "./binder/data";
+
+import {
     getProvidedIdentifiers
 } from "./binder/utils";
 
@@ -37,8 +41,10 @@ import {
 
 
 export class Container {
-    private _planner = new DependencyGraphPlanner();
+    private _planner: DependencyGraphPlanner;
     private _resolver: BasicDependencyGraphResolver;
+
+    private _bindingMap = new Map<Identifier, BinderImpl[]>();
 
     /**
      * Container to use if a binding is not find in this container.
@@ -46,6 +52,10 @@ export class Container {
     private _parent: Container | null = null;
 
     constructor() {
+        this._planner = new DependencyGraphPlanner(
+            this._resolveBindings.bind(this)
+        );
+
         this._resolver = new BasicDependencyGraphResolver({
             factory: this._factoryResolver.bind(this)
         });
@@ -94,7 +104,17 @@ export class Container {
     }
 
     private _addBinder<T>(identifier: Identifier<T>, binder: BinderImpl<T>) {
-        this._planner.addBinding(identifier, binder)
+        let binders = this._bindingMap.get(identifier);
+        if (!binders) {
+            binders = [];
+            this._bindingMap.set(identifier, binders);
+        }
+        binders.push(binder);
+    }
+
+    hasBinding(identifier: Identifier): boolean {
+        const binders = this._bindingMap.get(identifier);
+        return Boolean(binders && binders.length > 0);
     }
 
     /**
@@ -129,7 +149,7 @@ export class Container {
     private _get<T>(identifier: Identifier<T>, resolver?: DependencyGraphResolver): T {
         if (!resolver) resolver = this._resolver;
 
-        if (this._planner.hasBinding(identifier)) {
+        if (this.hasBinding(identifier)) {
             const plan = this._planner.getPlan(identifier);
             return resolver.resolveInstance(plan);
         }
@@ -182,7 +202,7 @@ export class Container {
         // Our scopes do not transcend containers.
         const values: T[] = this._parent ? this._parent._getAllNoThrow(identifier) : [];
 
-        const bindings = this._planner.getBindings(identifier);
+        const bindings = this._resolveBindings(identifier);
         if (bindings.length > 0) {
             const plans = bindings.map(binding => this._planner.getPlan(identifier, binding));
             values.push(...plans.map(plan => resolver!.resolveInstance(plan)));
@@ -196,7 +216,13 @@ export class Container {
      * @param identifier The identifier to check for.
      */
     has<T>(identifier: Identifier<T>): boolean {
-        return this._planner.hasBinding(identifier) || Boolean(this._parent && this._parent.has(identifier));
+        return this.hasBinding(identifier) || Boolean(this._parent && this._parent.has(identifier));
+    }
+
+    private _resolveBindings(identifier: Identifier): Binding[] {
+        const binders = this._bindingMap.get(identifier);
+        if (binders) return binders.map(x => x._getBinding());
+        return [];
     }
 
     /**

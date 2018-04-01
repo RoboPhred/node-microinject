@@ -1,12 +1,11 @@
 import { Identifier } from "../interfaces";
-import { BindingMap, Binding } from "../binder/data";
-import { BinderImpl } from "../binder/binder-impl";
+import { Binding } from "../binder/data";
 import { DependencyGraphNode } from "./interfaces";
+export interface BindingResolver {
+    (identifier: Identifier): Binding[];
+}
 export declare class DependencyGraphPlanner {
-    /**
-     * Bindings keyed by identifiers.
-     */
-    private _bindingsForIdentifier;
+    private _bindingResolver;
     private _planCache;
     /**
      * The current stack of identifiers being planned.
@@ -16,16 +15,14 @@ export declare class DependencyGraphPlanner {
      * A map of scopes to scope instance data.
      */
     private _rootScopeInstances;
-    constructor(bindings?: BindingMap);
-    addBinding(identifier: Identifier, binding: BinderImpl | BinderImpl[]): void;
-    getBindings(identifier: Identifier): Binding[];
-    hasBinding(identifier: Identifier): boolean;
+    constructor(_bindingResolver: BindingResolver);
     /**
      * Gets a plan for the identifier, optionally using a specific binding.
      * @param identifier The identifier to get a plan for.
      * @param binding An optional binding to use for the identifier.  Useful if multiple bindings may apply.
      */
     getPlan(identifier: Identifier, binding?: Binding): DependencyGraphNode;
+    private _getBindings(identifier);
     private _getComponentCreator(identifier, binding, scopeInstances);
     private _createComponentCreator(identifier, binding, scopeInstances);
     private _createFactoryCreator(identifier, binding, scopeInstances);

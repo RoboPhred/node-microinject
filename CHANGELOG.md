@@ -2,6 +2,7 @@
 # develop
 - Report the correct identifier in question when throwing over a circular dependency found in a constructor argument.
 - Fix newly instantiated factories not receiving context after container.reset().
+- Fix DependencyResolutionError message formatting.
 
 # 0.3.1
 - Fix auto-binding not attempting to use decorator data from the target of the binding, such as in ```bind(identifier).to(autoBindableTarget)```
