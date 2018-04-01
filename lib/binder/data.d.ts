@@ -10,8 +10,8 @@ export interface ConstBindingData extends BindingDataBase {
     value: any;
 }
 export interface InstanceCreatorBindingData extends BindingDataBase {
-    defineScope?: Scope;
-    inScope?: Scope;
+    definesScope?: Scope;
+    createInScope?: Scope;
 }
 export interface FactoryBindingData extends InstanceCreatorBindingData {
     type: "factory";

@@ -291,7 +291,7 @@ export class DependencyGraphPlanner {
             return null;
         }
 
-        const scope = binding.inScope;
+        const scope = binding.createInScope;
         if (!scope) {
             // Binding is not in any scope.
             return null;
@@ -336,20 +336,20 @@ export class DependencyGraphPlanner {
         if (!isComponentScopable(component)) return scopeInstances;
 
         const {
-            inScope,
-            defineScope
+            createInScope,
+            definesScope
         } = binding;
 
         // Check to see if the component is in a scope.
-        if (inScope) {
-            const instanceData = scopeInstances.get(inScope);
+        if (createInScope) {
+            const instanceData = scopeInstances.get(createInScope);
             if (!instanceData) {
-                throw new DependencyResolutionError(identifier, this._stack, `The resolved binding requres scope "${scopeToString(inScope)}", but no child object defines this scope.`);
+                throw new DependencyResolutionError(identifier, this._stack, `The resolved binding requres scope "${scopeToString(createInScope)}", but no child object defines this scope.`);
             }
 
             // The component is scoped, so add it as The Component for this specific identifier under the component.
             instanceData.instances.set(identifier, component);
-            component.containingScope = inScope;
+            component.containingScope = createInScope;
 
             // We might be being defined by a special case symbol, such as SingletonSymbol.
             if (typeof instanceData.definer !== "symbol") {
@@ -358,14 +358,14 @@ export class DependencyGraphPlanner {
         }
 
         // Check if the component is defining a new scope.
-        if (defineScope) {
+        if (definesScope) {
             // We are a new scope, so set up a new scope instance map that
             //  contains us.  This will be used by children.
             // We need to create a new outer map as new child scopes within a scope should only be accessible within that scope.
             //  We still need to copy the outer scopes, however.  A scope is available to all children unless overrode with another
             //  object defining the same scope.
-            component.defineScope = defineScope;
-            return new Map(scopeInstances).set(defineScope, {
+            component.defineScope = definesScope;
+            return new Map(scopeInstances).set(definesScope, {
                 definer: component,
                 instances: new Map()
             });

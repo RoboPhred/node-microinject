@@ -113,8 +113,8 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
 
         // Can only be an instance creator from a default binding.
         const binding = this._binding as InstanceCreatorBindingData;
-        if (binding.inScope !== undefined) throw new BindingConfigurationError("Binding target scope has already been established.");
-        binding.inScope = SingletonScope;
+        if (binding.createInScope !== undefined) throw new BindingConfigurationError("Binding target scope has already been established.");
+        binding.createInScope = SingletonScope;
     }
 
     /**
@@ -127,8 +127,8 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
 
         // Can only be an instance creator from a default binding.
         const binding = this._binding as InstanceCreatorBindingData;
-        if (binding.inScope !== undefined) throw new BindingConfigurationError("Binding targetscope has already been established.");
-        binding.inScope = null;
+        if (binding.createInScope !== undefined) throw new BindingConfigurationError("Binding targetscope has already been established.");
+        binding.createInScope = null;
     }
 
     /**
@@ -145,8 +145,8 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
 
         // Can only be an instance creator from a default binding.
         const binding = this._binding as InstanceCreatorBindingData;
-        if (binding.inScope !== undefined) throw new BindingConfigurationError("Binding target scope has already been established.");
-        binding.inScope = scope;
+        if (binding.createInScope !== undefined) throw new BindingConfigurationError("Binding target scope has already been established.");
+        binding.createInScope = scope;
     }
 
     /**
@@ -163,8 +163,8 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         this._ensureScopeable();
 
         const binding = this._binding as InstanceCreatorBindingData;
-        if (binding.defineScope !== undefined) throw new BindingConfigurationError("Binding scope creation has already been established.");
-        binding.defineScope = scope;
+        if (binding.definesScope !== undefined) throw new BindingConfigurationError("Binding scope creation has already been established.");
+        binding.definesScope = scope;
     }
 
     private _tryAutoBind(): void {
@@ -226,17 +226,17 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         // Again we are checking binding.type to make typescript happy.
         //  It will always not be value due to the switch statement above.
         if (autoBindSource && this._binding.type !== "value") {
-            if (this._binding.defineScope === undefined) {
-                this._binding.defineScope = getAsScope(autoBindSource);
+            if (this._binding.definesScope === undefined) {
+                this._binding.definesScope = getAsScope(autoBindSource) || null;
             }
 
             // While we could handle this logic in .asScope(), we still
             //  need it here to support the auto-bind @AsScope() decorator.
-            if (this._binding.defineScope === SelfIdentifiedScopeSymbol) {
-                this._binding.defineScope = this._identifier;
+            if (this._binding.definesScope === SelfIdentifiedScopeSymbol) {
+                this._binding.definesScope = this._identifier;
             }
 
-            if (this._binding.inScope === undefined) this._binding.inScope = getInScope(autoBindSource) || null;
+            if (this._binding.createInScope === undefined) this._binding.createInScope = getInScope(autoBindSource) || null;
         }
     }
 

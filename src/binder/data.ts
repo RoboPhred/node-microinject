@@ -25,8 +25,8 @@ export interface ConstBindingData extends BindingDataBase {
 }
 
 export interface InstanceCreatorBindingData extends BindingDataBase {
-    defineScope?: Scope;
-    inScope?: Scope;
+    definesScope?: Scope;
+    createInScope?: Scope;
 }
 
 export interface FactoryBindingData extends InstanceCreatorBindingData {
