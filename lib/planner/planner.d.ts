@@ -1,5 +1,5 @@
 import { Identifier } from "../interfaces";
-import { BindingMap, BindingData } from "../binder/data";
+import { BindingMap, Binding } from "../binder/data";
 import { BinderImpl } from "../binder/binder-impl";
 import { DependencyGraphNode } from "./interfaces";
 export declare class DependencyGraphPlanner {
@@ -18,14 +18,14 @@ export declare class DependencyGraphPlanner {
     private _rootScopeInstances;
     constructor(bindings?: BindingMap);
     addBinding(identifier: Identifier, binding: BinderImpl | BinderImpl[]): void;
-    getBindings(identifier: Identifier): BindingData[];
+    getBindings(identifier: Identifier): Binding[];
     hasBinding(identifier: Identifier): boolean;
     /**
      * Gets a plan for the identifier, optionally using a specific binding.
      * @param identifier The identifier to get a plan for.
      * @param binding An optional binding to use for the identifier.  Useful if multiple bindings may apply.
      */
-    getPlan(identifier: Identifier, binding?: BindingData): DependencyGraphNode;
+    getPlan(identifier: Identifier, binding?: Binding): DependencyGraphNode;
     private _getComponentCreator(identifier, binding, scopeInstances);
     private _createComponentCreator(identifier, binding, scopeInstances);
     private _createFactoryCreator(identifier, binding, scopeInstances);

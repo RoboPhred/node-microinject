@@ -26,7 +26,7 @@ import {
 } from "./binder-impl";
 
 import {
-    BindingData
+    Binding
 } from "./data";
 
 import {
@@ -77,7 +77,7 @@ describe("@BinderImpl", function () {
                 @injectable(identifier)
                 class TestAutoBindClass { }
 
-                let binding: BindingData;
+                let binding: Binding;
                 before(function() {
                     const binder = new BinderImpl(TestAutoBindClass);
                     binding = binder._getBinding();
@@ -96,7 +96,7 @@ describe("@BinderImpl", function () {
                 function testFactory() {}
                 factory()(testFactory);
 
-                let binding: BindingData;
+                let binding: Binding;
                 before(function() {
                     const binder = new BinderImpl(testFactory);
                     binding = binder._getBinding();
@@ -115,7 +115,7 @@ describe("@BinderImpl", function () {
         describe(".to()", function () {
             class TestBlankClass { }
 
-            let binding: BindingData;
+            let binding: Binding;
             before(function() {
                 const binder = new BinderImpl(identifier);
                 binder.to(TestBlankClass);
@@ -134,7 +134,7 @@ describe("@BinderImpl", function () {
         describe(".toDynamicValue()", function () {
             function testFactory() { }
 
-            let binding: BindingData;
+            let binding: Binding;
             before(function () {
                 const binder = new BinderImpl(identifier);
                 binder.toDynamicValue(testFactory);
@@ -153,7 +153,7 @@ describe("@BinderImpl", function () {
         describe(".toConstantValue()", function () {
             const boundValue = 42;
 
-            let binding: BindingData;
+            let binding: Binding;
             before(function () {
                 const impl = new BinderImpl(identifier);
                 impl.toConstantValue(boundValue);

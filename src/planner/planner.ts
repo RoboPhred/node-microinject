@@ -13,10 +13,10 @@ import {
 
 import {
     BindingMap,
-    BindingData,
+    Binding,
     isScopeableBinding,
     ConstructorBindingData,
-    FactoryBindingData
+    FactoryBinding
 } from "../binder/data";
 
 import {
@@ -113,7 +113,7 @@ export class DependencyGraphPlanner {
         this._planCache.clear();
     }
 
-    getBindings(identifier: Identifier): BindingData[] {
+    getBindings(identifier: Identifier): Binding[] {
         // TODO: can perform filtering here for conditional bindings.
         return (this._bindingsForIdentifier.get(identifier) || []).map(x => x._getBinding());
     }
@@ -128,7 +128,7 @@ export class DependencyGraphPlanner {
      * @param identifier The identifier to get a plan for.
      * @param binding An optional binding to use for the identifier.  Useful if multiple bindings may apply.
      */
-    getPlan(identifier: Identifier, binding?: BindingData): DependencyGraphNode {
+    getPlan(identifier: Identifier, binding?: Binding): DependencyGraphNode {
         let plan = this._planCache.get(identifier);
         if (plan) {
             return plan;
@@ -154,7 +154,7 @@ export class DependencyGraphPlanner {
         return plan;
     }
 
-    private _getComponentCreator(identifier: Identifier, binding: BindingData, scopeInstances: ScopeInstanceMap): ComponentCreator {
+    private _getComponentCreator(identifier: Identifier, binding: Binding, scopeInstances: ScopeInstanceMap): ComponentCreator {
         this._stack.push(identifier);
         let componentCreator: ComponentCreator;
         try {
@@ -173,7 +173,7 @@ export class DependencyGraphPlanner {
         return componentCreator;
     }
 
-    private _createComponentCreator(identifier: Identifier, binding: BindingData, scopeInstances: ScopeInstanceMap): ComponentCreator {
+    private _createComponentCreator(identifier: Identifier, binding: Binding, scopeInstances: ScopeInstanceMap): ComponentCreator {
         if (binding.type === "value") {
             return {
                 type: "value",
@@ -194,7 +194,7 @@ export class DependencyGraphPlanner {
         }
     }
 
-    private _createFactoryCreator(identifier: Identifier, binding: FactoryBindingData, scopeInstances: ScopeInstanceMap): FactoryComponentCreator {
+    private _createFactoryCreator(identifier: Identifier, binding: FactoryBinding, scopeInstances: ScopeInstanceMap): FactoryComponentCreator {
         const componentCreator: ComponentCreator = {
             type: "factory",
             componentId: uuidv4(),
@@ -285,7 +285,7 @@ export class DependencyGraphPlanner {
         return componentCreator;
     }
 
-    private _getScopedInstance(identifier: Identifier, binding: BindingData, scopeInstances: ScopeInstanceMap) {
+    private _getScopedInstance(identifier: Identifier, binding: Binding, scopeInstances: ScopeInstanceMap) {
         if (!isScopeableBinding(binding)) {
             // Cannot scope this binding.
             return null;
@@ -324,7 +324,7 @@ export class DependencyGraphPlanner {
      * @param scopeInstances The current set of scope instances.
      * @returns The set of scope instances to use for any child component creators.
      */
-    private _tryApplyScoping(identifier: Identifier, binding: BindingData, component: ComponentCreator, scopeInstances: ScopeInstanceMap): ScopeInstanceMap {
+    private _tryApplyScoping(identifier: Identifier, binding: Binding, component: ComponentCreator, scopeInstances: ScopeInstanceMap): ScopeInstanceMap {
         // Pointless binding type check to make typescript happy.
         if (binding.type === "value") {
             // Value types cannot be scoped, nor can they be within a scope.
@@ -377,5 +377,5 @@ export class DependencyGraphPlanner {
 }
 
 function assertKnownBinding(b: never): never {
-    throw new Error(`Encountered unknown binding type "${String((b as BindingData).type)}".`);
+    throw new Error(`Encountered unknown binding type "${String((b as Binding).type)}".`);
 }

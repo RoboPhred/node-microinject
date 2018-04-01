@@ -1,28 +1,28 @@
 import { Identifier, Newable, Context } from "../interfaces";
 import { Scope } from "../scope";
 import { InjectionData } from "../injection/utils";
-export declare type BindingDataType = "value" | "factory" | "constructor";
-export interface BindingDataBase {
-    type: BindingDataType;
+export declare type BindingType = "value" | "factory" | "constructor";
+export interface BindingCore {
+    type: BindingType;
 }
-export interface ConstBindingData extends BindingDataBase {
+export interface ConstBinding extends BindingCore {
     type: "value";
     value: any;
 }
-export interface InstanceCreatorBindingData extends BindingDataBase {
+export interface InstanceCreatorBinding extends BindingCore {
     definesScope?: Scope;
     createInScope?: Scope;
 }
-export interface FactoryBindingData extends InstanceCreatorBindingData {
+export interface FactoryBinding extends InstanceCreatorBinding {
     type: "factory";
     factory: (context: Context) => any;
 }
-export interface ConstructorBindingData extends InstanceCreatorBindingData {
+export interface ConstructorBindingData extends InstanceCreatorBinding {
     type: "constructor";
     ctor: Newable;
     injections: InjectionData[];
 }
-export declare type BindingData = ConstBindingData | FactoryBindingData | ConstructorBindingData;
-export declare type ScopeableBindingData = FactoryBindingData | ConstructorBindingData;
-export declare type BindingMap = ReadonlyMap<Identifier, BindingData[]>;
-export declare function isScopeableBinding(binding: BindingData): binding is ScopeableBindingData;
+export declare type Binding = ConstBinding | FactoryBinding | ConstructorBindingData;
+export declare type ScopeableBinding = FactoryBinding | ConstructorBindingData;
+export declare type BindingMap = ReadonlyMap<Identifier, Binding[]>;
+export declare function isScopeableBinding(binding: Binding): binding is ScopeableBinding;

@@ -13,38 +13,38 @@ import {
     InjectionData
 } from "../injection/utils";
 
-export type BindingDataType = "value" | "factory" | "constructor";
+export type BindingType = "value" | "factory" | "constructor";
 
-export interface BindingDataBase {
-    type: BindingDataType;
+export interface BindingCore {
+    type: BindingType;
 }
 
-export interface ConstBindingData extends BindingDataBase {
+export interface ConstBinding extends BindingCore {
     type: "value";
     value: any;
 }
 
-export interface InstanceCreatorBindingData extends BindingDataBase {
+export interface InstanceCreatorBinding extends BindingCore {
     definesScope?: Scope;
     createInScope?: Scope;
 }
 
-export interface FactoryBindingData extends InstanceCreatorBindingData {
+export interface FactoryBinding extends InstanceCreatorBinding {
     type: "factory";
     factory: (context: Context) => any;
 }
 
-export interface ConstructorBindingData extends InstanceCreatorBindingData {
+export interface ConstructorBindingData extends InstanceCreatorBinding {
     type: "constructor";
     ctor: Newable;
     injections: InjectionData[];
 }
 
-export type BindingData = ConstBindingData | FactoryBindingData | ConstructorBindingData;
-export type ScopeableBindingData = FactoryBindingData | ConstructorBindingData;
+export type Binding = ConstBinding | FactoryBinding | ConstructorBindingData;
+export type ScopeableBinding = FactoryBinding | ConstructorBindingData;
 
-export type BindingMap = ReadonlyMap<Identifier, BindingData[]>;
+export type BindingMap = ReadonlyMap<Identifier, Binding[]>;
 
-export function isScopeableBinding(binding: BindingData): binding is ScopeableBindingData {
+export function isScopeableBinding(binding: Binding): binding is ScopeableBinding {
     return binding.type === "factory" || binding.type === "constructor";
 }

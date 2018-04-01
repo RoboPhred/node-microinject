@@ -44,12 +44,12 @@ import {
 } from "./utils";
 
 import {
-    InstanceCreatorBindingData,
-    BindingData,
-    ConstBindingData,
-    FactoryBindingData,
+    InstanceCreatorBinding,
+    Binding,
+    ConstBinding,
+    FactoryBinding,
     ConstructorBindingData,
-    BindingDataType, 
+    BindingType, 
 } from "./data";
 
 
@@ -63,7 +63,7 @@ import {
  */
 export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
 
-    private _binding: BindingData | null = null;
+    private _binding: Binding | null = null;
     private _isFinalized = false;
 
     constructor(private _identifier: Identifier<T>) {}
@@ -112,7 +112,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         this._ensureScopeable();
 
         // Can only be an instance creator from a default binding.
-        const binding = this._binding as InstanceCreatorBindingData;
+        const binding = this._binding as InstanceCreatorBinding;
         if (binding.createInScope !== undefined) throw new BindingConfigurationError("Binding target scope has already been established.");
         binding.createInScope = SingletonScope;
     }
@@ -126,7 +126,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         this._ensureScopeable();
 
         // Can only be an instance creator from a default binding.
-        const binding = this._binding as InstanceCreatorBindingData;
+        const binding = this._binding as InstanceCreatorBinding;
         if (binding.createInScope !== undefined) throw new BindingConfigurationError("Binding targetscope has already been established.");
         binding.createInScope = null;
     }
@@ -144,7 +144,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         this._ensureScopeable();
 
         // Can only be an instance creator from a default binding.
-        const binding = this._binding as InstanceCreatorBindingData;
+        const binding = this._binding as InstanceCreatorBinding;
         if (binding.createInScope !== undefined) throw new BindingConfigurationError("Binding target scope has already been established.");
         binding.createInScope = scope;
     }
@@ -162,7 +162,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         this._tryAutoBind();
         this._ensureScopeable();
 
-        const binding = this._binding as InstanceCreatorBindingData;
+        const binding = this._binding as InstanceCreatorBinding;
         if (binding.definesScope !== undefined) throw new BindingConfigurationError("Binding scope creation has already been established.");
         binding.definesScope = scope;
     }
@@ -248,7 +248,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
 
 
     // TODO: It may be desirable to find a way of removing access to this from outside the library.
-    _getBinding(): BindingData {
+    _getBinding(): Binding {
         this._finalizeBinding();
         return this._binding!;
     }
