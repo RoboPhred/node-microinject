@@ -96,10 +96,7 @@ describe("defaultComponentResolvers", function() {
                 injections: args.map(arg => ({
                     identifier: arg.identifier
                 })),
-                injectionNodes: args.map(arg => ({
-                    identifier: arg.identifier,
-                    nodes: [arg]
-                }))
+                injectionNodes: args
             };
             return defaultComponentResolvers.ctor(identifier, creator, stubResolver);
         }
@@ -177,18 +174,12 @@ describe("defaultComponentResolvers", function() {
                 injections: [{
                     identifier: classA.identifier
                 }],
-                injectionNodes: [{
-                    identifier: classA.identifier,
-                    nodes: [{...classA}]
-                }]
+                injectionNodes: [{...classA}]
             };
             classA.injections.push({
                 identifier: classB.identifier
             });
-            classA.injectionNodes.push({
-                identifier: classB.identifier,
-                nodes: [{...classB}]
-            });
+            classA.injectionNodes.push({...classB});
 
             // Simulate resolving class B, when requested by class A.
             //  class B will then request class A, and we expect this to error.

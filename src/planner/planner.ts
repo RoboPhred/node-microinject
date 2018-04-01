@@ -30,7 +30,7 @@ import {
     ScopedDependenencyNode,
     FactoryDependencyNode,
     ConstructorDependencyNode,
-    DependencyInjection
+    InjectedArgumentValue
 } from "./interfaces";
 
 import {
@@ -192,7 +192,7 @@ export class DependencyGraphPlanner {
             injections
         } = binding;
 
-        const injectionNodes: DependencyInjection[] = [];
+        const injectionNodes: InjectedArgumentValue[] = [];
 
         const node: ConstructorDependencyNode = {
             ...binding,
@@ -222,7 +222,7 @@ export class DependencyGraphPlanner {
                 identifier: dependencyIdentifier
             } = injection;
 
-            let nodes: DependencyNode[];
+            let nodes: InjectedArgumentValue;
 
             const dependencyBindings = this._getBindings(dependencyIdentifier);
 
@@ -243,16 +243,7 @@ export class DependencyGraphPlanner {
                 // No matching bindings.
                 if (optional) {
                     // We are not an all / array, so the return value for optional is null.
-                    // TODO: We have to make up values here as we do not have a
-                    //  binding that represents this value.
-                    // Might want to make binding be a sub-property again, and accept
-                    //  the redundancy of the type property.
-                    nodes = [{
-                        type: "value",
-                        identifier,
-                        instanceId: "null",
-                        value: null
-                    }];
+                    nodes = null;
                 }
 
                 throw new DependencyResolutionError(
@@ -271,17 +262,14 @@ export class DependencyGraphPlanner {
             }
             else {
                 // At this point, we have exactly 1 binding on a 1-value injection.
-                nodes = [this._getDependencyNode(
+                nodes = this._getDependencyNode(
                     dependencyIdentifier,
                     dependencyBindings[0],
                     childScopeInstances
-                )];
+                );
             }
 
-            injectionNodes.push({
-                ...injection,
-                nodes
-            });
+            injectionNodes.push(nodes);
         }
 
         return node;

@@ -8,7 +8,7 @@ import {
     ConstDependencyNode,
     FactoryDependencyNode,
     ConstructorDependencyNode,
-    DependencyInjection
+    InjectedArgumentValue
 } from "../planner";
 
 import {
@@ -32,7 +32,11 @@ export const defaultComponentResolvers: ComponentResolvers = {
     },
     factory(identifier, creator, childResolver) {
         // Stub out Context.
-        //  Cannot make a context or resolve plans without knowing our container.
+        //  Cannot make a context or resolve plans without
+        //  knowing our container or planner.
+        // Previously, we treated factory as a function with arbitrary
+        //  arguments, but now that FactoryDependencyNode pulls in
+        //  FactoryBinding, we are contracted to the Context argument.
         return creator.factory({
             get container(): any {
                 throw new Error("Property not implemented.");
@@ -58,25 +62,16 @@ export const defaultComponentResolvers: ComponentResolvers = {
             return childResolver.resolveInstance(node);
         }
 
-        function resolveInjectedArg(injection: DependencyInjection): any {
-            // Bit weird to have to de-array the array here,
-            //  based on injection config, but it is a result
-            //  of the decision to fuze DependencyNode with Binding
-            //  and typescript getting angry when trying to widen
-            //  DependencyNode.type to include array.
-            // Array should probably be re-introduced as a DependencyNode type,
-            //  and the typescript typings issue fixed or worked around.
+        function resolveInjectedArg(injection: InjectedArgumentValue): any {
 
-            // Validation, optional, and so on should have been handled by the planner.
-            const instances = injection.nodes.map(resolveInjectionInstance);
-            if (injection.all) {
-                return instances;
-            }
-            else if (injection.optional && instances.length === 0) {
+            if (injection == null) {
                 return null;
             }
+            else if (Array.isArray(injection)) {
+                return injection.map(resolveInjectionInstance);
+            }
             else {
-                return instances[0];
+                return resolveInjectionInstance(injection);
             }
         }
         

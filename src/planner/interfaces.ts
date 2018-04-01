@@ -48,13 +48,21 @@ export interface FactoryDependencyNode extends ScopedDependencyNodeBase, Factory
 
 export interface ConstructorDependencyNode extends ScopedDependencyNodeBase, ConstructorBinding {
     type: "constructor";
-    injectionNodes: DependencyInjection[];
+    /**
+     * An array whose indexes correspond to those of ```injection```,
+     * and whose elements describe what is to be injected into the argument.
+     * 
+     * The elements may be a single DependencyNode, an array of
+     * DependencyNode objects, or null.
+     * If the value is a node, the node should be resolved and rejected.
+     * If the value is an array of nodes, the nodes should be resolved
+     * and the array of resolved values injected.
+     * If the value is ```null``, then ```null``` should be injected.
+     */
+    injectionNodes: InjectedArgumentValue[];
 }
 
-export interface DependencyInjection extends InjectionOptions {
-    identifier: Identifier,
-    nodes: DependencyNode[];
-}
+export type InjectedArgumentValue = DependencyNode | DependencyNode[] | null;
 
 export type DependencyNode =
     ConstDependencyNode
