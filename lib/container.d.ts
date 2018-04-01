@@ -30,17 +30,16 @@ export declare class Container {
     private _addBinder<T>(identifier, binder);
     /**
      * Clears out knowledge of all resolved identifiers and scopes.
-     * Previously resolved objects and factory bindings will still
-     * continue to work normally off the old data.
+     * Previously resolved objects and factories will still
+     * continue to work off the old data.
      *
      * This does not clear the container's bindings.  All previously
      * configured bindings remain configured.
      */
     reset(): void;
     /**
-     * Gets the bound object for an identifier.  This may create the object if necessary depending on scope and previous creations.
-     * If multiple objects are bound to the identifier, the object chosen may not be predictable.
-     * This method will throw IdentifierNotBoundError if no bindings exist for the identifier.
+     * Gets or creates the value represented by the identifier.
+     * This method will throw DependencyResolutionError if there is not exactly one binding for the identifier.
      * @param identifier The identifier of the object to get.
      * @returns The object for the given identifier.
      */
