@@ -50,7 +50,7 @@ import {
     FactoryBinding,
     ConstructorBinding,
     BindingType, 
-} from "./data";
+} from "./binding";
 
 
 /**

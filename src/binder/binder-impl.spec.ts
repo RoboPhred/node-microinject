@@ -27,7 +27,7 @@ import {
 
 import {
     Binding
-} from "./data";
+} from "./binding";
 
 import {
     BindingConfigurationError

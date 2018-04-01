@@ -1,5 +1,5 @@
 import { Identifier } from "../interfaces";
-import { BindingCore, ConstBinding, FactoryBinding, ConstructorBinding, BindingType } from "../binder/data";
+import { BindingCore, ConstBinding, FactoryBinding, ConstructorBinding, BindingType } from "../binder/binding";
 export interface DependencyNodeBase extends BindingCore {
     type: BindingType;
     /**

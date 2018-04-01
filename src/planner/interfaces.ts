@@ -9,7 +9,7 @@ import {
     FactoryBinding,
     ConstructorBinding,
     BindingType
-} from "../binder/data";
+} from "../binder/binding";
 
 import {
     InjectionOptions

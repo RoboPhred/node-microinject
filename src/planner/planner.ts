@@ -15,7 +15,7 @@ import {
     isScopeableBinding,
     ConstructorBinding,
     FactoryBinding
-} from "../binder/data";
+} from "../binder/binding";
 
 import {
     scopeToString

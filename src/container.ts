@@ -18,7 +18,7 @@ import {
 
 import {
     Binding
-} from "./binder/data";
+} from "./binder/binding";
 
 import {
     getProvidedIdentifiers

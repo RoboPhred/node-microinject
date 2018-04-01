@@ -1,7 +1,7 @@
 import { Identifier, Newable, Context } from "../interfaces";
 import { Scope } from "../scope";
 import { Binder, ScopedBinder } from "./interfaces";
-import { Binding } from "./data";
+import { Binding } from "./binding";
 /**
  * The implementation of the Binder fluent api.
  * This object is created when a binding is created, and will remain indefinitely.

@@ -1,5 +1,5 @@
 import { Identifier } from "../interfaces";
-import { Binding } from "../binder/data";
+import { Binding } from "../binder/binding";
 import { DependencyNode } from "./interfaces";
 export interface BindingResolver {
     (identifier: Identifier): Binding[];
