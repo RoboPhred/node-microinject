@@ -211,7 +211,11 @@ export class DependencyGraphPlanner {
             const dependencyBindings = this._getBindings(dependencyIdentifier);
             if (all) {
                 if (!optional && dependencyBindings.length === 0) {
-                    throw new DependencyResolutionError(dependencyIdentifier, this._stack, `No bindings exist for the required argument at position ${i} of bound constructor "${ctor.name}".`);
+                    throw new DependencyResolutionError(
+                        dependencyIdentifier,
+                        this._stack,
+                        `No bindings exist for the required argument at position ${i} of bound constructor "${ctor.name}".`
+                    );
                 }
 
                 // If we resolve an All, it must be an array.
@@ -236,15 +240,27 @@ export class DependencyGraphPlanner {
                     };
                 }
 
-                throw new DependencyResolutionError(dependencyIdentifier, this._stack, `No bindings exist for the required argument at position ${i} of bound constructor "${ctor.name}".`);
+                throw new DependencyResolutionError(
+                    dependencyIdentifier,
+                    this._stack,
+                    `No bindings exist for the required argument at position ${i} of bound constructor "${ctor.name}".`
+                );
             }
             else if (dependencyBindings.length > 1) {
                 // Array case was already handled, so this means we do not know what binding to use.
-                throw new DependencyResolutionError(dependencyIdentifier, this._stack, `More than one binding was resolved for the argument at position ${i} of bound constructor "${ctor.name}".`);
+                throw new DependencyResolutionError(
+                    dependencyIdentifier,
+                    this._stack,
+                    `More than one binding was resolved for the argument at position ${i} of bound constructor "${ctor.name}".`
+                );
             }
             else {
                 // At this point, we have exactly 1 binding on a 1-value injection.
-                dependencyCreator = this._getComponentCreator(dependencyIdentifier, dependencyBindings[0], childScopeInstances);
+                dependencyCreator = this._getComponentCreator(
+                    dependencyIdentifier,
+                    dependencyBindings[0],
+                    childScopeInstances
+                );
             }
 
             ctorArgs.push({
@@ -295,7 +311,12 @@ export class DependencyGraphPlanner {
      * @param scopeInstances The current set of scope instances.
      * @returns The set of scope instances to use for any child component creators.
      */
-    private _tryApplyScoping(identifier: Identifier, binding: Binding, component: ComponentCreator, scopeInstances: ScopeInstanceMap): ScopeInstanceMap {
+    private _tryApplyScoping(
+        identifier: Identifier,
+        binding: Binding,
+        component: ComponentCreator,
+        scopeInstances: ScopeInstanceMap
+    ): ScopeInstanceMap {
         // Pointless binding type check to make typescript happy.
         if (binding.type === "value") {
             // Value types cannot be scoped, nor can they be within a scope.
@@ -304,7 +325,9 @@ export class DependencyGraphPlanner {
         }
 
         // A component that cannot be placed in a scope also cannot serve as a scope itself.
-        if (!isComponentScopable(component)) return scopeInstances;
+        if (!isComponentScopable(component)) {
+            return scopeInstances;
+        }
 
         const {
             createInScope,
@@ -315,7 +338,11 @@ export class DependencyGraphPlanner {
         if (createInScope) {
             const instanceData = scopeInstances.get(createInScope);
             if (!instanceData) {
-                throw new DependencyResolutionError(identifier, this._stack, `The resolved binding requres scope "${scopeToString(createInScope)}", but no child object defines this scope.`);
+                throw new DependencyResolutionError(
+                    identifier,
+                    this._stack,
+                    `The resolved binding requres scope "${scopeToString(createInScope)}", but no child object defines this scope.`
+                );
             }
 
             // The component is scoped, so add it as The Component for this specific identifier under the component.
