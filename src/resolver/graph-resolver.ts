@@ -223,9 +223,9 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
 
         // Did not create it yet.  Create and store it now.
         const instance = this._createNodeInstance(node);
-        this._scopedInstances.set(instanceId, instanceId);
+        this._scopedInstances.set(instanceId, instance);
 
-        return instanceId;
+        return instance;
     }
 
     private _createNodeInstance(node: DependencyNode): any {
