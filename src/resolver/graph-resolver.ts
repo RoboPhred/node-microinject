@@ -168,7 +168,8 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
             return this._getScopedNodeInstance(node);
         }
         else {
-            // Transient or const.
+            // Not scoped, so we do not need to try to get an existing instance.
+            //  Create a new instance.
             return this._createNodeInstance(node);
         }
     }
@@ -229,13 +230,13 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
     }
 
     private _createNodeInstance(node: DependencyNode): any {
-        if (isNodeScopeCreator(node) && (!this._ownedScope || node.scopeOwnerInstanceId !== this._ownedScope.instanceId)) {
+        if (isNodeScopeCreator(node) && (!this._ownedScope || node.instanceId !== this._ownedScope.instanceId)) {
             // If the node is defining a new scope which we do not own,
             //  we need to create a child resolver to hold the instances scoped to it.
             return this._createScopeRootNodeComponent(node);
         }
         else {
-            // Not defining a scope, so no special handling.
+            // Not defining a scope, or we own the scope.  No special handling.
             return this._createLocalNodeComponent(node);
         }
     }
@@ -253,15 +254,15 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
         try {
             switch(node.type) {
                 case "constructor": {
-                    return this._resolvers.ctor(node.identifier, node, this._createChildResolver());
+                    return this._resolvers.ctor(node.identifier, node, this);
                 }
                 case "factory": {
-                    return this._resolvers.factory(node.identifier, node, this._createChildResolver());
+                    return this._resolvers.factory(node.identifier, node, this);
                 }
                 case "value": {
                     // We still allow external resolution of simple values.
                     //  This is for wrapping, proxying, monkey-patching, and other such cross-cutting tomfoolery.
-                    return this._resolvers.const(node.identifier, node, this._createChildResolver());
+                    return this._resolvers.const(node.identifier, node, this);
                 }
                 default:
                     throwUnknownNodeType(node);
