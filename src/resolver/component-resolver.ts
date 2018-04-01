@@ -26,7 +26,6 @@ export interface ComponentResolvers {
 
 export const defaultComponentResolvers: ComponentResolvers = {
     factory(identifier, creator, childResolver) {
-        // TODO: Make a create-only container api for factory.
         return creator.factory();
     },
     ctor(identifier, creator, childResolver) {
