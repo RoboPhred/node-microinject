@@ -20,8 +20,9 @@ import {
     getProvidedIdentifiers
 } from "./binder/utils";
 
-import DependencyGraphPlanner, {
+import {
     DependencyGraphNode,
+    DependencyGraphPlanner,
     FactoryComponentCreator
 } from "./planner";
 
