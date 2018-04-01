@@ -21,11 +21,22 @@ describe("Integration", function() {
         @provides(Right)
         @singleton()
         class LeftRightImpl implements LeftTarget, RightTarget {
+            private static serviceInstanceCounter = 1;
+            private _instanceId: number;
+
+            constructor() {
+                this._instanceId = LeftRightImpl.serviceInstanceCounter++;
+            }
+
             getLeft(): number {
                 return -5;
             }
             getRight(): number {
                 return 5;
+            }
+
+            toString() {
+                return String(this._instanceId);
             }
         }
         
