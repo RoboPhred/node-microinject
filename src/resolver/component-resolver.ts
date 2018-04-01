@@ -4,9 +4,10 @@ import {
 } from "../interfaces";
 
 import {
-    FactoryComponentCreator,
-    ConstructorComponentCreator,
-    ValueComponentCreator
+    ConstDependencyNode,
+    FactoryDependencyNode,
+    ConstructorDependencyNode,
+    DependencyInjection
 } from "../planner";
 
 import {
@@ -19,27 +20,48 @@ import {
 
 
 export interface ComponentResolvers {
-    factory: (identifier: Identifier, creator: FactoryComponentCreator, childResolver: DependencyGraphResolver) => any;
-    ctor: (identifier: Identifier, creator: ConstructorComponentCreator, childResolver: DependencyGraphResolver) => any;
-    value: (identifier: Identifier, creator: ValueComponentCreator, childResolver: DependencyGraphResolver) => any;
+    const: (identifier: Identifier, creator: ConstDependencyNode, childResolver: DependencyGraphResolver) => any;
+    factory: (identifier: Identifier, creator: FactoryDependencyNode, childResolver: DependencyGraphResolver) => any;
+    ctor: (identifier: Identifier, creator: ConstructorDependencyNode, childResolver: DependencyGraphResolver) => any;
 }
 
 export const defaultComponentResolvers: ComponentResolvers = {
+    const(identifier, creator, childResolver) {
+        return creator.value;
+    },
     factory(identifier, creator, childResolver) {
-        return creator.factory();
+        // Stub out Context.
+        //  Cannot make a context or resolve plans without knowing our container.
+        return creator.factory({
+            get container(): any {
+                throw new Error("Property not implemented.");
+            },
+            has() {
+                throw new Error("Method not implemented.");
+            },
+            get() {
+                throw new Error("Method not implemented.");
+            },
+            getAll() {
+                throw new Error("Method not implemented.");
+            }
+        });
     },
     ctor(identifier, creator, childResolver) {
-        const args = creator.args.map(x => {
-            if (childResolver.isResolving(x)) {
+        function resolveInjectionInstance(node: DependencyNode): any {
+            if (childResolver.isResolving(node)) {
                 const identifierStack = childResolver.getResolveStack().map(x => x.identifier);
-                identifierStack.push(x.identifier);
+                identifierStack.push(node.identifier);
                 throw new DependencyResolutionError(identifier, identifierStack, `Cannot resolve cyclic dependency.`);
             }
-            return childResolver.resolveInstance(x);
-        });
+            return childResolver.resolveInstance(node);
+        }
+
+        function resolveInjectedArg(injection: DependencyInjection): any {
+            // TODO: resolve single vs all, handle optional.
+        }
+        
+        const args = creator.injectionNodes.map(resolveInjectedArg);
         return new creator.ctor(...args);
-    },
-    value(identifier, creator, childResolver) {
-        return creator.value;
     }
 }

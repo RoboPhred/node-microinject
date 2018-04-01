@@ -18,14 +18,14 @@ import {
 } from "../interfaces";
 
 import {
-    FactoryComponentCreator,
-    ConstructorComponentCreator,
-    ValueComponentCreator,
-    DependencyGraphNode
+    DependencyNode,
+    ConstDependencyNode,
+    FactoryDependencyNode,
+    ConstructorDependencyNode
 } from "../planner";
 
 import {
-    DependencyGraphResolver
+    DependencyGraphResolver,
 } from "./interfaces";
 
 import {
@@ -37,11 +37,6 @@ import { DependencyResolutionError } from "..";
 type StubDependencyGraphResolver = {
     [key in keyof DependencyGraphResolver]: SinonStub
 };
-
-interface ConstructorDependencyGraphNode {
-    identifier: Identifier,
-    componentCreator: ConstructorComponentCreator
-}
 
 describe("defaultComponentResolvers", function() {
     const stubResolver: StubDependencyGraphResolver = {
@@ -58,15 +53,16 @@ describe("defaultComponentResolvers", function() {
         const identifier: Identifier = Symbol("factory-identifier");
         const factoryReturnValue = Symbol("factory-return-value");
         const factoryStub = stub().returns(factoryReturnValue);
-        const factoryCreator: FactoryComponentCreator = {
+        const factoryNode: FactoryDependencyNode = {
             type: "factory",
-            componentId: "factory-component-id",
+            identifier,
+            instanceId: "factory-component-id",
             factory: factoryStub
         };
 
         let resolvedValue: any;
         before(function() {
-            resolvedValue = defaultComponentResolvers.factory(identifier, factoryCreator, stubResolver);
+            resolvedValue = defaultComponentResolvers.factory(identifier, factoryNode, stubResolver);
         });
 
         it("invokes the factory", function() {
@@ -93,7 +89,7 @@ describe("defaultComponentResolvers", function() {
             ctor: constructorStub
         };
 
-        function invokeResolver(args: DependencyGraphNode[]) {
+        function invokeResolver(args: DependencyNode[]) {
             const creator: ConstructorComponentCreator = {
                 ...partialCtorCreator,
                 args
@@ -112,7 +108,7 @@ describe("defaultComponentResolvers", function() {
         });
 
         it("resolves arguments", function() {
-            const firstArg: DependencyGraphNode = {
+            const firstArg: DependencyNode = {
                 identifier: Symbol("first-arg-identifier"),
                 componentCreator: {
                     type: "value",
@@ -120,7 +116,7 @@ describe("defaultComponentResolvers", function() {
                     value: Symbol("first-arg-value")
                 }
             }
-            const secondArg: DependencyGraphNode = {
+            const secondArg: DependencyNode = {
                 identifier: Symbol("second-arg-identifier"),
                 componentCreator: {
                     type: "value",
@@ -138,7 +134,7 @@ describe("defaultComponentResolvers", function() {
 
         it("passes the resolved arguments to the constructor", function() {
             const firstArgValue = Symbol("first-arg-value");
-            const firstArg: DependencyGraphNode = {
+            const firstArg: DependencyNode = {
                 identifier: Symbol("first-arg-identifier"),
                 componentCreator: {
                     type: "value",
@@ -148,7 +144,7 @@ describe("defaultComponentResolvers", function() {
             }
 
             const secondArgValue = Symbol("second-arg-value");
-            const secondArg: DependencyGraphNode = {
+            const secondArg: DependencyNode = {
                 identifier: Symbol("second-arg-identifier"),
                 componentCreator: {
                     type: "value",
@@ -209,7 +205,7 @@ describe("defaultComponentResolvers", function() {
 
         let resolvedValue: any;
         before(function() {
-            resolvedValue = defaultComponentResolvers.value(identifier, valueCreator, stubResolver);
+            resolvedValue = defaultComponentResolvers.const(identifier, valueCreator, stubResolver);
         });
 
         it("returns the value result", function() {

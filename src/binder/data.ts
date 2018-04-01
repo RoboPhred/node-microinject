@@ -34,14 +34,14 @@ export interface FactoryBinding extends InstanceCreatorBinding {
     factory: (context: Context) => any;
 }
 
-export interface ConstructorBindingData extends InstanceCreatorBinding {
+export interface ConstructorBinding extends InstanceCreatorBinding {
     type: "constructor";
     ctor: Newable;
     injections: InjectionData[];
 }
 
-export type Binding = ConstBinding | FactoryBinding | ConstructorBindingData;
-export type ScopeableBinding = FactoryBinding | ConstructorBindingData;
+export type Binding = ConstBinding | FactoryBinding | ConstructorBinding;
+export type ScopeableBinding = FactoryBinding | ConstructorBinding;
 
 export type BindingMap = ReadonlyMap<Identifier, Binding[]>;
 

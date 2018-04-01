@@ -2,8 +2,7 @@
 import { v4 as uuidv4 } from "uuid";
 
 import {
-    Identifier,
-    Newable
+    Identifier
 } from "../interfaces";
 
 import {
@@ -12,19 +11,13 @@ import {
 } from "../scope"
 
 import {
-    BindingMap,
     Binding,
     isScopeableBinding,
-    ConstructorBindingData,
+    ConstructorBinding,
     FactoryBinding
 } from "../binder/data";
 
 import {
-    BinderImpl
-} from "../binder/binder-impl";
-
-import {
-    identifierToString,
     scopeToString
 } from "../utils";
 
@@ -33,18 +26,19 @@ import {
 } from "../errors";
 
 import {
-    DependencyGraphNode,
-    ComponentCreator,
-    ScopeableComponentCreator,
-    ScopeDefiningComponentCreator,
-    ConstructorComponentCreator,
-    FactoryComponentCreator
+    DependencyNode,
+    ScopedDependenencyNode,
+    FactoryDependencyNode,
+    ConstructorDependencyNode,
+    DependencyInjection
 } from "./interfaces";
 
 import {
-    isComponentScopable
+    isScopedDependencyNode
 } from "./utils";
 
+
+type ScopeDefiner = ScopedDependenencyNode | symbol; 
 
 interface ScopeInstance {
     /**
@@ -52,12 +46,12 @@ interface ScopeInstance {
      * 
      * May be SingletonSymbol as a special case for singleton-scoped services.
      */
-    definer: ScopeDefiningComponentCreator | symbol;
+    definer: ScopeDefiner;
 
     /**
      * Instances of scopable component creators that are in this scope.
      */
-    instances: Map<Identifier, ScopeableComponentCreator>
+    instances: Map<Identifier, ScopedDependenencyNode>
 }
 type ScopeInstanceMap = Map<Scope, ScopeInstance>;
 
@@ -66,7 +60,7 @@ export interface BindingResolver {
 }
 
 export class DependencyGraphPlanner {
-    private _planCache = new Map<Identifier, DependencyGraphNode>();
+    private _planCache = new Map<Identifier, DependencyNode>();
 
     /**
      * The current stack of identifiers being planned.
@@ -95,7 +89,7 @@ export class DependencyGraphPlanner {
      * @param identifier The identifier to get a plan for.
      * @param binding An optional binding to use for the identifier.  Useful if multiple bindings may apply.
      */
-    getPlan(identifier: Identifier, binding?: Binding): DependencyGraphNode {
+    getPlan(identifier: Identifier, binding?: Binding): DependencyNode {
         let plan = this._planCache.get(identifier);
         if (plan) {
             return plan;
@@ -112,103 +106,126 @@ export class DependencyGraphPlanner {
             binding = rootBindings[0];
         }
 
-        plan = {
-            identifier,
-            componentCreator: this._getComponentCreator(identifier, binding, this._rootScopeInstances)
-        };
+        const dependencyNode = this._getDependencyNode(identifier, binding, this._rootScopeInstances)
 
-        this._planCache.set(identifier, plan);
-        return plan;
+        this._planCache.set(identifier, dependencyNode);
+        return dependencyNode;
     }
 
     private _getBindings(identifier: Identifier): Binding[] {
         return this._bindingResolver(identifier);
     }
 
-    private _getComponentCreator(identifier: Identifier, binding: Binding, scopeInstances: ScopeInstanceMap): ComponentCreator {
+    private _getDependencyNode(
+        identifier: Identifier,
+        binding: Binding,
+        scopeInstances: ScopeInstanceMap
+    ): DependencyNode {
         this._stack.push(identifier);
-        let componentCreator: ComponentCreator;
+        let dependencyNode: DependencyNode;
         try {
-            let creator: ComponentCreator | null = this._getScopedInstance(identifier, binding, scopeInstances);
-            if (!creator) {
+            let node: DependencyNode | null = this._getScopedInstance(identifier, binding, scopeInstances);
+            if (!node) {
                 // If the binding is in a scope, this will register the resulting ComponentCreator with that scope.
                 //  This is to support reference loops during dependency lookup.
-                creator = this._createComponentCreator(identifier, binding, scopeInstances);
+                node = this._createDependencyNode(identifier, binding, scopeInstances);
             }
-            componentCreator = creator;
+            dependencyNode = node;
         }
         finally {
             this._stack.pop();
         }
 
-        return componentCreator;
+        return dependencyNode;
     }
 
-    private _createComponentCreator(identifier: Identifier, binding: Binding, scopeInstances: ScopeInstanceMap): ComponentCreator {
+    private _createDependencyNode(
+        identifier: Identifier,
+        binding: Binding,
+        scopeInstances: ScopeInstanceMap
+    ): DependencyNode {
         if (binding.type === "value") {
             return {
-                type: "value",
-                componentId: uuidv4(),
-                value: binding.value
+                ...binding,
+                identifier,
+                instanceId: uuidv4(),
             };
         }
 
         switch (binding.type) {
             case "factory": {
-                return this._createFactoryCreator(identifier, binding, scopeInstances);
+                return this._createFactoryNode(identifier, binding, scopeInstances);
             };
             case "constructor": {
-                return this._createConstructorCreator(identifier, binding, scopeInstances);
+                return this._createConstructorNode(identifier, binding, scopeInstances);
             };
             default:
                 return assertKnownBinding(binding);
         }
     }
 
-    private _createFactoryCreator(identifier: Identifier, binding: FactoryBinding, scopeInstances: ScopeInstanceMap): FactoryComponentCreator {
-        const componentCreator: ComponentCreator = {
-            type: "factory",
-            componentId: uuidv4(),
-            factory: binding.factory
+    private _createFactoryNode(
+        identifier: Identifier,
+        binding: FactoryBinding,
+        scopeInstances: ScopeInstanceMap
+    ): FactoryDependencyNode {
+        const node: FactoryDependencyNode = {
+            ...binding,
+            identifier,
+            instanceId: uuidv4(),
         };
 
-        this._tryApplyScoping(identifier, binding, componentCreator, scopeInstances);
+        this._tryApplyScoping(identifier, binding, node, scopeInstances);
 
         // We cannot plan for anything inside a factory, as the user will
         //  look stuff up at resolution time.
-        return componentCreator;
+        return node;
     }
 
-    private _createConstructorCreator(identifier: Identifier, binding: ConstructorBindingData, scopeInstances: ScopeInstanceMap): ConstructorComponentCreator {
+    private _createConstructorNode(
+        identifier: Identifier,
+        binding: ConstructorBinding,
+        scopeInstances: ScopeInstanceMap
+    ): ConstructorDependencyNode {
         const {
             ctor,
             injections
         } = binding;
-        const ctorArgs: DependencyGraphNode[] = [];
 
-        const componentCreator: ConstructorComponentCreator = {
-            type: "constructor",
-            componentId: uuidv4(),
+        const injectionNodes: DependencyInjection[] = [];
+
+        const node: ConstructorDependencyNode = {
+            ...binding,
+            identifier,
+            instanceId: uuidv4(),
             ctor,
-            args: ctorArgs
+            injectionNodes
         };
 
         // If we are part of a scope, add it before resolving the dependencies.
         //  This may allow for cyclic graphs, but that is the resolver's problem.
         // We need to add it to the current scope set, not the child scope set.
-        const childScopeInstances = this._tryApplyScoping(identifier, binding, componentCreator, scopeInstances);
+        const childScopeInstances = this._tryApplyScoping(
+            identifier,
+            binding,
+            node,
+            scopeInstances
+        );
 
         // Now we can recurse and resolve our dependencies.
         for (let i = 0; i < injections.length; i++) {
+            // Cannot use 'of', we need the index for error messages.
+            const injection = injections[i];
             const {
                 all,
                 optional,
                 identifier: dependencyIdentifier
-            } = injections[i];
+            } = injection;
 
-            let dependencyCreator: ComponentCreator;
+            let nodes: DependencyNode[];
 
             const dependencyBindings = this._getBindings(dependencyIdentifier);
+
             if (all) {
                 if (!optional && dependencyBindings.length === 0) {
                     throw new DependencyResolutionError(
@@ -218,26 +235,24 @@ export class DependencyGraphPlanner {
                     );
                 }
 
-                // If we resolve an All, it must be an array.
-                //  This is even the case when we are optional and no bindings were found.
-                dependencyCreator = {
-                    type: "array",
-                    componentId: uuidv4(),
-                    values: dependencyBindings.map(binding => ({
-                        identifier: dependencyIdentifier,
-                        componentCreator: this._getComponentCreator(dependencyIdentifier, binding, childScopeInstances)
-                    }))
-                };
+                nodes = dependencyBindings.map(binding => 
+                    this._getDependencyNode(dependencyIdentifier, binding, childScopeInstances)
+                );
             }
             else if (dependencyBindings.length === 0) {
                 // No matching bindings.
                 if (optional) {
                     // We are not an all / array, so the return value for optional is null.
-                    dependencyCreator = {
+                    // TODO: We have to make up values here as we do not have a
+                    //  binding that represents this value.
+                    // Might want to make binding be a sub-property again, and accept
+                    //  the redundancy of the type property.
+                    nodes = [{
                         type: "value",
-                        componentId: uuidv4(),
+                        identifier,
+                        instanceId: "null",
                         value: null
-                    };
+                    }];
                 }
 
                 throw new DependencyResolutionError(
@@ -256,20 +271,20 @@ export class DependencyGraphPlanner {
             }
             else {
                 // At this point, we have exactly 1 binding on a 1-value injection.
-                dependencyCreator = this._getComponentCreator(
+                nodes = [this._getDependencyNode(
                     dependencyIdentifier,
                     dependencyBindings[0],
                     childScopeInstances
-                );
+                )];
             }
 
-            ctorArgs.push({
-                identifier: dependencyIdentifier,
-                componentCreator: dependencyCreator
+            injectionNodes.push({
+                ...injection,
+                nodes
             });
         }
 
-        return componentCreator;
+        return node;
     }
 
     private _getScopedInstance(identifier: Identifier, binding: Binding, scopeInstances: ScopeInstanceMap) {
@@ -302,19 +317,19 @@ export class DependencyGraphPlanner {
     }
 
     /**
-     * Try to apply scoping data to the component.
-     * This checks both inScope and defineScope.
+     * Try to apply scoping data to the dependency node.
+     * This checks for and applies both createInScope and definesScope.
      * It will also generate a child scoping map if one is required.
      * @param identifier The identifier of the component being scoped.
-     * @param binding The binding being used to form the component creator.
-     * @param component The component creator.
+     * @param binding The binding being used to form the dependency node.
+     * @param node The dependency node to apply scoping to.
      * @param scopeInstances The current set of scope instances.
-     * @returns The set of scope instances to use for any child component creators.
+     * @returns The set of scope instances to use for any child nodes.
      */
     private _tryApplyScoping(
         identifier: Identifier,
         binding: Binding,
-        component: ComponentCreator,
+        node: DependencyNode,
         scopeInstances: ScopeInstanceMap
     ): ScopeInstanceMap {
         // Pointless binding type check to make typescript happy.
@@ -324,8 +339,8 @@ export class DependencyGraphPlanner {
             return scopeInstances;
         }
 
-        // A component that cannot be placed in a scope also cannot serve as a scope itself.
-        if (!isComponentScopable(component)) {
+        // A node that cannot be placed in a scope also cannot serve as a scope.
+        if (!isScopedDependencyNode(node)) {
             return scopeInstances;
         }
 
@@ -345,13 +360,17 @@ export class DependencyGraphPlanner {
                 );
             }
 
-            // The component is scoped, so add it as The Component for this specific identifier under the component.
-            instanceData.instances.set(identifier, component);
-            component.containingScope = createInScope;
+            // The newly created node is scoped, so record it as being
+            //  the specific node for the identifier in this scope instance.
+            // TODO: This needs to be revisited as we seem to want to scope things
+            //  by binding rather than by identifier.
+            //  Specifically, this creates the bug where a singleton with multiple
+            //  @provides() annotation creates multiple instances.
+            instanceData.instances.set(identifier, node);
 
             // We might be being defined by a special case symbol, such as SingletonSymbol.
             if (typeof instanceData.definer !== "symbol") {
-                component.containingScopeInstance = instanceData.definer;
+                node.scopeOwnerInstanceId = instanceData.definer.instanceId;
             }
         }
 
@@ -362,9 +381,8 @@ export class DependencyGraphPlanner {
             // We need to create a new outer map as new child scopes within a scope should only be accessible within that scope.
             //  We still need to copy the outer scopes, however.  A scope is available to all children unless overrode with another
             //  object defining the same scope.
-            component.defineScope = definesScope;
             return new Map(scopeInstances).set(definesScope, {
-                definer: component,
+                definer: node,
                 instances: new Map()
             });
         }

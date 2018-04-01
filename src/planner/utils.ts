@@ -1,9 +1,9 @@
 
 import {
-    ComponentCreator,
-    ScopeableComponentCreator
+    DependencyNode,
+    ScopedDependenencyNode
 } from "./interfaces";
 
-export function isComponentScopable(component: ComponentCreator): component is ScopeableComponentCreator {
-    return (component.type === "factory" || component.type === "constructor");
+export function isScopedDependencyNode(node: DependencyNode): node is ScopedDependenencyNode {
+    return (node.type === "factory" || node.type === "constructor");
 }

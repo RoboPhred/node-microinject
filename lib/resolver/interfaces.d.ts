@@ -1,4 +1,4 @@
-import { DependencyGraphNode } from "../planner";
+import { DependencyNode } from "../planner";
 /**
  * An object capable of resolving a dependency graph.
  */
@@ -10,7 +10,7 @@ export interface DependencyGraphResolver {
      * @param node The node to check if we are resolving.
      * @returns ```true``` if the node is being resolved, or ```false```.
      */
-    isResolving(node: DependencyGraphNode): boolean;
+    isResolving(node: DependencyNode): boolean;
     /**
      * Gets an array of nodes describing the stack of resolutions made
      * from the given node up to the current resolving node.
@@ -21,7 +21,7 @@ export interface DependencyGraphResolver {
      *
      * @param from The node to start retrieving the resolution stack at.
      */
-    getResolveStack(from?: DependencyGraphNode): DependencyGraphNode[];
+    getResolveStack(from?: DependencyNode): DependencyNode[];
     /**
      * Resolves an instance of a node of a dependency graph.
      * Child nodes will be recursively obtained as-needed to build the object.
@@ -29,5 +29,5 @@ export interface DependencyGraphResolver {
      * the object returned may have been pre-created.
      * @param node The dependency graph node representing the object to resolve.
      */
-    resolveInstance<T = any>(node: DependencyGraphNode): T;
+    resolveInstance<T = any>(node: DependencyNode): T;
 }

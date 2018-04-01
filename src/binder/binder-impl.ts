@@ -48,7 +48,7 @@ import {
     Binding,
     ConstBinding,
     FactoryBinding,
-    ConstructorBindingData,
+    ConstructorBinding,
     BindingType, 
 } from "./data";
 

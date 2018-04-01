@@ -25,9 +25,9 @@ import {
 } from "./binder/utils";
 
 import {
-    DependencyGraphNode,
+    DependencyNode,
     DependencyGraphPlanner,
-    FactoryComponentCreator
+    FactoryDependencyNode
 } from "./planner";
 
 import {
@@ -235,7 +235,11 @@ export class Container {
      * @param creator The factory component creator to be used to resolve the value.
      * @param childResolver A resolver capable of resolving correctly scoped child objects.
      */
-    private _factoryResolver(identifier: Identifier, creator: FactoryComponentCreator, childResolver: DependencyGraphResolver): any {
+    private _factoryResolver(
+        identifier: Identifier,
+        creator: FactoryDependencyNode,
+        childResolver: DependencyGraphResolver
+    ): any {
         const container = this;
         
         const context: Context = {

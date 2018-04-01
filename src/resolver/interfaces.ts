@@ -1,6 +1,6 @@
 
 import {
-    DependencyGraphNode
+    DependencyNode
 } from "../planner";
 
 /**
@@ -14,7 +14,7 @@ export interface DependencyGraphResolver {
      * @param node The node to check if we are resolving.
      * @returns ```true``` if the node is being resolved, or ```false```.
      */
-    isResolving(node: DependencyGraphNode): boolean;
+    isResolving(node: DependencyNode): boolean;
 
     /**
      * Gets an array of nodes describing the stack of resolutions made
@@ -26,7 +26,7 @@ export interface DependencyGraphResolver {
      * 
      * @param from The node to start retrieving the resolution stack at.
      */
-    getResolveStack(from?: DependencyGraphNode): DependencyGraphNode[];
+    getResolveStack(from?: DependencyNode): DependencyNode[];
 
     /**
      * Resolves an instance of a node of a dependency graph.
@@ -35,5 +35,5 @@ export interface DependencyGraphResolver {
      * the object returned may have been pre-created.
      * @param node The dependency graph node representing the object to resolve.
      */
-    resolveInstance<T = any>(node: DependencyGraphNode): T;
+    resolveInstance<T = any>(node: DependencyNode): T;
 }
