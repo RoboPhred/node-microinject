@@ -22,9 +22,13 @@ import {
 } from "../injection/utils";
 
 import {
+    SelfIdentifiedScopeSymbol
+} from "../scope/symbols";
+
+
+import {
     identifierToString
 } from "../utils";
-
 
 import {
     BindingConfigurationError
@@ -47,7 +51,6 @@ import {
     ConstructorBindingData,
     BindingDataType, 
 } from "./data";
-import { SelfIdentifiedScopeSymbol } from "../scope/symbols";
 
 
 /**
