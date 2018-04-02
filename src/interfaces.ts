@@ -18,13 +18,18 @@ export type AutoBoundIdentifier<T = any> = Newable<T> | ServiceFactory<T>;
  * A constructor creating a new object of type T.
  */
 export interface Newable<T = any> {
-    new(...args: any[]): T
+    new(...args: any[]): T;
 }
 
-export interface ServiceFactory<T = any> {
-    (context: Context): T;
-}
+/**
+ * A factory function capable of creating objects in the context
+ * and scope of a dependency resolution.
+ */
+export type ServiceFactory<T = any> = (context: Context) => T;
 
+/**
+ * An object capable of resolving identifiers to objects.
+ */
 export interface ServiceLocator {
     has(identifier: Identifier): boolean;
     get<T>(identifier: Identifier<T>): T;

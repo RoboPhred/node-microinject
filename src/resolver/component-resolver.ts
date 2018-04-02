@@ -4,10 +4,10 @@ import {
 } from "../interfaces";
 
 import {
-    DependencyNode,
     ConstDependencyNode,
-    FactoryDependencyNode,
     ConstructorDependencyNode,
+    DependencyNode,
+    FactoryDependencyNode,
     InjectedArgumentValue
 } from "../planner";
 
@@ -21,16 +21,16 @@ import {
 
 
 export interface ComponentResolvers {
-    const: (identifier: Identifier, creator: ConstDependencyNode, childResolver: DependencyGraphResolver) => any;
-    factory: (identifier: Identifier, creator: FactoryDependencyNode, childResolver: DependencyGraphResolver) => any;
-    ctor: (identifier: Identifier, creator: ConstructorDependencyNode, childResolver: DependencyGraphResolver) => any;
+    const(identifier: Identifier, creator: ConstDependencyNode, childResolver: DependencyGraphResolver): any;
+    factory(identifier: Identifier, creator: FactoryDependencyNode, childResolver: DependencyGraphResolver): any;
+    ctor(identifier: Identifier, creator: ConstructorDependencyNode, childResolver: DependencyGraphResolver): any;
 }
 
 export const defaultComponentResolvers: ComponentResolvers = {
-    const(identifier, creator, childResolver) {
+    const(_identifier, creator, _childResolver) {
         return creator.value;
     },
-    factory(identifier, creator, childResolver) {
+    factory(_identifier, creator, _childResolver) {
         // Stub out Context.
         //  Cannot make a context or resolve plans without
         //  knowing our container or planner.
@@ -74,8 +74,8 @@ export const defaultComponentResolvers: ComponentResolvers = {
                 return resolveInjectionInstance(injection);
             }
         }
-        
+
         const args = creator.injectionNodes.map(resolveInjectedArg);
         return new creator.ctor(...args);
     }
-}
+};

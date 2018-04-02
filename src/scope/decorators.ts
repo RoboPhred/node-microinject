@@ -1,12 +1,12 @@
 
 import {
-    AutoBindInScopeKey,
-    AutoBindAsScopeKey
+    AutoBindAsScopeKey,
+    AutoBindInScopeKey
 } from "./symbols";
 
 import {
-    SingletonScope,
-    SelfIdentifiedScope
+    SelfIdentifiedScope,
+    SingletonScope
 } from "./predefined";
 
 import {
@@ -17,13 +17,13 @@ import {
 export function singleton<TFunction extends Function>(): (target: TFunction) => void {
     return function(target: any) {
         target[AutoBindInScopeKey] = SingletonScope;
-    }
+    };
 }
 
 export function inScope<TFunction extends Function>(scope: Scope): (target: TFunction) => void {
     return function(target: any) {
         target[AutoBindInScopeKey] = scope;
-    }
+    };
 }
 
 /**
@@ -33,5 +33,5 @@ export function inScope<TFunction extends Function>(scope: Scope): (target: TFun
 export function asScope<TFunction extends Function>(scope?: Scope): (target: TFunction) => void {
     return function(target: any) {
         target[AutoBindAsScopeKey] = (scope !== undefined) ? scope : SelfIdentifiedScope;
-    }
+    };
 }

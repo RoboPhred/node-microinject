@@ -1,7 +1,7 @@
 
 import {
-    Identifier,
-    Context
+    Context,
+    Identifier
 } from "./interfaces";
 
 import {
@@ -25,14 +25,13 @@ import {
 } from "./binder/utils";
 
 import {
-    DependencyNode,
     DependencyGraphPlanner,
     FactoryDependencyNode
 } from "./planner";
 
 import {
-    DependencyGraphResolver,
-    BasicDependencyGraphResolver
+    BasicDependencyGraphResolver,
+    DependencyGraphResolver
 } from "./resolver";
 
 import {
@@ -96,8 +95,8 @@ export class Container {
 
         // Check to see if this is an auto-bind injectable.
         const autoIdentifiers = getProvidedIdentifiers(identifier);
-        for (let identifier of autoIdentifiers) {
-            this._addBinder(identifier, binder);
+        for (let autoIdentifier of autoIdentifiers) {
+            this._addBinder(autoIdentifier, binder);
         }
 
         return binder;
@@ -147,7 +146,9 @@ export class Container {
     }
 
     private _get<T>(identifier: Identifier<T>, resolver?: DependencyGraphResolver): T {
-        if (!resolver) resolver = this._resolver;
+        if (!resolver) {
+            resolver = this._resolver;
+        }
 
         if (this.hasBinding(identifier)) {
             const plan = this._planner.getPlan(identifier);
@@ -195,7 +196,9 @@ export class Container {
      * @param resolver The resolver to use to resolve instances of the identifier.
      */
     private _getAllNoThrow<T>(identifier: Identifier<T>, resolver?: DependencyGraphResolver): T[] {
-        if (!resolver) resolver = this._resolver;
+        if (!resolver) {
+            resolver = this._resolver;
+        }
 
         // Do not pass the resolver to the parent, as it is an entirely new container
         //  with disjoint scopes.
@@ -221,7 +224,9 @@ export class Container {
 
     private _resolveBindings(identifier: Identifier): Binding[] {
         const binders = this._bindingMap.get(identifier);
-        if (binders) return binders.map(x => x._getBinding());
+        if (binders) {
+            return binders.map(x => x._getBinding());
+        }
         return [];
     }
 
@@ -236,27 +241,25 @@ export class Container {
      * @param childResolver A resolver capable of resolving correctly scoped child objects.
      */
     private _factoryResolver(
-        identifier: Identifier,
+        _identifier: Identifier,
         creator: FactoryDependencyNode,
         childResolver: DependencyGraphResolver
     ): any {
-        const container = this;
-        
         const context: Context = {
-            container,
+            container: this,
 
             // "has" is simply interested if we have at least one binding for the identifier.
             //  Scope has no bearing on its value, so it is not interested in
-            has: container.has.bind(container),
+            has: this.has.bind(this),
 
-            get(identifier: Identifier) {
-                return container._get(identifier, childResolver);
+            get: (identifier: Identifier) => {
+                return this._get(identifier, childResolver);
             },
 
-            getAll(identifier: Identifier) {
-                return container._getAll(identifier, childResolver)
+            getAll: (identifier: Identifier) => {
+                return this._getAll(identifier, childResolver);
             }
-        }
+        };
 
         return creator.factory(context);
     }

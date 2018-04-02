@@ -8,13 +8,13 @@ import {
 import {
     Scope,
     SingletonScope
-} from "../scope"
+} from "../scope";
 
 import {
     Binding,
-    isScopeableBinding,
     ConstructorBinding,
-    FactoryBinding
+    FactoryBinding,
+    isScopeableBinding
 } from "../binder/binding";
 
 import {
@@ -26,11 +26,11 @@ import {
 } from "../errors";
 
 import {
-    DependencyNode,
-    ScopedDependenencyNode,
-    FactoryDependencyNode,
     ConstructorDependencyNode,
-    InjectedArgumentValue
+    DependencyNode,
+    FactoryDependencyNode,
+    InjectedArgumentValue,
+    ScopedDependenencyNode
 } from "./interfaces";
 
 import {
@@ -51,13 +51,11 @@ interface ScopeInstance {
     /**
      * Instances of scopable component creators that are in this scope.
      */
-    instances: Map<Identifier, ScopedDependenencyNode>
+    instances: Map<Identifier, ScopedDependenencyNode>;
 }
 type ScopeInstanceMap = Map<Scope, ScopeInstance>;
 
-export interface BindingResolver {
-    (identifier: Identifier): Binding[];
-}
+export type BindingResolver = (identifier: Identifier) => Binding[];
 
 export class DependencyGraphPlanner {
     private _planCache = new Map<Identifier, DependencyNode>();
@@ -106,7 +104,7 @@ export class DependencyGraphPlanner {
             binding = rootBindings[0];
         }
 
-        const dependencyNode = this._getDependencyNode(identifier, binding, this._rootScopeInstances)
+        const dependencyNode = this._getDependencyNode(identifier, binding, this._rootScopeInstances);
 
         this._planCache.set(identifier, dependencyNode);
         return dependencyNode;
@@ -155,10 +153,10 @@ export class DependencyGraphPlanner {
         switch (binding.type) {
             case "factory": {
                 return this._createFactoryNode(identifier, binding, scopeInstances);
-            };
+            }
             case "constructor": {
                 return this._createConstructorNode(identifier, binding, scopeInstances);
-            };
+            }
             default:
                 return assertKnownBinding(binding);
         }
@@ -235,8 +233,8 @@ export class DependencyGraphPlanner {
                     );
                 }
 
-                nodes = dependencyBindings.map(binding =>
-                    this._getDependencyNode(dependencyIdentifier, binding, childScopeInstances)
+                nodes = dependencyBindings.map(dependencyBinding =>
+                    this._getDependencyNode(dependencyIdentifier, dependencyBinding, childScopeInstances)
                 );
             }
             else if (dependencyBindings.length === 0) {

@@ -1,8 +1,8 @@
 
 
 import {
-    Newable,
-    Context
+    Context,
+    Newable
 } from "../interfaces";
 
 import {

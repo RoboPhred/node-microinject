@@ -1,10 +1,5 @@
 
 import {
-    Identifier,
-    Context
-} from "../interfaces";
-
-import {
     SingletonScope
 } from "../scope";
 
@@ -15,7 +10,7 @@ import {
 
 import {
     isScopedDependencyNode
-} from "../planner/utils"
+} from "../planner/utils";
 
 import {
     identifierToString
@@ -179,8 +174,6 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
             throw new Error("_getScopedNodeInstance called on non-scoped component.");
         }
 
-        // May be undefined if we are a singleton.
-        
         // Scoped nodes have special handling to avoid duplicating scoped nodes
         //  when requested from a child resolver.
         // We first establish that the "owner" of all instances of a node belonging
@@ -253,19 +246,16 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
         this._instantiationStack.push(node);
         try {
             switch(node.type) {
-                case "constructor": {
+                case "constructor":
                     return this._resolvers.ctor(node.identifier, node, this);
-                }
-                case "factory": {
+                case "factory":
                     return this._resolvers.factory(node.identifier, node, this);
-                }
-                case "value": {
+                case "value":
                     // We still allow external resolution of simple values.
                     //  This is for wrapping, proxying, monkey-patching, and other such cross-cutting tomfoolery.
                     return this._resolvers.const(node.identifier, node, this);
-                }
                 default:
-                    throwUnknownNodeType(node);
+                    return throwUnknownNodeType(node);
             }
         }
         finally {

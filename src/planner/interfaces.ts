@@ -5,20 +5,19 @@ import {
 
 import {
     BindingCore,
+    BindingType,
     ConstBinding,
-    FactoryBinding,
     ConstructorBinding,
-    BindingType
+    FactoryBinding
 } from "../binder/binding";
-
-import {
-    InjectionOptions
-} from "../injection";
 
 
 export interface DependencyNodeBase extends BindingCore {
+    /**
+     * The type of the dependency node.
+     */
     type: BindingType;
-    
+
     /**
      * The service identifier this node represents.
      */

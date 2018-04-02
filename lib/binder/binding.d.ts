@@ -1,4 +1,4 @@
-import { Identifier, Newable, Context } from "../interfaces";
+import { Context, Identifier, Newable } from "../interfaces";
 import { Scope } from "../scope";
 import { InjectionData } from "../injection/utils";
 export declare type BindingType = "value" | "factory" | "constructor";
@@ -16,7 +16,7 @@ export interface InstanceCreatorBinding extends BindingCore {
 }
 export interface FactoryBinding extends InstanceCreatorBinding {
     type: "factory";
-    factory: (context: Context) => any;
+    factory(context: Context): any;
 }
 export interface ConstructorBinding extends InstanceCreatorBinding {
     type: "constructor";

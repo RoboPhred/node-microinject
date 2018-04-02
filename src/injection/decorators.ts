@@ -1,15 +1,15 @@
 
 import {
+    AutobindIdentifiersKey
+} from "../binder/symbols";
+
+import {
     Identifier
 } from "../interfaces";
 
 import {
     InjectionOptions
 } from "./interfaces";
-
-import {
-    AutobindIdentifiersKey
-} from "../binder/symbols";
 
 import {
     ClassIsInjectableKey,
@@ -30,10 +30,12 @@ export function injectable<TFunction extends Function>(identifier?: Identifier):
     return function(target: any) {
         target[ClassIsInjectableKey] = true;
         if (identifier) {
-            if (target[AutobindIdentifiersKey] == null) target[AutobindIdentifiersKey] = [];
+            if (target[AutobindIdentifiersKey] == null) {
+                target[AutobindIdentifiersKey] = [];
+            }
             target[AutobindIdentifiersKey].push(identifier);
         }
-    }
+    };
 }
 
 /**
@@ -51,9 +53,9 @@ export function inject(identifier: Identifier, opts?: InjectionOptions) {
         dependencies[index] = {
             ...(dependencies[index] || {}),
             ...(opts || {}),
-            identifier: identifier
+            identifier
         };
-    }
+    };
 }
 
 /**
@@ -73,5 +75,5 @@ export function optional() {
             dependencies[index] = {} as any;
         }
         dependencies[index].optional = true;
-    } 
+    };
 }

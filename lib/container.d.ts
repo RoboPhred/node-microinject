@@ -82,5 +82,5 @@ export declare class Container {
      * @param creator The factory component creator to be used to resolve the value.
      * @param childResolver A resolver capable of resolving correctly scoped child objects.
      */
-    private _factoryResolver(identifier, creator, childResolver);
+    private _factoryResolver(_identifier, creator, childResolver);
 }

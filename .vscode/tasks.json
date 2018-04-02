@@ -47,7 +47,7 @@
         {
             "label": "Mocha - Watch",
             "identifier": "watch:test",
-            "type":"shell",
+            "type": "shell",
             "command": "npm",
             "args": [
                 "run",
@@ -82,14 +82,22 @@
                 ],
                 "background": {
                     "activeOnStart": false,
-                    "beginsPattern":{
+                    "beginsPattern": {
                         "regexp": "\\d+\\.\\.\\d+"
                     },
-                    "endsPattern":{
+                    "endsPattern": {
                         "regexp": "# fail \\d+"
                     }
                 },
                 "applyTo": "allDocuments"
+            }
+        },
+        {
+            "type": "npm",
+            "script": "lint",
+            "problemMatcher": {
+                "base": "$tslint5",
+                "fileLocation": "absolute"
             }
         }
     ]

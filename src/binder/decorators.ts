@@ -18,10 +18,12 @@ export function factory<TFunction extends ServiceFactory<T>, T = any>(identifier
     return function(target: any) {
         target[AutobindAsFactoryKey] = true;
         if (identifier) {
-            if (target[AutobindIdentifiersKey] == null) target[AutobindIdentifiersKey] = [];
+            if (target[AutobindIdentifiersKey] == null) {
+                target[AutobindIdentifiersKey] = [];
+            }
             target[AutobindIdentifiersKey].push(identifier);
         }
-    }
+    };
 }
 
 /**
@@ -32,7 +34,9 @@ export function factory<TFunction extends ServiceFactory<T>, T = any>(identifier
  */
 export function provides<TFunction extends Function>(identifier: Identifier): (target: TFunction) => void {
     return function(target: any) {
-        if (target[AutobindIdentifiersKey] == null) target[AutobindIdentifiersKey] = [];
+        if (target[AutobindIdentifiersKey] == null) {
+            target[AutobindIdentifiersKey] = [];
+        }
         target[AutobindIdentifiersKey].push(identifier);
-    }
+    };
 }

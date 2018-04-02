@@ -8,6 +8,7 @@
     "clean": "rimraf lib",
     "prebuild": "npm run clean",
     "build": "tsc -p src",
+    "lint": "tslint --project src -t verbose",
     "watch:build": "tsc -p src -w",
     "watch:test": "mocha --require ./mocha.env.js --watch ./lib/**/*.spec.js ./lib/**/tests/index.js",
     "watch": "concurrently \"npm run watch:build\" \"npm run watch:test\"",

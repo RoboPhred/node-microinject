@@ -8,10 +8,24 @@ import {
 } from "./utils";
 
 
+/**
+ * Indicates an error that occured while resolving a dependency.
+ */
 export class DependencyResolutionError extends Error {
-    public code: string;
-    public identifier: Identifier;
-    public path: Identifier[];
+    /**
+     * The error code.
+     */
+    code: string;
+
+    /**
+     * The identifier that failed to resolve.
+     */
+    identifier: Identifier;
+
+    /**
+     * The path from the root requested object to the failing identifier.
+     */
+    path: Identifier[];
 
     constructor(identifier: Identifier, path: Identifier[], message?: string) {
         message = `Failed to resolve value for identifier "${identifierToString(identifier)}"${message ? ": " + message : "."}`;

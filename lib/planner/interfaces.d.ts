@@ -1,6 +1,9 @@
 import { Identifier } from "../interfaces";
-import { BindingCore, ConstBinding, FactoryBinding, ConstructorBinding, BindingType } from "../binder/binding";
+import { BindingCore, BindingType, ConstBinding, ConstructorBinding, FactoryBinding } from "../binder/binding";
 export interface DependencyNodeBase extends BindingCore {
+    /**
+     * The type of the dependency node.
+     */
     type: BindingType;
     /**
      * The service identifier this node represents.

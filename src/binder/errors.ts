@@ -1,4 +1,7 @@
 
+/**
+ * Indicates an error while performing binding configuration.
+ */
 export class BindingConfigurationError extends Error {
     constructor(message: string) {
         super(message);

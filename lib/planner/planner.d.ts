@@ -1,9 +1,7 @@
 import { Identifier } from "../interfaces";
 import { Binding } from "../binder/binding";
 import { DependencyNode } from "./interfaces";
-export interface BindingResolver {
-    (identifier: Identifier): Binding[];
-}
+export declare type BindingResolver = (identifier: Identifier) => Binding[];
 export declare class DependencyGraphPlanner {
     private _bindingResolver;
     private _planCache;

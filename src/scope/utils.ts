@@ -1,7 +1,7 @@
 
 import {
-    AutoBindInScopeKey,
-    AutoBindAsScopeKey
+    AutoBindAsScopeKey,
+    AutoBindInScopeKey
 } from "./symbols";
 
 import {
