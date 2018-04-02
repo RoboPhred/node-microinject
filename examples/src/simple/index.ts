@@ -49,6 +49,7 @@ const singleton1 = container.get(SingletonService);
 const singleton2 = container.get(SingletonService);
 const singleton3 = container.get(SingletonService);
 console.log("Number of singletons:", singleton3.getNumberOfInstances());
+console.log("Are singletons ref equal?", singleton1 === singleton3 ? "yes" : "no");
 
 
 // Showing that custom scopes work.
@@ -64,7 +65,7 @@ const scopeRoots = [
 for (let i = 0; i < scopeRoots.length; i++) {
     const root  = scopeRoots[i];
     const sharedIDs = root.getShareConsumers().map(x => `{ consumerId: ${x.getConsumerId()}, scopeSharedId: ${x.getScopeSharedId()} }`);
-    console.log(`Scope root ${i} has these ShareConsumers: [${sharedIDs.join(", ")}]`)
+    console.log(`Scope root ${i} has these ShareConsumers: [${sharedIDs.join(", ")}]`);
 }
 
 
