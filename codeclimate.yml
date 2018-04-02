@@ -1,0 +1,10 @@
+plugins:
+  tslint:
+    enabled: true
+exclude_patterns:
+  - ".vscode"
+  - "examples/"
+  - "lib/"
+  - "node_modules/"
+  - "src/**/*.spec.ts"
+  - "src/**/tests/"

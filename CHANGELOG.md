@@ -1,12 +1,18 @@
 
-# develop
+# 0.4.0
+
+## Bug Fixes
 - Report the correct identifier in question when throwing over a circular dependency found in a constructor argument.
 - Fix newly instantiated factories not receiving context after container.reset().
-- Fix DependencyResolutionError message formatting.
-- Eliminate ComponentCreator concept by making DependencyGraphNode inherit properties of Binding and include resolution data.
-- Determine instance equality by instanceId rather than creator object reference equality.
 - Fix multiple @provides annotations on a scoped or singleton class producing multiple non-scoped instances of the class.
 - Fix optional injection.
+- Fix DependencyResolutionError message formatting.
+
+## Refactors
+- More Tests!
+- Eliminate ComponentCreator concept by making DependencyGraphNode inherit properties of Binding and include resolution data.
+- Determine instance equality by instanceId rather than creator object reference equality.
+- Progress to pluggable dependency graphing and resolution.
 
 # 0.3.1
 - Fix auto-binding not attempting to use decorator data from the target of the binding, such as in ```bind(identifier).to(autoBindableTarget)```
