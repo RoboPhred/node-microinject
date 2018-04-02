@@ -31,6 +31,7 @@ application-level IoC.
 - No [monkey patching of base or third party superclasses](https://github.com/inversify/InversifyJS/issues/619#issuecomment-352218311).
 - No requirement for the root node application to call [reflect-metadata](https://github.com/inversify/InversifyJS/issues/737).  No risk of interfering with modules that also use it.
 - Minimialist API: No [redundant functions](https://github.com/inversify/InversifyJS/issues/697) for varying names of the same behavior.  No more "Should I use toFactory or toDynamicValue?".
+- Lighter weight: No required, undeclared dependencies, smaller production size.
 
 # Drawbacks over InversifyJS
 - Lacking [powerful debug tools](https://github.com/inversify/inversify-chrome-devtools).
@@ -52,12 +53,6 @@ If you are making a NodeJS application and want a full featured and robust depen
 
 The primary target of this library is NodeJS libraries.
 It may be possible to bundle this library for browser support, but only if ES6 Symbol and Map are supported or shimmed.
-
-# Development
-
-This is a rebuild of a private incarnation of this project.
-Unit tests and examples are forthcomming.
-
 
 # Alternatives
 - [InversifyJS](https://github.com/inversify/InversifyJS) - Typescript-based full featured Dependency Injection.  Recommended for most application-level projects.
