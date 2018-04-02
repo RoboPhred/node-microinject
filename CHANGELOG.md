@@ -6,6 +6,7 @@
 - Eliminate ComponentCreator concept by making DependencyGraphNode inherit properties of Binding and include resolution data.
 - Determine instance equality by instanceId rather than creator object reference equality.
 - Fix multiple @provides annotations on a scoped or singleton class producing multiple non-scoped instances of the class.
+- Fix optional injection.
 
 # 0.3.1
 - Fix auto-binding not attempting to use decorator data from the target of the binding, such as in ```bind(identifier).to(autoBindableTarget)```
