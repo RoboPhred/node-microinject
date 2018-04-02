@@ -56,6 +56,7 @@ describe("defaultComponentResolvers", function() {
         const factoryNode: FactoryDependencyNode = {
             type: "factory",
             identifier,
+            bindingId: "factory-binding-id",
             instanceId: "factory-component-id",
             factory: factoryStub
         };
@@ -86,6 +87,7 @@ describe("defaultComponentResolvers", function() {
             // Explicitly tag type to make TS happy when building the real creator.
             type: "constructor" as "constructor",
             identifier,
+            bindingId: "ctor-binding-id",
             instanceId: "ctor-instance-id",
             ctor: constructorStub
         };
@@ -114,15 +116,17 @@ describe("defaultComponentResolvers", function() {
         it("resolves arguments", function() {
             const firstArg: ConstDependencyNode = {
                 type: "value",
-                identifier: Symbol("first-arg-identifier"),
-                instanceId: "first-arg-value",
-                value: Symbol("first-arg-value")
+                identifier: "first-arg-identifier",
+                bindingId: "first-arg-binding-id",
+                instanceId: "first-arg-instance",
+                value: "first-arg-value"
             }
             const secondArg: ConstDependencyNode = {
                 type: "value",
-                identifier: Symbol("second-arg-identifier"),
-                instanceId: "second-arg-value",
-                value: Symbol("second-arg-value")
+                identifier: "second-arg-identifier",
+                bindingId: "second-arg-binding-id",
+                instanceId: "second-arg-instance",
+                value: "second-arg-value"
             };
 
             invokeResolver([firstArg, secondArg]);
@@ -133,19 +137,21 @@ describe("defaultComponentResolvers", function() {
         });
 
         it("passes the resolved arguments to the constructor", function() {
-            const firstArgValue = Symbol("first-arg-value");
+            const firstArgValue = "first-arg-value";
             const firstArg: DependencyNode = {
                 type: "value",
-                identifier: Symbol("first-arg-identifier"),
-                instanceId: "first-arg-value",
+                identifier: "first-arg-identifier",
+                bindingId: "first-arg-binding-id",
+                instanceId: "first-arg-instance",
                 value: firstArgValue
             }
 
-            const secondArgValue = Symbol("second-arg-value");
+            const secondArgValue = "second-arg-value";
             const secondArg: DependencyNode = {
                 type: "value",
-                identifier: Symbol("second-arg-identifier"),
-                instanceId: "second-arg-value",
+                identifier: "second-arg-identifier",
+                bindingId: "second-arg-binding-id",
+                instanceId: "second-arg-instance",
                 value: secondArgValue
             };
 
@@ -161,15 +167,17 @@ describe("defaultComponentResolvers", function() {
             const classA: ConstructorDependencyNode = {
                 type: "constructor",
                 identifier: Symbol("class-a"),
-                instanceId: "class-a",
+                bindingId: "class-a-binding",
+                instanceId: "class-a-instance",
                 ctor: stub() as any,
                 injections: [],
                 injectionNodes: []
             };
             const classB: ConstructorDependencyNode = {
                 type: "constructor",
-                identifier: Symbol("class-b"),
-                    instanceId: "class-b",
+                identifier: "class-b-identifier",
+                bindingId: "class-b-binding",
+                instanceId: "class-b-instance",
                 ctor: stub() as any,
                 injections: [{
                     identifier: classA.identifier
@@ -199,7 +207,8 @@ describe("defaultComponentResolvers", function() {
         const valueNode: ConstDependencyNode = {
             type: "value",
             identifier,
-            instanceId: "value-component-id",
+            bindingId: "value-binding-id",
+            instanceId: "value-instance-id",
             value: returnValue
         };
 

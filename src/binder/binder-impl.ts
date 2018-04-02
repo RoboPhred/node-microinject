@@ -1,4 +1,6 @@
 
+import { v4 as uuidv4 } from "uuid";
+
 import {
     Identifier,
     Newable,
@@ -75,6 +77,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         this._ensureCanBind();
         this._binding = {
             type: "constructor",
+            bindingId: uuidv4(),
             ctor,
             injections: getConstructorInjections(ctor)
         };
@@ -90,6 +93,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
 
         this._binding = {
             type: "factory",
+            bindingId: uuidv4(),
             factory
         };
 
@@ -100,6 +104,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         this._ensureCanBind();
         this._binding = {
             type: "value",
+            bindingId: uuidv4(),
             value
         };
     }

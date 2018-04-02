@@ -4,6 +4,7 @@ import { InjectionData } from "../injection/utils";
 export declare type BindingType = "value" | "factory" | "constructor";
 export interface BindingCore {
     type: BindingType;
+    bindingId: string;
 }
 export interface ConstBinding extends BindingCore {
     type: "value";
