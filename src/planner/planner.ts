@@ -38,7 +38,7 @@ import {
 } from "./utils";
 
 
-type ScopeDefiner = ScopedDependenencyNode | symbol; 
+type ScopeDefiner = ScopedDependenencyNode | symbol;
 
 interface ScopeInstance {
     /**
@@ -235,7 +235,7 @@ export class DependencyGraphPlanner {
                     );
                 }
 
-                nodes = dependencyBindings.map(binding => 
+                nodes = dependencyBindings.map(binding =>
                     this._getDependencyNode(dependencyIdentifier, binding, childScopeInstances)
                 );
             }
@@ -245,12 +245,13 @@ export class DependencyGraphPlanner {
                     // We are not an all / array, so the return value for optional is null.
                     nodes = null;
                 }
-
-                throw new DependencyResolutionError(
-                    dependencyIdentifier,
-                    this._stack,
-                    `No bindings exist for the required argument at position ${i} of bound constructor "${ctor.name}".`
-                );
+                else {
+                    throw new DependencyResolutionError(
+                        dependencyIdentifier,
+                        this._stack,
+                        `No bindings exist for the required argument at position ${i} of bound constructor "${ctor.name}".`
+                    );
+                }
             }
             else if (dependencyBindings.length > 1) {
                 // Array case was already handled, so this means we do not know what binding to use.
