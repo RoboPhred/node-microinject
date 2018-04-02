@@ -14,7 +14,7 @@
                 "--require",
                 "./mocha.env.js",
                 "./lib/**/**.spec.js",
-                "./lib/**/tests/**/*.js"
+                "./lib/**/tests/index.js"
             ],
             "outFiles": [
                 "${workspaceFolder}/lib/**/*.js"
