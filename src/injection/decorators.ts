@@ -49,6 +49,7 @@ export function inject(identifier: Identifier, opts?: InjectionOptions) {
             target[ConstructorInjectionsKey] = dependencies;
         }
         dependencies[index] = {
+            ...(dependencies[index] || {}),
             ...(opts || {}),
             identifier: identifier
         };

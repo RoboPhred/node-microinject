@@ -1,7 +1,7 @@
 import { Identifier, Newable, Context } from "../interfaces";
 import { Scope } from "../scope";
 import { Binder, ScopedBinder } from "./interfaces";
-import { BindingData } from "./data";
+import { Binding } from "./binding";
 /**
  * The implementation of the Binder fluent api.
  * This object is created when a binding is created, and will remain indefinitely.
@@ -42,5 +42,5 @@ export declare class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
     private _ensureScopeable();
     private _finalizeBinding();
     private _ensureCanBind();
-    _getBinding(): BindingData;
+    _getBinding(): Binding;
 }

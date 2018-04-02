@@ -1,4 +1,6 @@
 
+import { v4 as uuidv4 } from "uuid";
+
 import {
     Identifier,
     Newable,
@@ -22,9 +24,13 @@ import {
 } from "../injection/utils";
 
 import {
+    SelfIdentifiedScopeSymbol
+} from "../scope/symbols";
+
+
+import {
     identifierToString
 } from "../utils";
-
 
 import {
     BindingConfigurationError
@@ -40,14 +46,13 @@ import {
 } from "./utils";
 
 import {
-    InstanceCreatorBindingData,
-    BindingData,
-    ConstBindingData,
-    FactoryBindingData,
-    ConstructorBindingData,
-    BindingDataType, 
-} from "./data";
-import { SelfIdentifiedScopeSymbol } from "../scope/symbols";
+    InstanceCreatorBinding,
+    Binding,
+    ConstBinding,
+    FactoryBinding,
+    ConstructorBinding,
+    BindingType, 
+} from "./binding";
 
 
 /**
@@ -60,7 +65,7 @@ import { SelfIdentifiedScopeSymbol } from "../scope/symbols";
  */
 export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
 
-    private _binding: BindingData | null = null;
+    private _binding: Binding | null = null;
     private _isFinalized = false;
 
     constructor(private _identifier: Identifier<T>) {}
@@ -72,6 +77,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         this._ensureCanBind();
         this._binding = {
             type: "constructor",
+            bindingId: uuidv4(),
             ctor,
             injections: getConstructorInjections(ctor)
         };
@@ -87,6 +93,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
 
         this._binding = {
             type: "factory",
+            bindingId: uuidv4(),
             factory
         };
 
@@ -97,6 +104,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         this._ensureCanBind();
         this._binding = {
             type: "value",
+            bindingId: uuidv4(),
             value
         };
     }
@@ -109,9 +117,9 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         this._ensureScopeable();
 
         // Can only be an instance creator from a default binding.
-        const binding = this._binding as InstanceCreatorBindingData;
-        if (binding.inScope !== undefined) throw new BindingConfigurationError("Binding target scope has already been established.");
-        binding.inScope = SingletonScope;
+        const binding = this._binding as InstanceCreatorBinding;
+        if (binding.createInScope !== undefined) throw new BindingConfigurationError("Binding target scope has already been established.");
+        binding.createInScope = SingletonScope;
     }
 
     /**
@@ -123,9 +131,9 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         this._ensureScopeable();
 
         // Can only be an instance creator from a default binding.
-        const binding = this._binding as InstanceCreatorBindingData;
-        if (binding.inScope !== undefined) throw new BindingConfigurationError("Binding targetscope has already been established.");
-        binding.inScope = null;
+        const binding = this._binding as InstanceCreatorBinding;
+        if (binding.createInScope !== undefined) throw new BindingConfigurationError("Binding targetscope has already been established.");
+        binding.createInScope = null;
     }
 
     /**
@@ -141,9 +149,9 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         this._ensureScopeable();
 
         // Can only be an instance creator from a default binding.
-        const binding = this._binding as InstanceCreatorBindingData;
-        if (binding.inScope !== undefined) throw new BindingConfigurationError("Binding target scope has already been established.");
-        binding.inScope = scope;
+        const binding = this._binding as InstanceCreatorBinding;
+        if (binding.createInScope !== undefined) throw new BindingConfigurationError("Binding target scope has already been established.");
+        binding.createInScope = scope;
     }
 
     /**
@@ -159,9 +167,9 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         this._tryAutoBind();
         this._ensureScopeable();
 
-        const binding = this._binding as InstanceCreatorBindingData;
-        if (binding.defineScope !== undefined) throw new BindingConfigurationError("Binding scope creation has already been established.");
-        binding.defineScope = scope;
+        const binding = this._binding as InstanceCreatorBinding;
+        if (binding.definesScope !== undefined) throw new BindingConfigurationError("Binding scope creation has already been established.");
+        binding.definesScope = scope;
     }
 
     private _tryAutoBind(): void {
@@ -223,17 +231,17 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
         // Again we are checking binding.type to make typescript happy.
         //  It will always not be value due to the switch statement above.
         if (autoBindSource && this._binding.type !== "value") {
-            if (this._binding.defineScope === undefined) {
-                this._binding.defineScope = getAsScope(autoBindSource);
+            if (this._binding.definesScope === undefined) {
+                this._binding.definesScope = getAsScope(autoBindSource) || null;
             }
 
             // While we could handle this logic in .asScope(), we still
             //  need it here to support the auto-bind @AsScope() decorator.
-            if (this._binding.defineScope === SelfIdentifiedScopeSymbol) {
-                this._binding.defineScope = this._identifier;
+            if (this._binding.definesScope === SelfIdentifiedScopeSymbol) {
+                this._binding.definesScope = this._identifier;
             }
 
-            if (this._binding.inScope === undefined) this._binding.inScope = getInScope(autoBindSource) || null;
+            if (this._binding.createInScope === undefined) this._binding.createInScope = getInScope(autoBindSource) || null;
         }
     }
 
@@ -245,7 +253,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
 
 
     // TODO: It may be desirable to find a way of removing access to this from outside the library.
-    _getBinding(): BindingData {
+    _getBinding(): Binding {
         this._finalizeBinding();
         return this._binding!;
     }

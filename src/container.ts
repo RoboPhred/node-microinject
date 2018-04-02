@@ -17,15 +17,23 @@ import {
 } from "./binder/binder-impl";
 
 import {
+    Binding
+} from "./binder/binding";
+
+import {
     getProvidedIdentifiers
 } from "./binder/utils";
 
-import DependencyGraphPlanner, {
-    DependencyGraphNode,
-    FactoryComponentCreator
+import {
+    DependencyNode,
+    DependencyGraphPlanner,
+    FactoryDependencyNode
 } from "./planner";
 
-import DependencyGraphResolver from "./resolver";
+import {
+    DependencyGraphResolver,
+    BasicDependencyGraphResolver
+} from "./resolver";
 
 import {
     DependencyResolutionError
@@ -33,8 +41,10 @@ import {
 
 
 export class Container {
-    private _planner = new DependencyGraphPlanner();
-    private _resolver: DependencyGraphResolver;
+    private _planner: DependencyGraphPlanner;
+    private _resolver: BasicDependencyGraphResolver;
+
+    private _bindingMap = new Map<Identifier, BinderImpl[]>();
 
     /**
      * Container to use if a binding is not find in this container.
@@ -42,7 +52,11 @@ export class Container {
     private _parent: Container | null = null;
 
     constructor() {
-        this._resolver = new DependencyGraphResolver({
+        this._planner = new DependencyGraphPlanner(
+            this._resolveBindings.bind(this)
+        );
+
+        this._resolver = new BasicDependencyGraphResolver({
             factory: this._factoryResolver.bind(this)
         });
     }
@@ -90,13 +104,23 @@ export class Container {
     }
 
     private _addBinder<T>(identifier: Identifier<T>, binder: BinderImpl<T>) {
-        this._planner.addBinding(identifier, binder)
+        let binders = this._bindingMap.get(identifier);
+        if (!binders) {
+            binders = [];
+            this._bindingMap.set(identifier, binders);
+        }
+        binders.push(binder);
+    }
+
+    hasBinding(identifier: Identifier): boolean {
+        const binders = this._bindingMap.get(identifier);
+        return Boolean(binders && binders.length > 0);
     }
 
     /**
      * Clears out knowledge of all resolved identifiers and scopes.
-     * Previously resolved objects and factory bindings will still
-     * continue to work normally off the old data.
+     * Previously resolved objects and factories will still
+     * continue to work off the old data.
      * 
      * This does not clear the container's bindings.  All previously
      * configured bindings remain configured.
@@ -104,16 +128,17 @@ export class Container {
     reset() {
         // Clearing the entire scope stack is as simple as getting
         //  a new graph resolver.
-        this._resolver = new DependencyGraphResolver();
+        this._resolver = new BasicDependencyGraphResolver({
+            factory: this._factoryResolver.bind(this)
+        });
 
         // No need to clear the cached plans.  Bindings are kept,
         //  so the plans are still valid.
     }
 
     /**
-     * Gets the bound object for an identifier.  This may create the object if necessary depending on scope and previous creations.
-     * If multiple objects are bound to the identifier, the object chosen may not be predictable.
-     * This method will throw IdentifierNotBoundError if no bindings exist for the identifier.
+     * Gets or creates the value represented by the identifier.
+     * This method will throw DependencyResolutionError if there is not exactly one binding for the identifier.
      * @param identifier The identifier of the object to get.
      * @returns The object for the given identifier.
      */
@@ -124,7 +149,7 @@ export class Container {
     private _get<T>(identifier: Identifier<T>, resolver?: DependencyGraphResolver): T {
         if (!resolver) resolver = this._resolver;
 
-        if (this._planner.hasBinding(identifier)) {
+        if (this.hasBinding(identifier)) {
             const plan = this._planner.getPlan(identifier);
             return resolver.resolveInstance(plan);
         }
@@ -177,7 +202,7 @@ export class Container {
         // Our scopes do not transcend containers.
         const values: T[] = this._parent ? this._parent._getAllNoThrow(identifier) : [];
 
-        const bindings = this._planner.getBindings(identifier);
+        const bindings = this._resolveBindings(identifier);
         if (bindings.length > 0) {
             const plans = bindings.map(binding => this._planner.getPlan(identifier, binding));
             values.push(...plans.map(plan => resolver!.resolveInstance(plan)));
@@ -191,10 +216,16 @@ export class Container {
      * @param identifier The identifier to check for.
      */
     has<T>(identifier: Identifier<T>): boolean {
-        return this._planner.hasBinding(identifier) || Boolean(this._parent && this._parent.has(identifier));
+        return this.hasBinding(identifier) || Boolean(this._parent && this._parent.has(identifier));
     }
 
-        /**
+    private _resolveBindings(identifier: Identifier): Binding[] {
+        const binders = this._bindingMap.get(identifier);
+        if (binders) return binders.map(x => x._getBinding());
+        return [];
+    }
+
+    /**
      * Resolver for factory bindings.
      * 
      * We need to pass an argument to the function to allow it to resolve child objects,
@@ -204,7 +235,11 @@ export class Container {
      * @param creator The factory component creator to be used to resolve the value.
      * @param childResolver A resolver capable of resolving correctly scoped child objects.
      */
-    private _factoryResolver(identifier: Identifier, creator: FactoryComponentCreator, childResolver: DependencyGraphResolver): any {
+    private _factoryResolver(
+        identifier: Identifier,
+        creator: FactoryDependencyNode,
+        childResolver: DependencyGraphResolver
+    ): any {
         const container = this;
         
         const context: Context = {

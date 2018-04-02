@@ -4,6 +4,7 @@ import { Binder } from "./binder";
 export declare class Container {
     private _planner;
     private _resolver;
+    private _bindingMap;
     /**
      * Container to use if a binding is not find in this container.
      */
@@ -28,19 +29,19 @@ export declare class Container {
      */
     bind<T>(identifier: Identifier<T>): Binder<T>;
     private _addBinder<T>(identifier, binder);
+    hasBinding(identifier: Identifier): boolean;
     /**
      * Clears out knowledge of all resolved identifiers and scopes.
-     * Previously resolved objects and factory bindings will still
-     * continue to work normally off the old data.
+     * Previously resolved objects and factories will still
+     * continue to work off the old data.
      *
      * This does not clear the container's bindings.  All previously
      * configured bindings remain configured.
      */
     reset(): void;
     /**
-     * Gets the bound object for an identifier.  This may create the object if necessary depending on scope and previous creations.
-     * If multiple objects are bound to the identifier, the object chosen may not be predictable.
-     * This method will throw IdentifierNotBoundError if no bindings exist for the identifier.
+     * Gets or creates the value represented by the identifier.
+     * This method will throw DependencyResolutionError if there is not exactly one binding for the identifier.
      * @param identifier The identifier of the object to get.
      * @returns The object for the given identifier.
      */
@@ -70,15 +71,16 @@ export declare class Container {
      * @param identifier The identifier to check for.
      */
     has<T>(identifier: Identifier<T>): boolean;
+    private _resolveBindings(identifier);
     /**
- * Resolver for factory bindings.
- *
- * We need to pass an argument to the function to allow it to resolve child objects,
- * and we need to pass it the root container as part of the InversifyJS api.
- *
- * @param identifier The identifier that was resolved to the factory we are resolving.
- * @param creator The factory component creator to be used to resolve the value.
- * @param childResolver A resolver capable of resolving correctly scoped child objects.
- */
+     * Resolver for factory bindings.
+     *
+     * We need to pass an argument to the function to allow it to resolve child objects,
+     * and we need to pass it the root container as part of the InversifyJS api.
+     *
+     * @param identifier The identifier that was resolved to the factory we are resolving.
+     * @param creator The factory component creator to be used to resolve the value.
+     * @param childResolver A resolver capable of resolving correctly scoped child objects.
+     */
     private _factoryResolver(identifier, creator, childResolver);
 }

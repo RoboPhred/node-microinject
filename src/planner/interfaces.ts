@@ -1,78 +1,72 @@
 
 import {
-    Identifier,
-    Newable
+    Identifier
 } from "../interfaces";
 
 import {
-    Scope
-} from "../scope";
+    BindingCore,
+    ConstBinding,
+    FactoryBinding,
+    ConstructorBinding,
+    BindingType
+} from "../binder/binding";
+
+import {
+    InjectionOptions
+} from "../injection";
 
 
-export type ComponentCreatorType = "value" | "array" | "factory" | "constructor";
-export interface ComponentCreatorBase {
-    type: ComponentCreatorType;
-    componentId: string;
-}
-
-export interface ValueComponentCreator extends ComponentCreatorBase {
-    type: "value";
-    value: any;
-}
-
-/**
- * A special case of component creator, useful for where
- * multiple matches of an identifier need to be injected.
- */
-export interface ArrayComponentCreator extends ComponentCreatorBase {
-    type: "array";
-    values: DependencyGraphNode[];
-}
-
-export interface CanDefineScope {
+export interface DependencyNodeBase extends BindingCore {
+    type: BindingType;
+    
     /**
-     * The Scope for which this creator defines an instance of.
-     */
-    defineScope?: Scope;
-}
-
-export interface CanBeScoped {
-    /**
-     * The Scope type that this creator is contained in.
-     */
-    containingScope?: Scope;
-    /**
-     * The specific instance of the scope-defining creator acting as the scope this creator is contained in.
-     * May be SingletonSymbol for the singleton scope.
-     */
-    containingScopeInstance?: ScopeDefiningComponentCreator;
-}
-
-export interface FactoryComponentCreator extends ComponentCreatorBase, CanBeScoped, CanDefineScope {
-    type: "factory";
-    factory: (...args: any[]) => any;
-}
-
-export interface ConstructorComponentCreator extends ComponentCreatorBase, CanBeScoped, CanDefineScope {
-    type: "constructor";
-    ctor: Newable;
-    args: DependencyGraphNode[];
-}
-
-export type ComponentCreator = ValueComponentCreator | FactoryComponentCreator | ConstructorComponentCreator | ArrayComponentCreator;
-export type ScopeableComponentCreator = FactoryComponentCreator | ConstructorComponentCreator;
-export type ScopeDefiningComponentCreator = FactoryComponentCreator | ConstructorComponentCreator;
-
-export type DependencyGraphNode<TCreator extends ComponentCreator = ComponentCreator> = {
-    /**
-     * The consumer this node is identifying.
+     * The service identifier this node represents.
      */
     identifier: Identifier;
 
     /**
-     * Information on how to resolve the identifier.
-     * Different identifiers may resolve to the same reference.
-     * To represent this, the same componentCreator reference will be used.
+     * The specific instance this node represents.
      */
-    componentCreator: ComponentCreator;
-};
+    instanceId: string;
+}
+
+export interface ConstDependencyNode extends DependencyNodeBase, ConstBinding {
+    type: "value";
+}
+
+export interface ScopedDependencyNodeBase extends DependencyNodeBase {
+    /**
+     * The instance of the node that defines the scope this
+     * node is contained in. 
+     */
+    scopeOwnerInstanceId?: string;
+}
+
+export interface FactoryDependencyNode extends ScopedDependencyNodeBase, FactoryBinding {
+    type: "factory";
+}
+
+export interface ConstructorDependencyNode extends ScopedDependencyNodeBase, ConstructorBinding {
+    type: "constructor";
+    /**
+     * An array whose indexes correspond to those of ```injection```,
+     * and whose elements describe what is to be injected into the argument.
+     * 
+     * The elements may be a single DependencyNode, an array of
+     * DependencyNode objects, or null.
+     * If the value is a node, the node should be resolved and rejected.
+     * If the value is an array of nodes, the nodes should be resolved
+     * and the array of resolved values injected.
+     * If the value is ```null``, then ```null``` should be injected.
+     */
+    injectionNodes: InjectedArgumentValue[];
+}
+
+export type InjectedArgumentValue = DependencyNode | DependencyNode[] | null;
+
+export type DependencyNode =
+    ConstDependencyNode
+    | FactoryDependencyNode
+    | ConstructorDependencyNode;
+
+export type ScopedDependenencyNode = FactoryDependencyNode | ConstructorDependencyNode;

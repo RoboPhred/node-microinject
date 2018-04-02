@@ -14,7 +14,7 @@ export class DependencyResolutionError extends Error {
     public path: Identifier[];
 
     constructor(identifier: Identifier, path: Identifier[], message?: string) {
-        message = `Failed to resolve value for identifier "${identifierToString(identifier)}"${message ? ":" + message : "."}`;
+        message = `Failed to resolve value for identifier "${identifierToString(identifier)}"${message ? ": " + message : "."}`;
         super(message);
         Object.setPrototypeOf(this, DependencyResolutionError.prototype);
         this.identifier = identifier;

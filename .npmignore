@@ -1,4 +1,5 @@
 src/
 lib/**/*.spec.js
 lib/**/*.map
+lib/**/tests/
 examples/

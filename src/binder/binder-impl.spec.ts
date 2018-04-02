@@ -26,8 +26,8 @@ import {
 } from "./binder-impl";
 
 import {
-    BindingData
-} from "./data";
+    Binding
+} from "./binding";
 
 import {
     BindingConfigurationError
@@ -77,7 +77,7 @@ describe("@BinderImpl", function () {
                 @injectable(identifier)
                 class TestAutoBindClass { }
 
-                let binding: BindingData;
+                let binding: Binding;
                 before(function() {
                     const binder = new BinderImpl(TestAutoBindClass);
                     binding = binder._getBinding();
@@ -96,7 +96,7 @@ describe("@BinderImpl", function () {
                 function testFactory() {}
                 factory()(testFactory);
 
-                let binding: BindingData;
+                let binding: Binding;
                 before(function() {
                     const binder = new BinderImpl(testFactory);
                     binding = binder._getBinding();
@@ -115,7 +115,7 @@ describe("@BinderImpl", function () {
         describe(".to()", function () {
             class TestBlankClass { }
 
-            let binding: BindingData;
+            let binding: Binding;
             before(function() {
                 const binder = new BinderImpl(identifier);
                 binder.to(TestBlankClass);
@@ -134,7 +134,7 @@ describe("@BinderImpl", function () {
         describe(".toDynamicValue()", function () {
             function testFactory() { }
 
-            let binding: BindingData;
+            let binding: Binding;
             before(function () {
                 const binder = new BinderImpl(identifier);
                 binder.toDynamicValue(testFactory);
@@ -153,7 +153,7 @@ describe("@BinderImpl", function () {
         describe(".toConstantValue()", function () {
             const boundValue = 42;
 
-            let binding: BindingData;
+            let binding: Binding;
             before(function () {
                 const impl = new BinderImpl(identifier);
                 impl.toConstantValue(boundValue);
@@ -178,32 +178,32 @@ describe("@BinderImpl", function () {
         @inScope(AutoBoundScope)
         class TestAutoBoundClass { }
 
-        it("defaults binding.inScope to null", function () {
+        it("defaults binding.createInScope to null", function () {
             const binder = new BinderImpl(identifier);
             binder.to(TestBlankClass);
 
             let binding = binder._getBinding();
 
-            expect(binding).property("inScope").to.be.null;
+            expect(binding).property("createInScope").to.be.null;
         });
 
         describe("auto-bind", function() {
             it("uses the scope specified by the @inScope decoration", function() {
                 const binder = new BinderImpl(TestAutoBoundClass);
                 let binding = binder._getBinding();
-                expect(binding).property("inScope").equals(AutoBoundScope);
+                expect(binding).property("createInScope").equals(AutoBoundScope);
             });
         });
 
         describe(".toSingletonScope()", function () {
-            it("sets binding.inScope to the singleton scope", function () {
+            it("sets binding.createInScope to the singleton scope", function () {
                 const binder = new BinderImpl(identifier);
                 binder.to(TestBlankClass);
                 binder.inSingletonScope();
 
                 let binding = binder._getBinding();
 
-                expect(binding).property("inScope").equals(SingletonScope);
+                expect(binding).property("createInScope").equals(SingletonScope);
             });
 
             it("overrides the @isScope decoration", function () {
@@ -213,7 +213,7 @@ describe("@BinderImpl", function () {
 
                 let binding = binder._getBinding();
 
-                expect(binding).property("inScope").equals(SingletonScope);
+                expect(binding).property("createInScope").equals(SingletonScope);
             });
 
             it("throws if the scope is already configured", function () {
@@ -233,14 +233,14 @@ describe("@BinderImpl", function () {
         });
 
         describe(".toTransientScope()", function () {
-            it("sets binding.inScope to null", function () {
+            it("sets binding.createInScope to null", function () {
                 const binder = new BinderImpl(identifier);
                 binder.to(TestBlankClass);
                 binder.inTransientScope();
 
                 let binding = binder._getBinding();
 
-                expect(binding).property("inScope").to.be.null;
+                expect(binding).property("createInScope").to.be.null;
             });
 
             it("overrides the @isScope decorationscope", function () {
@@ -250,7 +250,7 @@ describe("@BinderImpl", function () {
 
                 let binding = binder._getBinding();
 
-                expect(binding).property("inScope").to.be.null;
+                expect(binding).property("createInScope").to.be.null;
             });
 
             it("throws if the scope is already configured", function () {
@@ -269,27 +269,27 @@ describe("@BinderImpl", function () {
             });
         });
 
-        describe(".inScope()", function () {
+        describe(".createInScope()", function () {
             const scope: Scope = "test-scope";
 
-            it("sets binding.inScope to the scope", function () {
+            it("sets binding.createInScope to the scope", function () {
                 const binder = new BinderImpl(identifier);
                 binder.to(TestBlankClass);
                 binder.inScope(scope);
 
                 let binding = binder._getBinding();
 
-                expect(binding).property("inScope").equals(scope);
+                expect(binding).property("createInScope").equals(scope);
             });
 
-            it("overrides the @isScope decoration", function () {
+            it("overrides the @inScope decoration", function () {
                 const binder = new BinderImpl(identifier);
                 binder.to(TestAutoBoundClass);
                 binder.inScope(scope);
 
                 let binding = binder._getBinding();
 
-                expect(binding).property("inScope").equals(scope);
+                expect(binding).property("createInScope").equals(scope);
             });
 
             it("throws if the scope is already configured", function () {
@@ -317,13 +317,13 @@ describe("@BinderImpl", function () {
         @asScope(AutoBoundScope)
         class TestAutoBoundClass { }
 
-        it("defaults binding.inScope to null", function () {
+        it("defaults binding.definesScope to null", function () {
             const binder = new BinderImpl(identifier);
             binder.to(TestBlankClass);
 
             let binding = binder._getBinding();
 
-            expect(binding).property("inScope").to.be.null;
+            expect(binding).property("definesScope").to.be.null;
         });
 
         it("throws if used on a value binding", function () {
@@ -345,21 +345,21 @@ describe("@BinderImpl", function () {
             it("uses the scope specified by the @asScope decoration", function() {
                 const binder = new BinderImpl(TestAutoBoundClass);
                 let binding = binder._getBinding();
-                expect(binding).property("defineScope").equals(AutoBoundScope);
+                expect(binding).property("definesScope").equals(AutoBoundScope);
             });
         });
 
         describe("with a specified scope", function () {
             const scope: Scope = "test-scope";
 
-            it("sets binding.defineScope to the specified scope", function () {
+            it("sets binding.definesScope to the specified scope", function () {
                 const binder = new BinderImpl(identifier);
                 binder.to(TestBlankClass);
                 binder.asScope(scope);
 
                 const binding = binder._getBinding();
 
-                expect(binding).property("defineScope").equals(scope);
+                expect(binding).property("definesScope").equals(scope);
             });
 
             it("overrides the asScope decoration", function () {
@@ -369,19 +369,19 @@ describe("@BinderImpl", function () {
 
                 const binding = binder._getBinding();
 
-                expect(binding).property("defineScope").equals(scope);
+                expect(binding).property("definesScope").equals(scope);
             });
         });
 
         describe("with no scope specified", function () {
-            it("sets binding.defineScope to the binding identifier", function () {
+            it("sets binding.definesScope to the binding identifier", function () {
                 const binder = new BinderImpl(identifier);
                 binder.to(TestBlankClass);
                 binder.asScope();
 
                 const binding = binder._getBinding();
 
-                expect(binding).property("defineScope").equals(identifier);
+                expect(binding).property("definesScope").equals(identifier);
             });
 
             it("overrides the asScope decoration", function () {
@@ -391,7 +391,7 @@ describe("@BinderImpl", function () {
 
                 const binding = binder._getBinding();
 
-                expect(binding).property("defineScope").equals(identifier);
+                expect(binding).property("definesScope").equals(identifier);
             });
         });
     });

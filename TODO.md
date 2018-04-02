@@ -9,19 +9,8 @@
     - Ensure typings can understand these transformations (eg promisify).  Will require [typescript foo](https://github.com/Microsoft/TypeScript/pull/21496).
 
 
-# Bugs
-- Mixing @Provides and @InScope will create a new copy per each @Provides.  This is because Identifier is the identification mechanism for
-instances within a scope, and by the time the planner sees things, each @Provides identifier shows up seperately.  @InScope should really
-apply to the binding / auto-bound object as a whole.  This would become obvious if we had an .alias() method on the binding object.
-
-
 # Cleanup
-- Resolver needs another cleanup pass, after the hacks to properly handle scope roots needing to make new scope instance sets.
-    Consider changing how the planner deals with this.  ComponentCreator object ref works up to a point, but when we create multiple
-    transient objects the ref equality throws us off.
 - Unit test everything.
 - Ensure the engine limitation is set correctly; what nodejs versions support Map and Symbol?
 - Stop generating typedefs for non-exported / internal files.
 - Rework BinderImpl to prevent user access of internal methods.
-- Clean up BinderData vs BinderImpl issues.  We currently have to pass BinderImpl to the planner in order to generate the 
-    actual binding configuration as late as possible, as we do not know when the user is finished setting it up.

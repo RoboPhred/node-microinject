@@ -53,12 +53,6 @@ If you are making a NodeJS application and want a full featured and robust depen
 The primary target of this library is NodeJS libraries.
 It may be possible to bundle this library for browser support, but only if ES6 Symbol and Map are supported or shimmed.
 
-# Development
-
-This is a rebuild of a private incarnation of this project.
-Unit tests and examples are forthcomming.
-
-
 # Alternatives
 - [InversifyJS](https://github.com/inversify/InversifyJS) - Typescript-based full featured Dependency Injection.  Recommended for most application-level projects.
 - [Electrolyte](https://github.com/jaredhanson/electrolyte) - A commonjs-centric dependency injection mechanism that functions at the module level.
