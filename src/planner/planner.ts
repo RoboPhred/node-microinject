@@ -33,10 +33,6 @@ import {
     ScopedDependenencyNode
 } from "./interfaces";
 
-import {
-    isScopedDependencyNode
-} from "./utils";
-
 
 type ScopeDefiner = ScopedDependenencyNode | symbol;
 
@@ -329,7 +325,7 @@ export class DependencyGraphPlanner {
         }
 
         // A node that cannot be placed in a scope also cannot serve as a scope.
-        if (!isScopedDependencyNode(node)) {
+        if (!isScopeableBinding(node)) {
             return scopeInstances;
         }
 

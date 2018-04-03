@@ -9,8 +9,8 @@ import {
 } from "../planner";
 
 import {
-    isScopedDependencyNode
-} from "../planner/utils";
+    isScopeableBinding
+} from "../binder/binding";
 
 import {
     identifierToString
@@ -42,10 +42,10 @@ and resolutions.
 
 
 function isNodeScoped(node: DependencyNode): node is ScopedDependenencyNode {
-    return isScopedDependencyNode(node) && node.createInScope != null;
+    return isScopeableBinding(node) && node.createInScope != null;
 }
 function isNodeScopeCreator(node: DependencyNode): node is ScopedDependenencyNode {
-    return isScopedDependencyNode(node) && node.definesScope != null;
+    return isScopeableBinding(node) && node.definesScope != null;
 }
 
 /**
