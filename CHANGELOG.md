@@ -1,4 +1,7 @@
 
+# develop
+- Removed build and test code from npm package.
+
 # 0.4.0
 
 ## Bug Fixes

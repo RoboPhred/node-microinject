@@ -1,5 +1,9 @@
+.vscode/
+examples/
 src/
 lib/**/*.spec.js
 lib/**/*.map
 lib/**/tests/
-examples/
+codeclimate.yml
+mocha.env.js
+TODO.md
