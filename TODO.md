@@ -10,7 +10,9 @@
 
 
 # Cleanup
-- Unit test everything.
+- Unit test remaining components.
+- Integration tests for explicit binding syntax.
 - Ensure the engine limitation is set correctly; what nodejs versions support Map and Symbol?
+- Extract typedefs to a different folder, and eventually to @types/microinject
 - Stop generating typedefs for non-exported / internal files.
 - Rework BinderImpl to prevent user access of internal methods.
