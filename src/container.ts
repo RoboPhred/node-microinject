@@ -224,7 +224,7 @@ export class Container {
 
     private _resolveBindings(identifier: Identifier): Binding[] {
         const binders = this._bindingMap.get(identifier);
-        if (binders) {
+        if (binders != null) {
             return binders.map(x => x._getBinding());
         }
         return [];

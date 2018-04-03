@@ -7,11 +7,18 @@ import {
     Scope
 } from "./scope";
 
-
-export function identifierToString(identifier: Identifier) {
+/**
+ * Returns a string representation of the identifier.
+ * @param identifier The identifier to stringify.
+ */
+export function identifierToString(identifier: Identifier): string {
     return String(identifier);
 }
 
-export function scopeToString(scope: Scope) {
+/**
+ * Returns a string representation of the scope.
+ * @param scope The scope to stringify.
+ */
+export function scopeToString(scope: Scope): string {
     return String(scope);
 }
