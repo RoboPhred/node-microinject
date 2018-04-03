@@ -55,15 +55,12 @@ export const defaultComponentResolvers: ComponentResolvers = {
     ctor(identifier, creator, childResolver) {
         function resolveInjectionInstance(node: DependencyNode): any {
             if (childResolver.isResolving(node)) {
-                const identifierStack = childResolver.getResolveStack().map(x => x.identifier);
-                identifierStack.push(node.identifier);
-                throw new DependencyResolutionError(identifier, identifierStack, `Cannot resolve cyclic dependency.`);
+                throwCyclicDependency(node.identifier, childResolver);
             }
             return childResolver.resolveInstance(node);
         }
 
         function resolveInjectedArg(injection: InjectedArgumentValue): any {
-
             if (injection == null) {
                 return null;
             }
@@ -79,3 +76,9 @@ export const defaultComponentResolvers: ComponentResolvers = {
         return new creator.ctor(...args);
     }
 };
+
+function throwCyclicDependency(cyclicIdentifier: Identifier, childResolver: DependencyGraphResolver): never {
+    const identifierStack = childResolver.getResolveStack().map(x => x.identifier);
+    identifierStack.push(cyclicIdentifier);
+    throw new DependencyResolutionError(cyclicIdentifier, identifierStack, `Cannot resolve cyclic dependency.`);
+}
