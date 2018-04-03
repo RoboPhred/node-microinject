@@ -1,7 +1,7 @@
 {
   "linterOptions": {
     "exclude": [
-      "**/tests/",
+      "**/tests/**.*",
       "**/*.spec.ts"
     ]
   },
@@ -53,7 +53,10 @@
       true,
       "no-public"
     ],
-    "member-ordering": true,
+    "member-ordering": [
+      true,
+      "fields-first"
+    ],
     "new-parens": true,
     "no-angle-bracket-type-assertion": true,
     "no-consecutive-blank-lines": [

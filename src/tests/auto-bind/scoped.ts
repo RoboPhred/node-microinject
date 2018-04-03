@@ -20,7 +20,7 @@ describe("Scoped", function() {
 
     interface ScopeConsumer {
         getScopedService(): InstanceIdProvider;
-    }    
+    }
     const ScopeConsumerA = Symbol("ScopeConsumerA") as Identifier<ScopeConsumer>;
     const ScopeConsumerB = Symbol("ScopeConsumerB") as Identifier<ScopeConsumer>;
 
@@ -38,14 +38,14 @@ describe("Scoped", function() {
         class ScopeRootImpl implements InstanceIdProvider {
             private static nextInstanceId = 1;
             private _instanceId: number;
-    
+
             constructor(
                 @inject(ScopeConsumerA) public consumerA: ScopeConsumer,
                 @inject(ScopeConsumerB) public consumerB: ScopeConsumer
             ) {
                 this._instanceId = ScopeRootImpl.nextInstanceId++;
             }
-    
+
             getInstanceId() {
                 return this._instanceId;
             }
@@ -78,11 +78,11 @@ describe("Scoped", function() {
         class ScopedServiceImpl implements InstanceIdProvider {
             private static nextInstanceId = 1;
             private _instanceId: number;
-    
+
             constructor() {
                 this._instanceId = ScopedServiceImpl.nextInstanceId++;
             }
-    
+
             getInstanceId() {
                 return this._instanceId;
             }
@@ -103,7 +103,7 @@ describe("Scoped", function() {
             const nextRoot = scopeRoots[i];
             expect(firstRoot).to.not.equal(nextRoot);
         }
-    })
+    });
 
     it("returns the same scoped object when in the same scope", function() {
         for(let root of scopeRoots) {
