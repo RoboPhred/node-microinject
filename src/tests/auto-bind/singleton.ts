@@ -2,8 +2,8 @@
 import { expect } from "chai";
 
 import {
-    Identifier,
     Container,
+    Identifier,
     injectable,
     singleton,
 } from "../..";
@@ -22,11 +22,11 @@ describe("Singleton", function() {
         class TestSingletonImpl implements TestSingleton {
             private static nextInstanceId = 1;
             private _instanceId: number;
-    
+
             constructor() {
                 this._instanceId = TestSingletonImpl.nextInstanceId++;
             }
-    
+
             getInstanceId() {
                 return this._instanceId;
             }
@@ -37,11 +37,15 @@ describe("Singleton", function() {
     });
 
     it("generates a single instance for all requests", function() {
-        const singleton = container.get(TestSingleton);
-        const otherRequests = Array.from(new Array(3), () => container.get(TestSingleton));
+        const instance = container.get(TestSingleton);
+        const requestCount = 3;
+        const otherRequests = Array.from(
+            new Array(requestCount),
+            () => container.get(TestSingleton)
+        );
 
         for(let other of otherRequests) {
-            expect(other).to.equal(singleton);
+            expect(other).to.equal(instance);
         }
     });
 });

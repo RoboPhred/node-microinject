@@ -37,7 +37,23 @@
         "ignore-pattern": "\\s\\s"
       }
     ],
-    "completed-docs": true,
+    "completed-docs": [
+      true,
+      {
+        "enums": true,
+        "functions": {
+          "visibilities": [
+            "exported"
+          ]
+        },
+        "methods": {
+          "locations": "all",
+          "visibilities": [
+            "exported"
+          ]
+        }
+      }
+    ],
     "curly": true,
     "encoding": true,
     "import-spacing": true,
