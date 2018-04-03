@@ -1,5 +1,16 @@
 {
     "typescript.tsdk": "./node_modules/typescript/lib",
-    "mocha.files.glob": "lib/**/*.spec.js",
-    "mocha.runTestsOnSave": "true"
+    // vscode-tslint scanning only runs on
+    //  the currently open file, and cannot
+    //  use type data.
+    // Because of this, many rules will not work
+    // This is a problem for us, as our project
+    //  wide tslint will try to report issues,
+    //  then get overridden by vscode-tslint when
+    //  the file is opened.  This makes most
+    //  reported problems disappear when clicked on.
+    // Instead, we will rely on manual linting and
+    //  only use tslint for its problem matcher.
+    "tslint.enable": false,
+    //"tslint.configFile": "./src/tslint.json"
 }

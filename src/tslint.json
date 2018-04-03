@@ -1,7 +1,7 @@
 {
   "linterOptions": {
     "exclude": [
-      "**/tests/**.*",
+      "**/tests/**/*.*",
       "**/*.spec.ts"
     ]
   },
