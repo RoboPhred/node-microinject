@@ -30,7 +30,14 @@ application-level IoC.
 - Custom scope support - create services shared based on other objects further up the chain.
 - No [monkey patching of base or third party superclasses](https://github.com/inversify/InversifyJS/issues/619#issuecomment-352218311).
 - No requirement for the root node application to call [reflect-metadata](https://github.com/inversify/InversifyJS/issues/737).  No risk of interfering with modules that also use it.
-- Minimialist API: No [redundant functions](https://github.com/inversify/InversifyJS/issues/697) for varying names of the same behavior.  No more "Should I use toFactory or toDynamicValue?".
+- Minimialist API: No [redundant functions](https://github.com/inversify/InversifyJS/issues/697) for varying names of the same behavior.
+- Lighter weight
+    - node_module sizes (including explicit and implicit dependencies)
+        - ```npm i inversify@4.11.1 reflect-metadata@0.1.12``` = 617 KB
+        - ```npm i microinject@0.4.0 uuid@3.2.1``` = 137 KB
+    - Code sizes
+        - ```inversify@4.11.1 ./lib``` = 85.5 KB (does not include typedefs)
+        - ```microinject@0.4.0 ./lib``` = 80.5 KB post-install, 53.0 KB excluding typedefs
 
 # Drawbacks over InversifyJS
 - Lacking [powerful debug tools](https://github.com/inversify/inversify-chrome-devtools).
