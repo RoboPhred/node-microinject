@@ -1,7 +1,11 @@
 
-# develop
-- Removed build and test code from npm package.
+# 0.4.1
+
+## Bug Fixes
 - Fix getAll() returning a copy of the first registered value per matched binding.
+
+## Refactors
+- Removed build and test code from npm package.
 
 # 0.4.0
 
