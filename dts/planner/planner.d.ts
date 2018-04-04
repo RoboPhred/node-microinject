@@ -4,6 +4,9 @@ import { DependencyNode } from "./interfaces";
 export declare type BindingResolver = (identifier: Identifier) => Binding[];
 export declare class DependencyGraphPlanner {
     private _bindingResolver;
+    /**
+     * Maps binding IDs to their plan cache.
+     */
     private _planCache;
     /**
      * The current stack of identifiers being planned.

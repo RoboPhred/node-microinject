@@ -54,7 +54,10 @@ type ScopeInstanceMap = Map<Scope, ScopeInstance>;
 export type BindingResolver = (identifier: Identifier) => Binding[];
 
 export class DependencyGraphPlanner {
-    private _planCache = new Map<Identifier, DependencyNode>();
+    /**
+     * Maps binding IDs to their plan cache.
+     */
+    private _planCache = new Map<string, DependencyNode>();
 
     /**
      * The current stack of identifiers being planned.
@@ -84,11 +87,6 @@ export class DependencyGraphPlanner {
      * @param binding An optional binding to use for the identifier.  Useful if multiple bindings may apply.
      */
     getPlan(identifier: Identifier, binding?: Binding): DependencyNode {
-        let plan = this._planCache.get(identifier);
-        if (plan) {
-            return plan;
-        }
-
         if (!binding) {
             const rootBindings = this._getBindings(identifier);
             if (rootBindings.length === 0) {
@@ -100,9 +98,14 @@ export class DependencyGraphPlanner {
             binding = rootBindings[0];
         }
 
+        let plan = this._planCache.get(binding.bindingId);
+        if (plan) {
+            return plan;
+        }
+
         const dependencyNode = this._getDependencyNode(identifier, binding, this._rootScopeInstances);
 
-        this._planCache.set(identifier, dependencyNode);
+        this._planCache.set(binding.bindingId, dependencyNode);
         return dependencyNode;
     }
 
