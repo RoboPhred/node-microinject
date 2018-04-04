@@ -1,4 +1,7 @@
 
+# Develop
+- Insignificantly trim bundle size by directly requesting uuid/v4
+
 # 0.4.1
 
 ## Bug Fixes
