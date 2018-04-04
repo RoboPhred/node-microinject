@@ -32,6 +32,7 @@ import {
     InjectedArgumentValue,
     ScopedDependenencyNode
 } from "./interfaces";
+import { InjectionData } from "../injection/utils";
 
 
 type ScopeDefiner = ScopedDependenencyNode | symbol;
@@ -212,65 +213,80 @@ export class DependencyGraphPlanner {
         // Now we can recurse and resolve our dependencies.
         for (let i = 0; i < injections.length; i++) {
             // Cannot use 'of', we need the index for error messages.
-            const injection = injections[i];
-            const {
-                all,
-                optional,
-                identifier: dependencyIdentifier
-            } = injection;
 
-            let nodes: InjectedArgumentValue;
-
-            const dependencyBindings = this._getBindings(dependencyIdentifier);
-
-            if (all) {
-                if (!optional && dependencyBindings.length === 0) {
-                    throw new DependencyResolutionError(
-                        dependencyIdentifier,
-                        this._stack,
-                        `No bindings exist for the required argument at position ${i} of bound constructor "${ctor.name}".`
-                    );
+            let injectedValue: InjectedArgumentValue;
+            try {
+                injectedValue = this._createArgumentInjection(injections[i], childScopeInstances);
+            }
+            catch(err) {
+                if (typeof err.message === "string") {
+                    err.message = `Error injecting argument ${i} of bound constructor "${ctor.name}": ${err.message}`;
                 }
-
-                nodes = dependencyBindings.map(dependencyBinding =>
-                    this._getDependencyNode(dependencyIdentifier, dependencyBinding, childScopeInstances)
-                );
-            }
-            else if (dependencyBindings.length === 0) {
-                // No matching bindings.
-                if (optional) {
-                    // We are not an all / array, so the return value for optional is null.
-                    nodes = null;
-                }
-                else {
-                    throw new DependencyResolutionError(
-                        dependencyIdentifier,
-                        this._stack,
-                        `No bindings exist for the required argument at position ${i} of bound constructor "${ctor.name}".`
-                    );
-                }
-            }
-            else if (dependencyBindings.length > 1) {
-                // Array case was already handled, so this means we do not know what binding to use.
-                throw new DependencyResolutionError(
-                    dependencyIdentifier,
-                    this._stack,
-                    `More than one binding was resolved for the argument at position ${i} of bound constructor "${ctor.name}".`
-                );
-            }
-            else {
-                // At this point, we have exactly 1 binding on a 1-value injection.
-                nodes = this._getDependencyNode(
-                    dependencyIdentifier,
-                    dependencyBindings[0],
-                    childScopeInstances
-                );
+                throw err;
             }
 
-            injectionNodes.push(nodes);
+            injectionNodes.push(injectedValue);
         }
 
         return node;
+    }
+
+    private _createArgumentInjection(injection: InjectionData, childScopeInstances: ScopeInstanceMap): InjectedArgumentValue {
+        const {
+            all,
+            optional,
+            identifier: dependencyIdentifier
+        } = injection;
+
+        let injectedArg: InjectedArgumentValue;
+
+        const dependencyBindings = this._getBindings(dependencyIdentifier);
+
+        if (all) {
+            if (!optional && dependencyBindings.length === 0) {
+                throw new DependencyResolutionError(
+                    dependencyIdentifier,
+                    this._stack,
+                    `No bindings exist for the required argument.`
+                );
+            }
+
+            injectedArg = dependencyBindings.map(dependencyBinding =>
+                this._getDependencyNode(dependencyIdentifier, dependencyBinding, childScopeInstances)
+            );
+        }
+        else if (dependencyBindings.length === 0) {
+            // No matching bindings.
+            if (optional) {
+                // We are not an all / array, so the return value for optional is null.
+                injectedArg = null;
+            }
+            else {
+                throw new DependencyResolutionError(
+                    dependencyIdentifier,
+                    this._stack,
+                    `No bindings exist for the required argument.`
+                );
+            }
+        }
+        else if (dependencyBindings.length > 1) {
+            // Array case was already handled, so this means we do not know what binding to use.
+            throw new DependencyResolutionError(
+                dependencyIdentifier,
+                this._stack,
+                `More than one binding was resolved for the argument.`
+            );
+        }
+        else {
+            // At this point, we have exactly 1 binding on a 1-value injection.
+            injectedArg = this._getDependencyNode(
+                dependencyIdentifier,
+                dependencyBindings[0],
+                childScopeInstances
+            );
+        }
+
+        return injectedArg;
     }
 
     private _getScopedInstance(identifier: Identifier, binding: Binding, scopeInstances: ScopeInstanceMap) {
