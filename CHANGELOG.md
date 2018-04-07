@@ -1,6 +1,12 @@
 
-# Develop
-- Insignificantly trim bundle size by directly requesting uuid/v4
+# 0.5.0
+
+## Features
+- Introduce property injection.
+- Add postInstantiate resolution step to component resolver.
+
+## Refactors
+- Insignificantly trim bundle size by directly requesting uuid/v4.
 
 # 0.4.1
 
