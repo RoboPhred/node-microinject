@@ -26,8 +26,40 @@ This library intends to remain minimalist while still covering a decent set of u
 As this is intended to be used transparently by middleware libraries, it will not receive features intended for
 application-level IoC.
 
+# Common features with InversifyJS
+- ```container.bind.to```.
+- ```container.bind.toConstantValue```.
+- ```container.bind.toDynamicValue```.
+- *container.bind.toFactory* = ```container.bind.toDynamicValue```.
+- ```container.bind.*.inSingletonScope```.
+- ```container.bind.*.inTransientScope```.
+- ```container.get```.
+- ```container.getAll```.
+- ```ContainerModule(bind => {...})``` - Only ```bind``` argument is supported.
+- ```container.load```.
+- ```@injectable()```.
+- ```@inject(identifier)``` - Constructor and Property injection supported.  Identifier must be specified; inject-by-type not supported.
+- ```@optional``` modifier for @inject.
+- *@injectAll()* = ```@inject(identifier, {all: true})```.
+
+# New features over InversifyJS
+- Custom scopes: ```container.bind.[toScope | inScope]``` - create services shared based on other objects further up the chain.
+- auto-binding: ```container.bind(ClassConstructor)``` will preconfigure the binding from annotations on the object.
+    - Binding aliases: ```@provides(identifier)```.
+    - As a singleton: ```@singleton```.
+    - Inside a custom scope: ```@inScope```.
+    - Defining a custom scope: ```@asScope```.
+    - Can be overridden by standard binding api.
+- Multiple identifiers to a single binding (using ```@provides```)
+
+# Missing features from InversifyJS
+- unbinding
+- [tagged binding](https://github.com/inversify/InversifyJS/blob/master/wiki/tagged_bindings.md).
+- [debug tools](https://github.com/inversify/inversify-chrome-devtools)
+- async modules
+- async resolution
+
 # Benefits over InfersifyJS
-- Custom scope support - create services shared based on other objects further up the chain.
 - No [monkey patching of base or third party superclasses](https://github.com/inversify/InversifyJS/issues/619#issuecomment-352218311).
 - No requirement for the root node application to call [reflect-metadata](https://github.com/inversify/InversifyJS/issues/737).  No risk of interfering with modules that also use it.
 - Minimialist API: No [redundant functions](https://github.com/inversify/InversifyJS/issues/697) for varying names of the same behavior.
@@ -40,14 +72,10 @@ application-level IoC.
         - ```microinject@0.4.0 ./lib``` = 80.5 KB post-install, 53.0 KB excluding typedefs
 
 # Drawbacks over InversifyJS
-- Lacking [powerful debug tools](https://github.com/inversify/inversify-chrome-devtools).
-- No [conditional binding](https://github.com/inversify/InversifyJS/blob/master/wiki/named_bindings.md).
-- No [tagged binding](https://github.com/inversify/InversifyJS/blob/master/wiki/tagged_bindings.md).
-- No [property injection](https://github.com/inversify/InversifyJS/blob/master/wiki/property_injection.md).
-- No typescript-based injection-by-type.  This is a result of being unable to use reflect-metadata.
+- Missing IoC capabilities.  See "Missing features from InversifyJS" above.
+- Missing debug tools.
+- No typescript-based injection-by-type.  *requires reflect-metadata.*
 - Less established and proven.
-
-*Not all of these drawbacks are by design, and additional features may be forthcomming.*
 
 # Which one should I choose?
 
@@ -58,7 +86,7 @@ If you are making a NodeJS application and want a full featured and robust depen
 # Compatibility
 
 The primary target of this library is NodeJS libraries.
-It may be possible to bundle this library for browser support, but only if ES6 Symbol and Map are supported or shimmed.
+It should be possible to bundle this library for browser support, as long as Symbol and Map are supported or shimmed.
 
 # Alternatives
 - [InversifyJS](https://github.com/inversify/InversifyJS) - Typescript-based full featured Dependency Injection.  Recommended for most application-level projects.
