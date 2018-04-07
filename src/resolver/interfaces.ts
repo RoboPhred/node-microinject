@@ -8,10 +8,13 @@ import {
  */
 export interface DependencyGraphResolver {
     /**
-     * Returns a value indicating whether we are presently trying to resolve
-     * the value of the given node.
-     * This indicates that somewhere in our call stack is a call to resolveInstance(node).
-     * @param node The node to check if we are resolving.
+     * Returns a value indicating whether we are presently trying to
+     * create a new instance from the given node.
+     * 
+     * This can be used to check if resolving the node will create
+     * a circular dependency.
+     * 
+     * @param node The node to check if we are instantiating.
      * @returns ```true``` if the node is being resolved, or ```false```.
      */
     isInstantiating(node: DependencyNode): boolean;
