@@ -30,7 +30,7 @@ application-level IoC.
 - ```container.bind.to```.
 - ```container.bind.toConstantValue```.
 - ```container.bind.toDynamicValue```.
-- *container.bind.toFactory* = ```container.bind.toDynamicValue```.
+- *container.bind.toFactory* identical to ```container.bind.toDynamicValue```.
 - ```container.bind.*.inSingletonScope```.
 - ```container.bind.*.inTransientScope```.
 - ```container.get```.
@@ -41,6 +41,7 @@ application-level IoC.
 - ```@inject(identifier)``` - Constructor and Property injection supported.  Identifier must be specified; inject-by-type not supported.
 - ```@optional``` modifier for @inject.
 - *@injectAll()* = ```@inject(identifier, {all: true})```.
+- *child containers* as ```childContainer.parent = parentContainer;```;
 
 # New features over InversifyJS
 - Custom scopes: ```container.bind.[toScope | inScope]``` - create services shared based on other objects further up the chain.
@@ -56,8 +57,9 @@ application-level IoC.
 - unbinding
 - [tagged binding](https://github.com/inversify/InversifyJS/blob/master/wiki/tagged_bindings.md).
 - [debug tools](https://github.com/inversify/inversify-chrome-devtools)
-- async modules
-- async resolution
+- async modules.
+- async resolution.
+- snapshotting.
 
 # Benefits over InfersifyJS
 - No [monkey patching of base or third party superclasses](https://github.com/inversify/InversifyJS/issues/619#issuecomment-352218311).
