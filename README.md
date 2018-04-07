@@ -70,8 +70,8 @@ application-level IoC.
         - ```npm i inversify@4.11.1 reflect-metadata@0.1.12``` = 617 KB
         - ```npm i microinject@0.4.0 uuid@3.2.1``` = 137 KB
     - Code sizes
-        - ```inversify@4.11.1 ./lib``` = 85.5 KB (does not include typedefs)
-        - ```microinject@0.4.0 ./lib``` = 80.5 KB post-install, 53.0 KB excluding typedefs
+        - ```inversify@4.11.1 ./lib``` = 85.5 KB
+        - ```microinject@0.4.1 ./lib``` = 53.6 KB
 
 # Drawbacks over InversifyJS
 - Missing IoC capabilities.  See "Missing features from InversifyJS" above.
