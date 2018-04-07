@@ -28,7 +28,7 @@ export declare class DependencyGraphPlanner {
     private _createDependencyNode(identifier, binding, scopeInstances);
     private _createFactoryNode(identifier, binding, scopeInstances);
     private _createConstructorNode(identifier, binding, scopeInstances);
-    private _createArgumentInjection(injection, childScopeInstances);
+    private _createValueInjection(injection, childScopeInstances);
     private _getScopedInstance(identifier, binding, scopeInstances);
     /**
      * Try to apply scoping data to the dependency node.

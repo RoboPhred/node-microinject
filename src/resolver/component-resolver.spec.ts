@@ -40,7 +40,7 @@ type StubDependencyGraphResolver = {
 
 describe("defaultComponentResolvers", function() {
     const stubResolver: StubDependencyGraphResolver = {
-        isResolving: stub(),
+        isInstantiating: stub(),
         getResolveStack: stub(),
         resolveInstance: stub()
     };
@@ -95,10 +95,12 @@ describe("defaultComponentResolvers", function() {
         function invokeResolver(args: DependencyNode[]) {
             const creator: ConstructorDependencyNode = {
                 ...partialCtorCreator,
-                injections: args.map(arg => ({
+                ctorInjections: args.map(arg => ({
                     identifier: arg.identifier
                 })),
-                injectionNodes: args
+                propInjections: new Map(),
+                ctorInjectionNodes: args,
+                propInjectionNodes: new Map()
             };
             return defaultComponentResolvers.ctor(identifier, creator, stubResolver);
         }
@@ -170,8 +172,10 @@ describe("defaultComponentResolvers", function() {
                 bindingId: "class-a-binding",
                 instanceId: "class-a-instance",
                 ctor: stub() as any,
-                injections: [],
-                injectionNodes: []
+                ctorInjections: [],
+                propInjections: new Map(),
+                ctorInjectionNodes: [],
+                propInjectionNodes: new Map()
             };
             const classB: ConstructorDependencyNode = {
                 type: "constructor",
@@ -179,20 +183,22 @@ describe("defaultComponentResolvers", function() {
                 bindingId: "class-b-binding",
                 instanceId: "class-b-instance",
                 ctor: stub() as any,
-                injections: [{
+                ctorInjections: [{
                     identifier: classA.identifier
                 }],
-                injectionNodes: [{...classA}]
+                propInjections: new Map(),
+                ctorInjectionNodes: [{...classA}],
+                propInjectionNodes: new Map()
             };
-            classA.injections.push({
+            classA.ctorInjections.push({
                 identifier: classB.identifier
             });
-            classA.injectionNodes.push({...classB});
+            classA.ctorInjectionNodes.push({...classB});
 
             // Simulate resolving class B, when requested by class A.
             //  class B will then request class A, and we expect this to error.
-            stubResolver.isResolving.withArgs(classA).returns(true);
-            stubResolver.isResolving.withArgs(classB).returns(true);
+            stubResolver.isInstantiating.withArgs(classA).returns(true);
+            stubResolver.isInstantiating.withArgs(classB).returns(true);
             stubResolver.getResolveStack.returns([classA, classB]);
 
             expect(

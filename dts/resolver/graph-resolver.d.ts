@@ -16,10 +16,22 @@ export declare class BasicDependencyGraphResolver implements DependencyGraphReso
      */
     private _resolvers;
     /**
-     * The stack of identifiers of the instantiations we are currently processing.
-     * This should always contain all identifiers of _instantiationSet.values().map(x => identifier)
+     * The stack of nodes we are currently instantiating.
+     * This differs from _resolutionStack in that it only contains
+     * nodes for which we are generating new instances for.
+     *
+     * Trying to instantiate a node already in this or parent
+     * stacks indicates a circular dependency.
      */
     private _instantiationStack;
+    /**
+     * The stack of nodes we are currently resolving.
+     *
+     * Trying to instantiate a node already in this or
+     * parent stacks is not necessarily a circular dependency, as
+     * the node instance may already have been created.
+     */
+    private _resolutionStack;
     /**
      * Map of instance IDs to their instances.
      * The instances contained in here should all be owned by our _ownedScope.
@@ -45,13 +57,12 @@ export declare class BasicDependencyGraphResolver implements DependencyGraphReso
     private _ownedScope?;
     constructor(resolvers?: Partial<ComponentResolvers>);
     /**
-     * Returns a value indicating whether we are presently trying to resolve
-     * the value of the given node.
-     * This indicates that somewhere in our call stack is a call to resolveInstance(node).
+     * Returns a value indicating whether we are presently trying to create an
+     * instance the given node.
      * @param node The node to check if we are resolving.
      * @returns ```true``` if the node is being resolved.
      */
-    isResolving(node: DependencyNode): boolean;
+    isInstantiating(node: DependencyNode): boolean;
     /**
      * Gets an array of nodes describing the stack of resolutions made
      * from the given node up to the current resolving node.
@@ -60,7 +71,11 @@ export declare class BasicDependencyGraphResolver implements DependencyGraphReso
      * The primary purpose of this function is for diagnostic
      * tracing, particularly when a circular dependency is found.
      *
+     * This function cannot be used to detect circular dependencies,
+     * as returned nodes may be in the property resolution stage.
+     *
      * @param from The node to start retrieving the resolution stack at.
+     * @see isInstantiating
      */
     getResolveStack(from?: DependencyNode): DependencyNode[];
     /**
@@ -73,8 +88,9 @@ export declare class BasicDependencyGraphResolver implements DependencyGraphReso
     resolveInstance<T = any>(node: DependencyNode): T;
     private _getNodeInstance(node);
     private _getScopedNodeInstance(node);
-    private _createNodeInstance(node);
-    private _createScopeRootNodeComponent(node);
-    private _createLocalNodeComponent(node);
+    private _createNodeInstance(node, register?);
+    private _postInstantiateNode(node, instance);
+    private _instantiateScopeRootNode(node);
+    private _instantiateOwnedNodeInstance(node);
     private _createChildResolver(scopeOwner?);
 }

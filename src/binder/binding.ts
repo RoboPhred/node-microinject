@@ -28,8 +28,7 @@ export interface ConstBinding extends BindingCore {
 
 export interface InstanceCreatorBinding extends BindingCore {
     definesScope?: Scope;
-    createInScope?: Scope;
-}
+    createInScope?: Scope;}
 
 export interface FactoryBinding extends InstanceCreatorBinding {
     type: "factory";
@@ -39,7 +38,8 @@ export interface FactoryBinding extends InstanceCreatorBinding {
 export interface ConstructorBinding extends InstanceCreatorBinding {
     type: "constructor";
     ctor: Newable;
-    injections: InjectionData[];
+    ctorInjections: InjectionData[];
+    propInjections: Map<string, InjectionData>;
 }
 
 export type Binding = ConstBinding | FactoryBinding | ConstructorBinding;

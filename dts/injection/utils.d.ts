@@ -17,4 +17,8 @@ export declare function isInjectable(target: any): boolean;
  * @param target The target to obtain constructor injections for.
  */
 export declare function getConstructorInjections(target: any): InjectionData[];
+/**
+ * Returns a map of property names to their injection data.
+ * @param target The target to obtain property injections for.
+ */
 export declare function getPropertyInjections(target: any): Map<string, InjectionData>;

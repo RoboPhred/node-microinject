@@ -29,7 +29,7 @@ import {
     ConstructorDependencyNode,
     DependencyNode,
     FactoryDependencyNode,
-    InjectedArgumentValue,
+    InjectedValue,
     ScopedDependenencyNode
 } from "./interfaces";
 import { InjectionData } from "../injection/utils";
@@ -187,17 +187,19 @@ export class DependencyGraphPlanner {
     ): ConstructorDependencyNode {
         const {
             ctor,
-            injections
+            ctorInjections
         } = binding;
 
-        const injectionNodes: InjectedArgumentValue[] = [];
+        const ctorInjectionNodes: InjectedValue[] = [];
+        const propInjectionNodes: Map<string, InjectedValue> = new Map();
 
         const node: ConstructorDependencyNode = {
             ...binding,
             identifier,
             instanceId: uuidv4(),
             ctor,
-            injectionNodes
+            ctorInjectionNodes,
+            propInjectionNodes
         };
 
         // If we are part of a scope, add it before resolving the dependencies.
@@ -211,34 +213,47 @@ export class DependencyGraphPlanner {
         );
 
         // Now we can recurse and resolve our dependencies.
-        for (let i = 0; i < injections.length; i++) {
-            // Cannot use 'of', we need the index for error messages.
-
-            let injectedValue: InjectedArgumentValue;
+        for (let i = 0; i < ctorInjections.length; i++) {
+            let injectedValue: InjectedValue;
             try {
-                injectedValue = this._createArgumentInjection(injections[i], childScopeInstances);
+                injectedValue = this._createValueInjection(ctorInjections[i], childScopeInstances);
             }
-            catch(err) {
+            catch (err) {
                 if (typeof err.message === "string") {
                     err.message = `Error injecting argument ${i} of bound constructor "${ctor.name}": ${err.message}`;
                 }
                 throw err;
             }
 
-            injectionNodes.push(injectedValue);
+            ctorInjectionNodes.push(injectedValue);
+        }
+
+        for (let [propName, injection] of binding.propInjections) {
+            let injectedValue: InjectedValue;
+            try {
+                injectedValue = this._createValueInjection(injection, childScopeInstances);
+            }
+            catch (err) {
+                if (typeof err.message === "string") {
+                    err.message = `Error injecting property ${propName} of bound constructor "${ctor.name}": ${err.message}`;
+                }
+                throw err;
+            }
+
+            propInjectionNodes.set(propName, injectedValue);
         }
 
         return node;
     }
 
-    private _createArgumentInjection(injection: InjectionData, childScopeInstances: ScopeInstanceMap): InjectedArgumentValue {
+    private _createValueInjection(injection: InjectionData, childScopeInstances: ScopeInstanceMap): InjectedValue {
         const {
             all,
             optional,
             identifier: dependencyIdentifier
         } = injection;
 
-        let injectedArg: InjectedArgumentValue;
+        let injectedArg: InjectedValue;
 
         const dependencyBindings = this._getBindings(dependencyIdentifier);
 

@@ -64,10 +64,23 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
     private _resolvers: ComponentResolvers;
 
     /**
-     * The stack of identifiers of the instantiations we are currently processing.
-     * This should always contain all identifiers of _instantiationSet.values().map(x => identifier)
+     * The stack of nodes we are currently instantiating.
+     * This differs from _resolutionStack in that it only contains
+     * nodes for which we are generating new instances for.
+     * 
+     * Trying to instantiate a node already in this or parent
+     * stacks indicates a circular dependency.
      */
     private _instantiationStack: DependencyNode[] = [];
+
+    /**
+     * The stack of nodes we are currently resolving.
+     * 
+     * Trying to instantiate a node already in this or
+     * parent stacks is not necessarily a circular dependency, as
+     * the node instance may already have been created.
+     */
+    private _resolutionStack: DependencyNode[] = [];
 
     /**
      * Map of instance IDs to their instances.
@@ -102,19 +115,18 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
     }
 
     /**
-     * Returns a value indicating whether we are presently trying to resolve
-     * the value of the given node.
-     * This indicates that somewhere in our call stack is a call to resolveInstance(node).
+     * Returns a value indicating whether we are presently trying to create an
+     * instance the given node.
      * @param node The node to check if we are resolving.
      * @returns ```true``` if the node is being resolved.
      */
-    isResolving(node: DependencyNode): boolean {
+    isInstantiating(node: DependencyNode): boolean {
         if (this._instantiationStack.indexOf(node) !== -1) {
             return true;
         }
 
         if (this._parent) {
-            return this._parent.isResolving(node);
+            return this._parent.isInstantiating(node);
         }
 
         return false;
@@ -128,19 +140,23 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
      * The primary purpose of this function is for diagnostic
      * tracing, particularly when a circular dependency is found.
      * 
+     * This function cannot be used to detect circular dependencies,
+     * as returned nodes may be in the property resolution stage.
+     * 
      * @param from The node to start retrieving the resolution stack at.
+     * @see isInstantiating
      */
     getResolveStack(from?: DependencyNode): DependencyNode[] {
         let stack: DependencyNode[];
 
-        const idx = from ? this._instantiationStack.indexOf(from) : -1;
+        const idx = from ? this._resolutionStack.indexOf(from) : -1;
         if (idx === -1) {
             // Get the portion of the stack from the parent (if any), and add on our portion.
             const parentStack = this._parent ? this._parent.getResolveStack(from) : [];
-            stack = parentStack.concat(this._instantiationStack);
+            stack = parentStack.concat(this._resolutionStack);
         }
         else {
-            stack = this._instantiationStack.slice(idx);
+            stack = this._resolutionStack.slice(idx);
         }
 
         return stack;
@@ -154,7 +170,13 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
      * @param node The dependency graph node representing the object to resolve.
      */
     resolveInstance<T = any>(node: DependencyNode): T {
-        return this._getNodeInstance(node);
+        this._resolutionStack.push(node);
+        try {
+            return this._getNodeInstance(node);
+        }
+        finally {
+            this._resolutionStack.pop();
+        }
     }
 
     private _getNodeInstance(node: DependencyNode): any {
@@ -164,7 +186,6 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
         }
         else {
             // Not scoped, so we do not need to try to get an existing instance.
-            //  Create a new instance.
             return this._createNodeInstance(node);
         }
     }
@@ -209,40 +230,64 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
 
         // At this point, we are the owner of the node.
         // We need to check for, create, and cache the instance.
-        // We still have to use .has() when looking for the instance, as its possible to store null or
-        //  undefined as a scoped value through a factory binding.
+        // We still have to use .has() when looking for the instance,
+        //  as its possible to store null or undefined as a scoped
+        //  value through a factory binding.
         if (this._scopedInstances.has(instanceId)) {
             return this._scopedInstances.get(instanceId);
         }
 
-        // Did not create it yet.  Create and store it now.
-        const instance = this._createNodeInstance(node);
-        this._scopedInstances.set(instanceId, instance);
+        // Did not create it yet.  Create it.
+        //  Store the instance from the register callback, so 
+        //  it is available to postInstantiate
+        const instance = this._createNodeInstance(
+            node,
+            instance => this._scopedInstances.set(instanceId, instance)
+        );
 
         return instance;
     }
 
-    private _createNodeInstance(node: DependencyNode): any {
+    private _createNodeInstance(node: DependencyNode, register?: (instance: any) => void): any {
+        let instance: any;
         if (isNodeScopeCreator(node) && (!this._ownedScope || node.instanceId !== this._ownedScope.instanceId)) {
             // If the node is defining a new scope which we do not own,
             //  we need to create a child resolver to hold the instances scoped to it.
-            return this._createScopeRootNodeComponent(node);
+            instance = this._instantiateScopeRootNode(node);
         }
         else {
             // Not defining a scope, or we own the scope.  No special handling.
-            return this._createLocalNodeComponent(node);
+            instance = this._instantiateOwnedNodeInstance(node);
+        }
+
+        if (register) {
+            register(instance);
+        }
+
+        this._postInstantiateNode(node, instance);
+
+        return instance;
+    }
+
+    private _postInstantiateNode(node: DependencyNode, instance: any): void {
+        if (this._resolvers.postInstantiate) {
+            this._resolvers.postInstantiate(node.identifier, node, this, instance);
         }
     }
 
-    private _createScopeRootNodeComponent(node: ScopedDependenencyNode): any {
+    private _instantiateScopeRootNode(node: ScopedDependenencyNode): any {
         // Create a new child resolver to hold the instances inside this new scope.
         //  Be sure to specify the parent and scope owner creator ref.
         const scopeResolver = this._createChildResolver(node);
-        const value = scopeResolver.resolveInstance(node);
+
+        // We are certain that we want to create a new node, rather than resolving
+        //  an existing one.
+        const value = scopeResolver._createNodeInstance(node);
+
         return value;
     }
 
-    private _createLocalNodeComponent(node: DependencyNode): any {
+    private _instantiateOwnedNodeInstance(node: DependencyNode): any {
         this._instantiationStack.push(node);
         try {
             switch(node.type) {
@@ -263,7 +308,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
         }
     }
 
-    private _createChildResolver(scopeOwner?: ScopedDependenencyNode): DependencyGraphResolver {
+    private _createChildResolver(scopeOwner?: ScopedDependenencyNode): BasicDependencyGraphResolver {
         const resolver = new BasicDependencyGraphResolver(
             this._resolvers
         );

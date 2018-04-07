@@ -20,7 +20,8 @@ import {
 
 import {
     getConstructorInjections,
-    isInjectable
+    isInjectable,
+    getPropertyInjections
 } from "../injection/utils";
 
 import {
@@ -74,7 +75,8 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
             type: "constructor",
             bindingId: uuidv4(),
             ctor,
-            injections: getConstructorInjections(ctor)
+            ctorInjections: getConstructorInjections(ctor),
+            propInjections: getPropertyInjections(ctor)
         };
 
         return this;

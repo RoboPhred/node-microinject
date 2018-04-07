@@ -42,5 +42,7 @@ export function getConstructorInjections(target: any): InjectionData[] {
  * @param target The target to obtain property injections for.
  */
 export function getPropertyInjections(target: any): Map<string, InjectionData> {
-    return (target[PropertyInjectionsKey] || new Map());
+    const prototype = target.prototype;
+    if (!prototype) return new Map();
+    return (prototype[PropertyInjectionsKey] || new Map());
 }

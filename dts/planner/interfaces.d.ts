@@ -30,7 +30,18 @@ export interface FactoryDependencyNode extends ScopedDependencyNodeBase, Factory
 export interface ConstructorDependencyNode extends ScopedDependencyNodeBase, ConstructorBinding {
     type: "constructor";
     /**
-     * An array whose indexes correspond to those of ```injection```,
+     * An array whose indexes correspond to resolved injected constructor arguments.
+     *
+     * The elements may be a single DependencyNode, an array of
+     * DependencyNode objects, or null.
+     * If the value is a node, the node should be resolved and rejected.
+     * If the value is an array of nodes, the nodes should be resolved
+     * and the array of resolved values injected.
+     * If the value is ```null``, then ```null``` should be injected.
+     */
+    ctorInjectionNodes: InjectedValue[];
+    /**
+     * A map of property names to resolved injected properties,
      * and whose elements describe what is to be injected into the argument.
      *
      * The elements may be a single DependencyNode, an array of
@@ -40,8 +51,8 @@ export interface ConstructorDependencyNode extends ScopedDependencyNodeBase, Con
      * and the array of resolved values injected.
      * If the value is ```null``, then ```null``` should be injected.
      */
-    injectionNodes: InjectedArgumentValue[];
+    propInjectionNodes: Map<string, InjectedValue>;
 }
-export declare type InjectedArgumentValue = DependencyNode | DependencyNode[] | null;
+export declare type InjectedValue = DependencyNode | DependencyNode[] | null;
 export declare type DependencyNode = ConstDependencyNode | FactoryDependencyNode | ConstructorDependencyNode;
 export declare type ScopedDependenencyNode = FactoryDependencyNode | ConstructorDependencyNode;

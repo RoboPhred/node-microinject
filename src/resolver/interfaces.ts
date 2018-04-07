@@ -14,7 +14,7 @@ export interface DependencyGraphResolver {
      * @param node The node to check if we are resolving.
      * @returns ```true``` if the node is being resolved, or ```false```.
      */
-    isResolving(node: DependencyNode): boolean;
+    isInstantiating(node: DependencyNode): boolean;
 
     /**
      * Gets an array of nodes describing the stack of resolutions made

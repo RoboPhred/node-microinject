@@ -8,6 +8,9 @@
     - Remoted calls, for example over an IPC bus or microservice architecture.
     - Ensure typings can understand these transformations (eg promisify).  Will require [typescript foo](https://github.com/Microsoft/TypeScript/pull/21496).
 
+# Efficiency
+- Minimize created objects
+    - Do not generate empty arrays/maps for the bindings when no ctor arguments or properties are specified.
 
 # Cleanup
 - Unit test remaining components.

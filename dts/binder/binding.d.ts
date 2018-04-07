@@ -21,7 +21,8 @@ export interface FactoryBinding extends InstanceCreatorBinding {
 export interface ConstructorBinding extends InstanceCreatorBinding {
     type: "constructor";
     ctor: Newable;
-    injections: InjectionData[];
+    ctorInjections: InjectionData[];
+    propInjections: Map<string, InjectionData>;
 }
 export declare type Binding = ConstBinding | FactoryBinding | ConstructorBinding;
 export declare type ScopeableBinding = FactoryBinding | ConstructorBinding;
