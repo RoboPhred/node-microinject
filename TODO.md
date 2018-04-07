@@ -1,4 +1,34 @@
 
+# Bugs
+- Cyclic property dependencies in transient or cyclic scopes cause a stack overflow.  These should be detected ahead of time.
+Example:
+```
+const S1 = "s1";
+const S2 = "s2";
+
+@injectable(A)
+@inScope(S1)
+@asScope(S2)
+class A {
+  @inject(B) b;
+}
+
+@injectable(B)
+@inScope(S2)
+@asScope(S1)
+class B {
+    @inject(A) a;
+}
+
+class Root {
+    @inject(A) a;
+}
+
+// ... auto-bind all ...
+
+container.get(Root)
+```
+
 # Features
 - Tagged binding.
 - Graph construction should be pluggable
