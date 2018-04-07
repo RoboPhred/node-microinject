@@ -14,6 +14,12 @@ export const ClassIsInjectableKey = getSymbol("InjectableDecorator");
 
 /**
  * Symbol used as a key to contain the array of InjectionData objects
- * corresponding to the class's constructor arguments.
+ * corresponding to a class's constructor arguments.
  */
 export const ConstructorInjectionsKey = getSymbol("ConstructorInjectionDecorators");
+
+/**
+ * Symbol used as a key to contain the map of InjectionData objects
+ * by object properties.
+ */
+export const PropertyInjectionsKey = getSymbol("PropertyInjectionsKey");
