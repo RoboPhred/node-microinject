@@ -114,7 +114,7 @@ describe("Property Injection", function () {
 
         @injectable()
         class TestTarget {
-            @inject(InjectedValue)
+            @inject(InjectedValue, {all: true})
             public allInjections: string[] | undefined;
         }
 

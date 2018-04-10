@@ -69,10 +69,15 @@ export function inject(identifier: Identifier, opts?: InjectionOptions) {
             }
             let data = properties.get(targetKey);
             if (!data) {
-                data = {} as InjectionData;
+                data = {
+                    ...opts,
+                    identifier
+                };
                 properties.set(targetKey, data)
             }
-            data.identifier = identifier;
+            else {
+                data.identifier = identifier;
+            }
         }
     };
 }
