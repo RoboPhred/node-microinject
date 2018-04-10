@@ -56,12 +56,12 @@ describe("Property Injection", function () {
         class TestInjected {
             constructor(
                 @inject(TestTarget) public injected: TestTarget
-            ) {}
+            ) { }
         }
 
         describe("when injected identifier is bound", function () {
             let instance: TestTarget;
-            before(function() {
+            before(function () {
                 const container = new Container();
                 container.bind(InjectedValue).to(TestInjected);
                 container.bind(TestTarget).to(TestTarget);
@@ -72,7 +72,7 @@ describe("Property Injection", function () {
                 expect(instance.injectedValueProp).to.be.instanceof(TestInjected);
             });
 
-            it("uses the singleton instance", function() {
+            it("uses the singleton instance", function () {
                 expect(instance.injectedValueProp!.injected).to.equal(instance);
             });
         });
@@ -105,6 +105,33 @@ describe("Property Injection", function () {
                 const instance = container.get(TestTarget);
                 expect(instance.injectedValueProp).to.be.null;
             });
+        });
+    });
+
+    describe("all", function () {
+        const firstValue = "foo";
+        const secondValue = "bar";
+
+        @injectable()
+        class TestTarget {
+            @inject(InjectedValue)
+            public allInjections: string[] | undefined;
+        }
+
+        let container: Container;
+        before(function() {
+            container = new Container();
+            container.bind(InjectedValue).toConstantValue(firstValue);
+            container.bind(InjectedValue).toConstantValue(secondValue);
+            container.bind(TestTarget).to(TestTarget);
+        });
+
+        it("receives all values", function () {
+            const instance = container.get(TestTarget);
+            const injected = instance.allInjections!
+            expect(injected.length).equals(2);
+            expect(injected).to.contain(firstValue);
+            expect(injected).to.contain(secondValue);
         });
     });
 });
