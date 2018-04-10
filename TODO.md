@@ -29,6 +29,8 @@ class Root {
 container.get(Root)
 ```
 
+- Invalid scoping setups go undetected and throw bad error messages.  Example: Scoped item under a singleton item can never reach a scope.
+
 # Features
 - Tagged binding.
 - Graph construction should be pluggable
