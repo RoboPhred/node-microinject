@@ -111,7 +111,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
 
     constructor(resolvers?: Partial<ComponentResolvers>) {
         // Make sure to fill in any resolvers that the user didn't specify.
-        this._resolvers = {...defaultComponentResolvers, ...(resolvers || {})};
+        this._resolvers = { ...defaultComponentResolvers, ...(resolvers || {}) };
     }
 
     /**
@@ -250,47 +250,42 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
 
     private _createNodeInstance(node: DependencyNode, register?: (instance: any) => void): any {
         let instance: any;
+        let resolver: BasicDependencyGraphResolver;
         if (isNodeScopeCreator(node) && (!this._ownedScope || node.instanceId !== this._ownedScope.instanceId)) {
             // If the node is defining a new scope which we do not own,
             //  we need to create a child resolver to hold the instances scoped to it.
-            instance = this._instantiateScopeRootNode(node);
+            //  Be sure to specify the scope owner node.
+            resolver = this._createChildResolver(node);
+
+            // We are certain that we want to create a new node, rather than resolving
+            //  an existing one.
+            instance = resolver._createNodeInstance(node);
         }
         else {
             // Not defining a scope, or we own the scope.  No special handling.
             instance = this._instantiateOwnedNodeInstance(node);
+            resolver = this;
         }
 
         if (register) {
             register(instance);
         }
 
-        this._postInstantiateNode(node, instance);
+        this._postInstantiateNode(node, resolver, instance);
 
         return instance;
     }
 
-    private _postInstantiateNode(node: DependencyNode, instance: any): void {
+    private _postInstantiateNode(node: DependencyNode, resolver: DependencyGraphResolver, instance: any): void {
         if (this._resolvers.postInstantiate) {
-            this._resolvers.postInstantiate(node.identifier, node, this, instance);
+            this._resolvers.postInstantiate(node.identifier, node, resolver, instance);
         }
-    }
-
-    private _instantiateScopeRootNode(node: ScopedDependenencyNode): any {
-        // Create a new child resolver to hold the instances inside this new scope.
-        //  Be sure to specify the parent and scope owner creator ref.
-        const scopeResolver = this._createChildResolver(node);
-
-        // We are certain that we want to create a new node, rather than resolving
-        //  an existing one.
-        const value = scopeResolver._createNodeInstance(node);
-
-        return value;
     }
 
     private _instantiateOwnedNodeInstance(node: DependencyNode): any {
         this._instantiationStack.push(node);
         try {
-            switch(node.type) {
+            switch (node.type) {
                 case "constructor":
                     return this._resolvers.ctor(node.identifier, node, this);
                 case "factory":

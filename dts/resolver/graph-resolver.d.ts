@@ -89,8 +89,7 @@ export declare class BasicDependencyGraphResolver implements DependencyGraphReso
     private _getNodeInstance(node);
     private _getScopedNodeInstance(node);
     private _createNodeInstance(node, register?);
-    private _postInstantiateNode(node, instance);
-    private _instantiateScopeRootNode(node);
+    private _postInstantiateNode(node, resolver, instance);
     private _instantiateOwnedNodeInstance(node);
     private _createChildResolver(scopeOwner?);
 }
