@@ -181,7 +181,7 @@ export class DependencyGraphPlanner {
       instanceId: uuidv4()
     };
 
-    this._tryApplyScoping(identifier, binding, node, scopeInstances);
+    this._tryApplyScoping(identifier, node, scopeInstances);
 
     // We cannot plan for anything inside a factory, as the user will
     //  look stuff up at resolution time.
@@ -212,7 +212,6 @@ export class DependencyGraphPlanner {
     // We need to add it to the current scope set, not the child scope set.
     const childScopeInstances = this._tryApplyScoping(
       identifier,
-      binding,
       node,
       scopeInstances
     );
@@ -221,7 +220,7 @@ export class DependencyGraphPlanner {
     for (let i = 0; i < ctorInjections.length; i++) {
       let injectedValue: InjectedValue;
       try {
-        injectedValue = this._createValueInjection(
+        injectedValue = this._planInjection(
           ctorInjections[i],
           childScopeInstances
         );
@@ -240,10 +239,7 @@ export class DependencyGraphPlanner {
     for (let [propName, injection] of binding.propInjections) {
       let injectedValue: InjectedValue;
       try {
-        injectedValue = this._createValueInjection(
-          injection,
-          childScopeInstances
-        );
+        injectedValue = this._planInjection(injection, childScopeInstances);
       } catch (err) {
         if (typeof err.message === "string") {
           err.message = `Error injecting property ${propName} of bound constructor "${
@@ -259,7 +255,7 @@ export class DependencyGraphPlanner {
     return node;
   }
 
-  private _createValueInjection(
+  private _planInjection(
     injection: InjectionData,
     childScopeInstances: ScopeInstanceMap
   ): InjectedValue {
@@ -267,10 +263,51 @@ export class DependencyGraphPlanner {
 
     let injectedArg: InjectedValue;
 
+    if (all) {
+      return this._planAllValuesInjection(injection, childScopeInstances);
+    }
+
+    return this._planSingleValueInjection(injection, childScopeInstances);
+  }
+
+  private _planAllValuesInjection(
+    injection: InjectionData,
+    childScopeInstances: ScopeInstanceMap
+  ): InjectedValue {
+    const { optional, identifier: dependencyIdentifier } = injection;
+
     const dependencyBindings = this._getBindings(dependencyIdentifier);
 
-    if (all) {
-      if (!optional && dependencyBindings.length === 0) {
+    if (!optional && dependencyBindings.length === 0) {
+      throw new DependencyResolutionError(
+        dependencyIdentifier,
+        this._stack,
+        `No bindings exist for the required argument.`
+      );
+    }
+
+    const injectedArg = dependencyBindings.map(dependencyBinding =>
+      this._getDependencyNode(
+        dependencyIdentifier,
+        dependencyBinding,
+        childScopeInstances
+      )
+    );
+
+    return injectedArg;
+  }
+
+  private _planSingleValueInjection(
+    injection: InjectionData,
+    childScopeInstances: ScopeInstanceMap
+  ): InjectedValue {
+    const { optional, identifier: dependencyIdentifier } = injection;
+
+    const dependencyBindings = this._getBindings(dependencyIdentifier);
+
+    if (dependencyBindings.length === 0) {
+      // No matching bindings.
+      if (!optional) {
         throw new DependencyResolutionError(
           dependencyIdentifier,
           this._stack,
@@ -278,40 +315,25 @@ export class DependencyGraphPlanner {
         );
       }
 
-      injectedArg = dependencyBindings.map(dependencyBinding =>
-        this._getDependencyNode(
-          dependencyIdentifier,
-          dependencyBinding,
-          childScopeInstances
-        )
-      );
-    } else if (dependencyBindings.length === 0) {
-      // No matching bindings.
-      if (optional) {
-        // We are not an all / array, so the return value for optional is null.
-        injectedArg = null;
-      } else {
-        throw new DependencyResolutionError(
-          dependencyIdentifier,
-          this._stack,
-          `No bindings exist for the required argument.`
-        );
-      }
-    } else if (dependencyBindings.length > 1) {
+      // We are not an all / array, so the return value for optional is null.
+      return null;
+    }
+
+    if (dependencyBindings.length > 1) {
       // Array case was already handled, so this means we do not know what binding to use.
       throw new DependencyResolutionError(
         dependencyIdentifier,
         this._stack,
         `More than one binding was resolved for the argument.`
       );
-    } else {
-      // At this point, we have exactly 1 binding on a 1-value injection.
-      injectedArg = this._getDependencyNode(
-        dependencyIdentifier,
-        dependencyBindings[0],
-        childScopeInstances
-      );
     }
+
+    // At this point, we have exactly 1 binding on a 1-value injection.
+    const injectedArg = this._getDependencyNode(
+      dependencyIdentifier,
+      dependencyBindings[0],
+      childScopeInstances
+    );
 
     return injectedArg;
   }
@@ -369,23 +391,15 @@ export class DependencyGraphPlanner {
    */
   private _tryApplyScoping(
     identifier: Identifier,
-    binding: Binding,
     node: DependencyNode,
     scopeInstances: ScopeInstanceMap
   ): ScopeInstanceMap {
-    // Pointless binding type check to make typescript happy.
-    if (binding.type === "value") {
-      // Value types cannot be scoped, nor can they be within a scope.
-      //  This is because we have no way of binding to a specific instance within the scope.
-      return scopeInstances;
-    }
-
     // A node that cannot be placed in a scope also cannot serve as a scope.
     if (!isScopeableBinding(node)) {
       return scopeInstances;
     }
 
-    const { createInScope, definesScope } = binding;
+    const { createInScope, definesScope } = node;
 
     // Check to see if the component is in a scope.
     if (createInScope) {
@@ -404,7 +418,7 @@ export class DependencyGraphPlanner {
       //  the specific node for the identifier in this scope instance.
       // Set instance by bindingId, as multiple identifiers
       //  may be aliases of a scoped binding.
-      instanceData.instances.set(binding.bindingId, node);
+      instanceData.instances.set(node.bindingId, node);
 
       // We might be being defined by a special case symbol, such as SingletonSymbol.
       if (typeof instanceData.definer !== "symbol") {

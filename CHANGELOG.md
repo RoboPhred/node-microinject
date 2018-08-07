@@ -1,6 +1,12 @@
 # vNext
 
+## Features
+
 - Add `Container.create` and factory `context.create` to directly instantiate and inject an arbitrary constructor.
+
+## Refactors
+
+- Clean up planner logic.
 
 # 0.5.0
 
