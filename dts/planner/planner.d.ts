@@ -22,7 +22,7 @@ export declare class DependencyGraphPlanner {
      * @param identifier The identifier to get a plan for.
      * @param binding An optional binding to use for the identifier.  Useful if multiple bindings may apply.
      */
-    getPlan(identifier: Identifier, binding?: Binding): DependencyNode;
+    getPlan(identifier: Identifier, binding?: Binding, noCache?: boolean): DependencyNode;
     private _getBindings(identifier);
     private _getDependencyNode(identifier, binding, scopeInstances);
     private _createDependencyNode(identifier, binding, scopeInstances);

@@ -1,4 +1,4 @@
-import { Identifier } from "./interfaces";
+import { Identifier, Newable } from "./interfaces";
 import { ContainerModule } from "./module";
 import { Binder } from "./binder";
 export declare class Container {
@@ -39,6 +39,8 @@ export declare class Container {
      * configured bindings remain configured.
      */
     reset(): void;
+    create<T>(ctor: Newable<T>): T;
+    private _create<T>(ctor, resolver);
     /**
      * Gets or creates the value represented by the identifier.
      * This method will throw DependencyResolutionError if there is not exactly one binding for the identifier.

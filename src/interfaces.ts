@@ -27,9 +27,10 @@ export type ServiceFactory<T = any> = (context: Context) => T;
  * An object capable of resolving identifiers to objects.
  */
 export interface ServiceLocator {
-  has(identifier: Identifier): boolean;
+  create<T>(ctor: Newable<T>): T;
   get<T>(identifier: Identifier<T>): T;
   getAll<T>(identifier: Identifier<T>): T[];
+  has(identifier: Identifier): boolean;
 }
 
 /**

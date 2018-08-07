@@ -99,6 +99,9 @@ export const defaultComponentResolvers: ComponentResolvers = {
       get container(): any {
         throw new Error("Property not implemented.");
       },
+      create() {
+        throw new Error("Method not implemented.");
+      },
       has() {
         throw new Error("Method not implemented.");
       },

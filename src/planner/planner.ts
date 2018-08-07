@@ -72,7 +72,11 @@ export class DependencyGraphPlanner {
    * @param identifier The identifier to get a plan for.
    * @param binding An optional binding to use for the identifier.  Useful if multiple bindings may apply.
    */
-  getPlan(identifier: Identifier, binding?: Binding): DependencyNode {
+  getPlan(
+    identifier: Identifier,
+    binding?: Binding,
+    noCache?: boolean
+  ): DependencyNode {
     if (!binding) {
       const rootBindings = this._getBindings(identifier);
       if (rootBindings.length === 0) {
@@ -91,9 +95,11 @@ export class DependencyGraphPlanner {
       binding = rootBindings[0];
     }
 
-    let plan = this._planCache.get(binding.bindingId);
-    if (plan) {
-      return plan;
+    if (!noCache) {
+      let plan = this._planCache.get(binding.bindingId);
+      if (plan) {
+        return plan;
+      }
     }
 
     const dependencyNode = this._getDependencyNode(
@@ -102,7 +108,10 @@ export class DependencyGraphPlanner {
       this._rootScopeInstances
     );
 
-    this._planCache.set(binding.bindingId, dependencyNode);
+    if (!noCache) {
+      this._planCache.set(binding.bindingId, dependencyNode);
+    }
+
     return dependencyNode;
   }
 

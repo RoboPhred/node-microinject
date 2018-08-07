@@ -1,4 +1,4 @@
-import { Context, Identifier } from "./interfaces";
+import { Context, Identifier, Newable } from "./interfaces";
 
 import { ContainerModule } from "./module";
 
@@ -112,6 +112,20 @@ export class Container {
 
     // No need to clear the cached plans.  Bindings are kept,
     //  so the plans are still valid.
+  }
+
+  create<T>(ctor: Newable<T>) {
+    return this._create(ctor, this._resolver);
+  }
+
+  private _create<T>(ctor: Newable<T>, resolver: DependencyGraphResolver): T {
+    // TODO: Allow passing values to decorated ctor args `@param("foo") myFoo: number`.
+    // TODO: Caching should be allowed if no args passed.  Store this binding in the map as create-${ctor.name}
+    const binder = new BinderImpl(ctor);
+    binder.to(ctor).inTransientScope();
+    const binding = binder._getBinding();
+    const plan = this._planner.getPlan(ctor, binding, true);
+    return resolver.resolveInstance(plan);
   }
 
   /**
@@ -250,9 +264,9 @@ export class Container {
     const context: Context = {
       container: this,
 
-      // "has" is simply interested if we have at least one binding for the identifier.
-      //  Scope has no bearing on its value, so it is not interested in
-      has: this.has.bind(this),
+      create: <T>(ctor: Newable<T>): T => {
+        return this._create(ctor, childResolver);
+      },
 
       get: (identifier: Identifier) => {
         return this._get(identifier, childResolver);
@@ -260,7 +274,11 @@ export class Container {
 
       getAll: (identifier: Identifier) => {
         return this._getAll(identifier, childResolver);
-      }
+      },
+
+      // "has" is simply interested if we have at least one binding for the identifier.
+      //  Scope has no bearing on its value, so it is not interested in
+      has: this.has.bind(this)
     };
 
     return creator.factory(context);

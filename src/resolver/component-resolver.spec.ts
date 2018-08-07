@@ -7,6 +7,8 @@ import { SinonStub, stub, spy, match } from "sinon";
 
 import { Identifier, Newable } from "../interfaces";
 
+import { DependencyResolutionError } from "../errors";
+
 import {
   DependencyNode,
   ConstDependencyNode,
@@ -17,7 +19,6 @@ import {
 import { DependencyGraphResolver } from "./interfaces";
 
 import { defaultComponentResolvers } from "./component-resolver";
-import { DependencyResolutionError } from "..";
 
 type StubDependencyGraphResolver = {
   [key in keyof DependencyGraphResolver]: SinonStub
