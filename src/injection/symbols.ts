@@ -1,10 +1,7 @@
-
-import {
-    getSymbol as getParentSymbol
-} from "../symbols";
+import { getSymbol as getParentSymbol } from "../symbols";
 
 function getSymbol(id: string) {
-    return getParentSymbol(`/injection/${id}`);
+  return getParentSymbol(`/injection/${id}`);
 }
 
 /**
@@ -16,7 +13,9 @@ export const ClassIsInjectableKey = getSymbol("InjectableDecorator");
  * Symbol used as a key to contain the array of InjectionData objects
  * corresponding to a class's constructor arguments.
  */
-export const ConstructorInjectionsKey = getSymbol("ConstructorInjectionDecorators");
+export const ConstructorInjectionsKey = getSymbol(
+  "ConstructorInjectionDecorators"
+);
 
 /**
  * Symbol used as a key to contain the map of InjectionData objects

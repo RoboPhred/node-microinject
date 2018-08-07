@@ -1,137 +1,137 @@
-
 import { expect } from "chai";
 
 import {
-    Container,
-    DependencyResolutionError,
-    inject,
-    injectable,
-    optional,
-    singleton
+  Container,
+  DependencyResolutionError,
+  inject,
+  injectable,
+  optional,
+  singleton
 } from "../..";
 
-describe("Property Injection", function () {
-    const InjectedValue = Symbol("InjectedValue");
-    const preValue = Symbol("pre-inject-value");
+describe("Property Injection", function() {
+  const InjectedValue = Symbol("InjectedValue");
+  const preValue = Symbol("pre-inject-value");
 
-    describe("default", function () {
-        const testValue = Symbol("test-value");
+  describe("default", function() {
+    const testValue = Symbol("test-value");
 
-        @injectable()
-        class TestTarget {
-            @inject(InjectedValue)
-            injectedValueProp: any = preValue;
-        }
+    @injectable()
+    class TestTarget {
+      @inject(InjectedValue)
+      injectedValueProp: any = preValue;
+    }
 
-        describe("when injected identifier is bound", function () {
-            it("injects the value into the property", function () {
-                const container = new Container();
-                container.bind(InjectedValue).toConstantValue(testValue);
-                container.bind(TestTarget).to(TestTarget);
-                const instance = container.get(TestTarget);
+    describe("when injected identifier is bound", function() {
+      it("injects the value into the property", function() {
+        const container = new Container();
+        container.bind(InjectedValue).toConstantValue(testValue);
+        container.bind(TestTarget).to(TestTarget);
+        const instance = container.get(TestTarget);
 
-                expect(instance.injectedValueProp).to.equal(testValue);
-            });
-        });
-
-        describe("when injected identifier is not bound", function () {
-            it("throws an error if the value is not found", function () {
-                const container = new Container();
-                container.bind(TestTarget).to(TestTarget);
-
-                expect(() => container.get(TestTarget)).to.throw(DependencyResolutionError, /InjectedValue/);
-            });
-        });
+        expect(instance.injectedValueProp).to.equal(testValue);
+      });
     });
 
-    describe("circular", function () {
-        @injectable()
-        @singleton()
-        class TestTarget {
-            @inject(InjectedValue)
-            injectedValueProp: TestInjected | null = null;
-        }
+    describe("when injected identifier is not bound", function() {
+      it("throws an error if the value is not found", function() {
+        const container = new Container();
+        container.bind(TestTarget).to(TestTarget);
 
-        @injectable(InjectedValue)
-        class TestInjected {
-            constructor(
-                @inject(TestTarget) public injected: TestTarget
-            ) { }
-        }
+        expect(() => container.get(TestTarget)).to.throw(
+          DependencyResolutionError,
+          /InjectedValue/
+        );
+      });
+    });
+  });
 
-        describe("when injected identifier is bound", function () {
-            let instance: TestTarget;
-            before(function () {
-                const container = new Container();
-                container.bind(InjectedValue).to(TestInjected);
-                container.bind(TestTarget).to(TestTarget);
-                instance = container.get(TestTarget);
-            });
+  describe("circular", function() {
+    @injectable()
+    @singleton()
+    class TestTarget {
+      @inject(InjectedValue)
+      injectedValueProp: TestInjected | null = null;
+    }
 
-            it("injects the value into the property", function () {
-                expect(instance.injectedValueProp).to.be.instanceof(TestInjected);
-            });
+    @injectable(InjectedValue)
+    class TestInjected {
+      constructor(@inject(TestTarget) public injected: TestTarget) {}
+    }
 
-            it("uses the singleton instance", function () {
-                expect(instance.injectedValueProp!.injected).to.equal(instance);
-            });
-        });
+    describe("when injected identifier is bound", function() {
+      let instance: TestTarget;
+      before(function() {
+        const container = new Container();
+        container.bind(InjectedValue).to(TestInjected);
+        container.bind(TestTarget).to(TestTarget);
+        instance = container.get(TestTarget);
+      });
+
+      it("injects the value into the property", function() {
+        expect(instance.injectedValueProp).to.be.instanceof(TestInjected);
+      });
+
+      it("uses the singleton instance", function() {
+        expect(instance.injectedValueProp!.injected).to.equal(instance);
+      });
+    });
+  });
+
+  describe("optional", function() {
+    const testValue = Symbol("test-value");
+
+    @injectable()
+    class TestTarget {
+      @inject(InjectedValue)
+      @optional()
+      injectedValueProp: any = preValue;
+    }
+
+    describe("when injected identifier is bound", function() {
+      it("injects the value into the property when available", function() {
+        const container = new Container();
+        container.bind(InjectedValue).toConstantValue(testValue);
+        container.bind(TestTarget).to(TestTarget);
+        const instance = container.get(TestTarget);
+        expect(instance.injectedValueProp).to.equal(testValue);
+      });
     });
 
-    describe("optional", function () {
-        const testValue = Symbol("test-value");
+    describe("when injected identifier is not bound", function() {
+      it("sets the property to null", function() {
+        const container = new Container();
+        container.bind(TestTarget).to(TestTarget);
+        const instance = container.get(TestTarget);
+        expect(instance.injectedValueProp).to.be.null;
+      });
+    });
+  });
 
-        @injectable()
-        class TestTarget {
-            @inject(InjectedValue)
-            @optional()
-            injectedValueProp: any = preValue;
-        }
+  describe("all", function() {
+    const firstValue = "foo";
+    const secondValue = "bar";
 
-        describe("when injected identifier is bound", function () {
-            it("injects the value into the property when available", function () {
-                const container = new Container();
-                container.bind(InjectedValue).toConstantValue(testValue);
-                container.bind(TestTarget).to(TestTarget);
-                const instance = container.get(TestTarget);
-                expect(instance.injectedValueProp).to.equal(testValue);
-            });
-        });
+    @injectable()
+    class TestTarget {
+      @inject(InjectedValue, { all: true })
+      public allInjections: string[] | undefined;
+    }
 
-        describe("when injected identifier is not bound", function () {
-            it("sets the property to null", function () {
-                const container = new Container();
-                container.bind(TestTarget).to(TestTarget);
-                const instance = container.get(TestTarget);
-                expect(instance.injectedValueProp).to.be.null;
-            });
-        });
+    let container: Container;
+    before(function() {
+      container = new Container();
+      container.bind(InjectedValue).toConstantValue(firstValue);
+      container.bind(InjectedValue).toConstantValue(secondValue);
+      container.bind(TestTarget).to(TestTarget);
     });
 
-    describe("all", function () {
-        const firstValue = "foo";
-        const secondValue = "bar";
-
-        @injectable()
-        class TestTarget {
-            @inject(InjectedValue, {all: true})
-            public allInjections: string[] | undefined;
-        }
-
-        let container: Container;
-        before(function() {
-            container = new Container();
-            container.bind(InjectedValue).toConstantValue(firstValue);
-            container.bind(InjectedValue).toConstantValue(secondValue);
-            container.bind(TestTarget).to(TestTarget);
-        });
-
-        it("receives all values", function () {
-            const instance = container.get(TestTarget);
-            const injected = instance.allInjections!
-            expect(injected.length).equals(2);
-            expect(injected).to.contain(firstValue);
-            expect(injected).to.contain(secondValue);
-        });
+    it("receives all values", function() {
+      const instance = container.get(TestTarget);
+      const injected = instance.allInjections!;
+      expect(injected.length).equals(2);
+      expect(injected).to.contain(firstValue);
+      expect(injected).to.contain(secondValue);
     });
+  });
 });

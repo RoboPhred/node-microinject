@@ -1,23 +1,18 @@
+import { Identifier } from "../interfaces";
+
+import { InjectionOptions } from "./interfaces";
 
 import {
-    Identifier
-} from "../interfaces";
-
-import {
-    InjectionOptions
-} from "./interfaces";
-
-import {
-    ClassIsInjectableKey,
-    ConstructorInjectionsKey,
-    PropertyInjectionsKey
+  ClassIsInjectableKey,
+  ConstructorInjectionsKey,
+  PropertyInjectionsKey
 } from "./symbols";
 
 /**
  * Data associated with an injection.
  */
 export interface InjectionData extends InjectionOptions {
-    identifier: Identifier;
+  identifier: Identifier;
 }
 
 /**
@@ -25,7 +20,7 @@ export interface InjectionData extends InjectionOptions {
  * @param target The target to test for injectability.
  */
 export function isInjectable(target: any): boolean {
-    return target[ClassIsInjectableKey] === true;
+  return target[ClassIsInjectableKey] === true;
 }
 
 /**
@@ -34,7 +29,7 @@ export function isInjectable(target: any): boolean {
  * @param target The target to obtain constructor injections for.
  */
 export function getConstructorInjections(target: any): InjectionData[] {
-    return (target[ConstructorInjectionsKey] || []);
+  return target[ConstructorInjectionsKey] || [];
 }
 
 /**
@@ -42,7 +37,7 @@ export function getConstructorInjections(target: any): InjectionData[] {
  * @param target The target to obtain property injections for.
  */
 export function getPropertyInjections(target: any): Map<string, InjectionData> {
-    const prototype = target.prototype;
-    if (!prototype) return new Map();
-    return (prototype[PropertyInjectionsKey] || new Map());
+  const prototype = target.prototype;
+  if (!prototype) return new Map();
+  return prototype[PropertyInjectionsKey] || new Map();
 }

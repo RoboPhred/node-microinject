@@ -1,10 +1,7 @@
-
-import {
-    getSymbol as getParentSymbol
-} from "../symbols";
+import { getSymbol as getParentSymbol } from "../symbols";
 
 export function getSymbol(name: string) {
-    return getParentSymbol(`/scope/${name}`);
+  return getParentSymbol(`/scope/${name}`);
 }
 
 /**
