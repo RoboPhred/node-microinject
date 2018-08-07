@@ -6,7 +6,8 @@ import {
   injectable,
   inject,
   optional,
-  DependencyResolutionError
+  DependencyResolutionError,
+  all
 } from "../..";
 
 describe("Constructor Injection", function() {
@@ -110,7 +111,9 @@ describe("Constructor Injection", function() {
     @injectable()
     class TestTarget {
       constructor(
-        @inject(InjectedService, { all: true }) public injected: any[]
+        @inject(InjectedService)
+        @all()
+        public injected: any[]
       ) {}
     }
 

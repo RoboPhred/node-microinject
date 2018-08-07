@@ -6,7 +6,8 @@ import {
   inject,
   injectable,
   optional,
-  singleton
+  singleton,
+  all
 } from "../..";
 
 describe("Property Injection", function() {
@@ -114,7 +115,8 @@ describe("Property Injection", function() {
 
     @injectable()
     class TestTarget {
-      @inject(InjectedValue, { all: true })
+      @inject(InjectedValue)
+      @all()
       public allInjections: string[] | undefined;
     }
 

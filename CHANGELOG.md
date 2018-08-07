@@ -2,6 +2,7 @@
 
 ## Features
 
+- Add `@all()` decorator to specify all matching targets. Equivalent to`@inject(identifier, { all: true})`
 - Add `Container.create` and factory `context.create` to directly instantiate and inject an arbitrary constructor.
 
 ## Refactors
