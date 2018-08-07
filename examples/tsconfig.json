@@ -1,16 +1,17 @@
 {
-    "compilerOptions": {
-        "target": "es6",
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "strict": true,
-        "experimentalDecorators": true,
-        "rootDir": "./src",
-        "outDir": "./lib",
-        "baseUrl": ".",
-        "paths": {
-            "microinject": ["../lib"]
-        },
-        "sourceMap": true
-    }
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "lib": ["es2016"],
+    "strict": true,
+    "experimentalDecorators": true,
+    "rootDir": "./src",
+    "outDir": "./lib",
+    "baseUrl": ".",
+    "paths": {
+      "microinject": ["../"]
+    },
+    "sourceMap": true
+  }
 }

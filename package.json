@@ -16,9 +16,8 @@
     "watch": "concurrently \"npm run watch:build\" \"npm run watch:test\"",
     "test": "mocha --require ./mocha.env.js ./lib/**/**.spec.js ./lib/**/tests/index.js",
     "prune": "rimraf lib/**/*.map lib/**/*.spec.js lib/**/*.map lib/**/tests",
-    "examples:clean": "rimraf examples/lib",
-    "preexamples:build": "npm run examples:clean",
-    "examples:build": "tsc -p examples"
+    "examples:build": "tsc -p examples --noEmit",
+    "examples:watch": "tsc -w -p examples --noEmit"
   },
   "repository": {
     "type": "git",
@@ -54,7 +53,7 @@
     "sinon-chai": "^3.0.0",
     "source-map-support": "^0.5.4",
     "tslint": "^5.9.1",
-    "typescript": "^2.7.2"
+    "typescript": "^2.8.4"
   },
   "engines": {
     "node": ">=6.13.1"
