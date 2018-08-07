@@ -1,105 +1,79 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "Build",
-            "type": "npm",
-            "script": "build",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": false,
-                "reveal": "silent",
-                "focus": false,
-                "panel": "dedicated"
-            },
-            "problemMatcher": [
-                "$tsc"
-            ]
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build",
+      "type": "npm",
+      "script": "build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": false,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "dedicated"
+      },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Watch (Build and Mocha)",
+      "dependsOn": ["watch:build", "watch:test"],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Build - Watch",
+      "identifier": "watch:build",
+      "type": "npm",
+      "script": "watch:build",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "isBackground": true,
+      "problemMatcher": ["$tsc-watch"]
+    },
+    {
+      "label": "Mocha - Watch",
+      "identifier": "watch:test",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "watch:test", "--", "--reporter", "tap", "--colors"],
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "mocha",
+        "fileLocation": ["relative", "${workspaceRoot}"],
+        "pattern": [
+          {
+            "regexp": "^not\\sok\\s\\d+\\s(.*)$"
+          },
+          {
+            "regexp": "\\s+(.*)$",
+            "message": 1
+          },
+          {
+            "regexp": "\\s+at\\s(.*)\\s\\((.*):(\\d+):(\\d+)\\)",
+            "file": 2,
+            "line": 3,
+            "column": 4
+          }
+        ],
+        "background": {
+          "activeOnStart": false,
+          "beginsPattern": {
+            "regexp": "\\d+\\.\\.\\d+"
+          },
+          "endsPattern": {
+            "regexp": "# fail \\d+"
+          }
         },
-        {
-            "label": "Watch (Build and Mocha)",
-            "dependsOn": [
-                "watch:build",
-                "watch:test"
-            ],
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "Build - Watch",
-            "identifier": "watch:build",
-            "type": "npm",
-            "script": "watch:build",
-            "group": {
-                "kind": "test",
-                "isDefault": true
-            },
-            "isBackground": true,
-            "problemMatcher": [
-                "$tsc-watch"
-            ]
-        },
-        {
-            "label": "Mocha - Watch",
-            "identifier": "watch:test",
-            "type": "shell",
-            "command": "npm",
-            "args": [
-                "run",
-                "watch:test",
-                "--",
-                "--reporter",
-                "tap",
-                "--colors"
-            ],
-            "group": "test",
-            "isBackground": true,
-            "problemMatcher": {
-                "owner": "mocha",
-                "fileLocation": [
-                    "relative",
-                    "${workspaceRoot}"
-                ],
-                "pattern": [
-                    {
-                        "regexp": "^not\\sok\\s\\d+\\s(.*)$"
-                    },
-                    {
-                        "regexp": "\\s+(.*)$",
-                        "message": 1
-                    },
-                    {
-                        "regexp": "\\s+at\\s(.*)\\s\\((.*):(\\d+):(\\d+)\\)",
-                        "file": 2,
-                        "line": 3,
-                        "column": 4
-                    }
-                ],
-                "background": {
-                    "activeOnStart": false,
-                    "beginsPattern": {
-                        "regexp": "\\d+\\.\\.\\d+"
-                    },
-                    "endsPattern": {
-                        "regexp": "# fail \\d+"
-                    }
-                },
-                "applyTo": "allDocuments"
-            }
-        },
-        {
-            "type": "npm",
-            "script": "lint",
-            "problemMatcher": {
-                "base": "$tslint5",
-                "fileLocation": "absolute",
-                "applyTo": "allDocuments"
-            }
-        }
-    ]
+        "applyTo": "allDocuments"
+      }
+    }
+  ]
 }
