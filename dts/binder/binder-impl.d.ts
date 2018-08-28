@@ -15,9 +15,10 @@ export declare class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
     private _binding;
     private _isFinalized;
     constructor(_identifier: Identifier<T>);
-    to<N extends T>(ctor: Newable<N>): ScopedBinder;
-    toDynamicValue<N extends T>(factory: (context: Context) => N): ScopedBinder;
-    toConstantValue<N extends T>(value: N): void;
+    to(ctor: Newable): ScopedBinder;
+    toSelf(): ScopedBinder;
+    toDynamicValue(factory: (context: Context) => any): ScopedBinder;
+    toConstantValue(value: any): void;
     /**
      * Mark the binding as a singleton.  Only one will be created per container.
      */

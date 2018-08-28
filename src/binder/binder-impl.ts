@@ -38,7 +38,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
 
   constructor(private _identifier: Identifier<T>) {}
 
-  to<N extends T>(ctor: Newable<N>): ScopedBinder {
+  to(ctor: Newable): ScopedBinder {
     if (typeof ctor !== "function") {
       throw new TypeError("Target must be a constructor.");
     }
@@ -54,7 +54,15 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
     return this;
   }
 
-  toDynamicValue<N extends T>(factory: (context: Context) => N): ScopedBinder {
+  toSelf(): ScopedBinder {
+    const ctor = this._identifier;
+    if (typeof this._identifier !== "function") {
+      throw new TypeError("Identifier must be a constructor.");
+    }
+    return this.to(ctor as Newable);
+  }
+
+  toDynamicValue(factory: (context: Context) => any): ScopedBinder {
     if (typeof factory !== "function") {
       throw new TypeError("Factory must be a function.");
     }
@@ -69,7 +77,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
     return this;
   }
 
-  toConstantValue<N extends T>(value: N): void {
+  toConstantValue(value: any): void {
     this._ensureCanBind();
     this._binding = {
       type: "value",

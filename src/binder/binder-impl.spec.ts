@@ -122,6 +122,29 @@ describe("@BinderImpl", function() {
       });
     });
 
+    describe(".toSelf()", function() {
+      class TestBlankClass {}
+
+      let binding: Binding;
+      before(function() {
+        const binder = new BinderImpl(TestBlankClass);
+        binder.toSelf();
+        binding = binder._getBinding();
+      });
+
+      it("generates a constructor binding", function() {
+        expect(binding)
+          .property("type")
+          .equals("constructor");
+      });
+
+      it("sets binding.ctor to the identifier constructor", function() {
+        expect(binding)
+          .property("ctor")
+          .equals(TestBlankClass);
+      });
+    });
+
     describe(".toDynamicValue()", function() {
       function testFactory() {}
 
