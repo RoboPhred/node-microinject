@@ -3,7 +3,7 @@ import { use as chaiUse, expect } from "chai";
 import sinonChai = require("sinon-chai");
 chaiUse(sinonChai);
 
-import { SinonStub, stub, spy, match } from "sinon";
+import { SinonStub, stub, spy, match, SinonStubbedInstance } from "sinon";
 
 import { Identifier, Newable } from "../interfaces";
 
@@ -20,9 +20,9 @@ import { DependencyGraphResolver } from "./interfaces";
 
 import { defaultComponentResolvers } from "./component-resolver";
 
-type StubDependencyGraphResolver = {
-  [key in keyof DependencyGraphResolver]: SinonStub
-};
+type StubDependencyGraphResolver = SinonStubbedInstance<
+  DependencyGraphResolver
+>;
 
 describe("defaultComponentResolvers", function() {
   const stubResolver: StubDependencyGraphResolver = {
@@ -41,6 +41,7 @@ describe("defaultComponentResolvers", function() {
     const factoryStub = stub().returns(factoryReturnValue);
     const factoryNode: FactoryDependencyNode = {
       type: "factory",
+      identifiers: [identifier],
       identifier,
       bindingId: "factory-binding-id",
       instanceId: "factory-component-id",
@@ -76,6 +77,7 @@ describe("defaultComponentResolvers", function() {
     const partialCtorCreator = {
       // Explicitly tag type to make TS happy when building the real creator.
       type: "constructor" as "constructor",
+      identifiers: [identifier],
       identifier,
       bindingId: "ctor-binding-id",
       instanceId: "ctor-instance-id",
@@ -108,6 +110,7 @@ describe("defaultComponentResolvers", function() {
     it("resolves arguments", function() {
       const firstArg: ConstDependencyNode = {
         type: "value",
+        identifiers: ["first-arg-identifier"],
         identifier: "first-arg-identifier",
         bindingId: "first-arg-binding-id",
         instanceId: "first-arg-instance",
@@ -115,6 +118,7 @@ describe("defaultComponentResolvers", function() {
       };
       const secondArg: ConstDependencyNode = {
         type: "value",
+        identifiers: ["second-arg-identifier"],
         identifier: "second-arg-identifier",
         bindingId: "second-arg-binding-id",
         instanceId: "second-arg-instance",
@@ -132,6 +136,7 @@ describe("defaultComponentResolvers", function() {
       const firstArgValue = "first-arg-value";
       const firstArg: DependencyNode = {
         type: "value",
+        identifiers: ["first-arg-identifier"],
         identifier: "first-arg-identifier",
         bindingId: "first-arg-binding-id",
         instanceId: "first-arg-instance",
@@ -141,6 +146,7 @@ describe("defaultComponentResolvers", function() {
       const secondArgValue = "second-arg-value";
       const secondArg: DependencyNode = {
         type: "value",
+        identifiers: ["second-arg-identifier"],
         identifier: "second-arg-identifier",
         bindingId: "second-arg-binding-id",
         instanceId: "second-arg-instance",
@@ -156,9 +162,11 @@ describe("defaultComponentResolvers", function() {
     });
 
     it("throws on circular dependencies", function() {
+      const IdentifierA = Symbol("class-a");
       const classA: ConstructorDependencyNode = {
         type: "constructor",
-        identifier: Symbol("class-a"),
+        identifiers: [IdentifierA],
+        identifier: IdentifierA,
         bindingId: "class-a-binding",
         instanceId: "class-a-instance",
         ctor: stub() as any,
@@ -167,9 +175,11 @@ describe("defaultComponentResolvers", function() {
         ctorInjectionNodes: [],
         propInjectionNodes: new Map()
       };
+      const IdentifierB = Symbol("class-b");
       const classB: ConstructorDependencyNode = {
         type: "constructor",
-        identifier: "class-b-identifier",
+        identifiers: [IdentifierB],
+        identifier: IdentifierB,
         bindingId: "class-b-binding",
         instanceId: "class-b-instance",
         ctor: stub() as any,
@@ -204,6 +214,7 @@ describe("defaultComponentResolvers", function() {
     const returnValue = Symbol("return-value");
     const valueNode: ConstDependencyNode = {
       type: "value",
+      identifiers: [identifier],
       identifier,
       bindingId: "value-binding-id",
       instanceId: "value-instance-id",

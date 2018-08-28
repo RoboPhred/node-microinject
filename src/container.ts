@@ -23,7 +23,8 @@ export class Container {
   private _planner: DependencyGraphPlanner;
   private _resolver: BasicDependencyGraphResolver;
 
-  private _bindingMap = new Map<Identifier, BinderImpl[]>();
+  private _pendingBinders = new Set<BinderImpl>();
+  private _bindingMap = new Map<Identifier, Binding[]>();
 
   /**
    * Container to use if a binding is not find in this container.
@@ -70,27 +71,16 @@ export class Container {
    */
   bind<T>(identifier: Identifier<T>): Binder<T> {
     const binder = new BinderImpl<T>(identifier);
-    this._addBinder(identifier, binder);
-
-    // Check to see if this is an auto-bind injectable.
-    const autoIdentifiers = getProvidedIdentifiers(identifier);
-    for (let autoIdentifier of autoIdentifiers) {
-      this._addBinder(autoIdentifier, binder);
-    }
+    this._pendingBinders.add(binder);
 
     return binder;
   }
 
-  private _addBinder<T>(identifier: Identifier<T>, binder: BinderImpl<T>) {
-    let binders = this._bindingMap.get(identifier);
-    if (!binders) {
-      binders = [];
-      this._bindingMap.set(identifier, binders);
-    }
-    binders.push(binder);
-  }
-
   hasBinding(identifier: Identifier): boolean {
+    // TODO: The side effect of finalizing bindings
+    //  might interfere with public usage of this function.
+    this._finalizeBinders();
+
     const binders = this._bindingMap.get(identifier);
     return Boolean(binders && binders.length > 0);
   }
@@ -239,11 +229,25 @@ export class Container {
   }
 
   private _resolveBindings(identifier: Identifier): Binding[] {
-    const binders = this._bindingMap.get(identifier);
-    if (binders != null) {
-      return binders.map(x => x._getBinding());
+    debugger;
+    this._finalizeBinders();
+
+    return this._bindingMap.get(identifier) || [];
+  }
+
+  private _finalizeBinders() {
+    for (const binder of this._pendingBinders) {
+      const binding = binder._getBinding();
+      for (const identifier of binding.identifiers) {
+        let bindingGroup = this._bindingMap.get(identifier);
+        if (bindingGroup == undefined) {
+          bindingGroup = [];
+          this._bindingMap.set(identifier, bindingGroup);
+        }
+        bindingGroup.push(binding);
+      }
     }
-    return [];
+    this._pendingBinders.clear();
   }
 
   /**

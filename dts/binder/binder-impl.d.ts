@@ -11,10 +11,17 @@ import { Binding } from "./binding";
  * Care must be taken to ensure members of this class cannot be called in a contradictory manner.
  */
 export declare class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
-    private _identifier;
-    private _binding;
+    private _primaryIdentifier;
     private _isFinalized;
-    constructor(_identifier: Identifier<T>);
+    private _identifiers;
+    private _bindingId;
+    private _type;
+    private _ctor;
+    private _factory;
+    private _value;
+    private _definesScope;
+    private _createInScope;
+    constructor(_primaryIdentifier: Identifier<T>);
     to(ctor: Newable): ScopedBinder;
     toSelf(): ScopedBinder;
     toDynamicValue(factory: (context: Context) => any): ScopedBinder;
@@ -40,8 +47,8 @@ export declare class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
      */
     asScope(scope?: Scope): void;
     private _tryAutoBind();
+    private _ensureCanBind();
     private _ensureScopeable();
     private _finalizeBinding();
-    private _ensureCanBind();
     _getBinding(): Binding;
 }
