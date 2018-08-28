@@ -187,7 +187,7 @@ describe("@BinderImpl", function() {
     });
 
     describe("auto-bind", function() {
-      it("uses the scope specified by the @inScope decoration", function() {
+      it("uses the scope specified by the @inScope decorator", function() {
         const binder = new BinderImpl(TestAutoBoundClass);
         let binding = binder._getBinding();
         expect(binding)
@@ -209,7 +209,7 @@ describe("@BinderImpl", function() {
           .equals(SingletonScope);
       });
 
-      it("overrides the @isScope decoration", function() {
+      it("overrides the @isScope decorator", function() {
         const binder = new BinderImpl(identifier);
         binder.to(TestAutoBoundClass);
         binder.inSingletonScope();
@@ -252,7 +252,7 @@ describe("@BinderImpl", function() {
         expect(binding).property("createInScope").to.be.null;
       });
 
-      it("overrides the @isScope decorationscope", function() {
+      it("overrides the @isScope decorator", function() {
         const binder = new BinderImpl(identifier);
         binder.to(TestAutoBoundClass);
         binder.inTransientScope();
@@ -297,7 +297,7 @@ describe("@BinderImpl", function() {
           .equals(scope);
       });
 
-      it("overrides the @inScope decoration", function() {
+      it("overrides the @inScope decorator", function() {
         const binder = new BinderImpl(identifier);
         binder.to(TestAutoBoundClass);
         binder.inScope(scope);
@@ -365,7 +365,7 @@ describe("@BinderImpl", function() {
     });
 
     describe("auto-bind", function() {
-      it("uses the scope specified by the @asScope decoration", function() {
+      it("uses the scope specified by the @asScope decorator", function() {
         const binder = new BinderImpl(TestAutoBoundClass);
         let binding = binder._getBinding();
         expect(binding)
@@ -389,7 +389,7 @@ describe("@BinderImpl", function() {
           .equals(scope);
       });
 
-      it("overrides the asScope decoration", function() {
+      it("overrides the asScope decorator", function() {
         const binder = new BinderImpl(identifier);
         binder.to(TestAutoBoundClass);
         binder.asScope(scope);
@@ -415,7 +415,7 @@ describe("@BinderImpl", function() {
           .equals(identifier);
       });
 
-      it("overrides the asScope decoration", function() {
+      it("overrides the asScope decorator", function() {
         const binder = new BinderImpl(identifier);
         binder.to(TestAutoBoundClass);
         binder.asScope();
