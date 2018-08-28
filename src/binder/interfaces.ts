@@ -14,6 +14,12 @@ export interface Binder<T = any> {
   to<N extends T>(construct: Newable<N>): ScopedBinder;
 
   /**
+   * Binds the identifier to itself.
+   * Only valid for constructor identifiers.
+   */
+  toSelf(): ScopedBinder;
+
+  /**
    * Binds the service identifier to a value factory function.
    * @param factory The factory function to provide the value.
    */
