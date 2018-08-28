@@ -4,6 +4,7 @@ import { Binder } from "./binder";
 export declare class Container {
     private _planner;
     private _resolver;
+    private _pendingBinders;
     private _bindingMap;
     /**
      * Container to use if a binding is not find in this container.
@@ -28,7 +29,6 @@ export declare class Container {
      * @returns A binder object to configure the binding.
      */
     bind<T>(identifier: Identifier<T>): Binder<T>;
-    private _addBinder<T>(identifier, binder);
     hasBinding(identifier: Identifier): boolean;
     /**
      * Clears out knowledge of all resolved identifiers and scopes.
@@ -74,6 +74,7 @@ export declare class Container {
      */
     has<T>(identifier: Identifier<T>): boolean;
     private _resolveBindings(identifier);
+    private _finalizeBinders();
     /**
      * Resolver for factory bindings.
      *

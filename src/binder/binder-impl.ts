@@ -20,9 +20,17 @@ import { BindingConfigurationError } from "./errors";
 
 import { Binder, ScopedBinder } from "./interfaces";
 
-import { isAutoBindFactory } from "./utils";
+import { isAutoBindFactory, getProvidedIdentifiers } from "./utils";
 
-import { Binding, InstanceCreatorBinding } from "./binding";
+import {
+  Binding,
+  InstanceCreatorBinding,
+  BindingType,
+  FactoryBinding,
+  BindingFactoryFunction,
+  ConstructorBinding,
+  ConstBinding
+} from "./binding";
 
 /**
  * The implementation of the Binder fluent api.
@@ -33,30 +41,41 @@ import { Binding, InstanceCreatorBinding } from "./binding";
  * Care must be taken to ensure members of this class cannot be called in a contradictory manner.
  */
 export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
-  private _binding: Binding | null = null;
   private _isFinalized = false;
 
-  constructor(private _identifier: Identifier<T>) {}
+  private _identifiers: Identifier[] = [];
+  private _bindingId: string = uuidv4();
+  private _type: BindingType | undefined;
+  private _ctor: Newable | undefined;
+  private _factory: BindingFactoryFunction | undefined;
+  private _value: any;
+  private _definesScope: Scope | undefined;
+  private _createInScope: Scope | undefined;
+
+  constructor(private _primaryIdentifier: Identifier<T>) {
+    if (_primaryIdentifier == null) {
+      throw new TypeError("Identifier must not be null or undefined.");
+    }
+
+    this._identifiers.push(_primaryIdentifier);
+
+    const aliases = getProvidedIdentifiers(_primaryIdentifier);
+    this._identifiers.push(...aliases);
+  }
 
   to(ctor: Newable): ScopedBinder {
     if (typeof ctor !== "function") {
       throw new TypeError("Target must be a constructor.");
     }
     this._ensureCanBind();
-    this._binding = {
-      type: "constructor",
-      bindingId: uuidv4(),
-      ctor,
-      ctorInjections: getConstructorInjections(ctor),
-      propInjections: getPropertyInjections(ctor)
-    };
-
+    this._type = "constructor";
+    this._ctor = ctor;
     return this;
   }
 
   toSelf(): ScopedBinder {
-    const ctor = this._identifier;
-    if (typeof this._identifier !== "function") {
+    const ctor = this._primaryIdentifier;
+    if (typeof this._primaryIdentifier !== "function") {
       throw new TypeError("Identifier must be a constructor.");
     }
     return this.to(ctor as Newable);
@@ -68,22 +87,16 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
     }
     this._ensureCanBind();
 
-    this._binding = {
-      type: "factory",
-      bindingId: uuidv4(),
-      factory
-    };
+    this._type = "factory";
+    this._factory = factory;
 
     return this;
   }
 
   toConstantValue(value: any): void {
     this._ensureCanBind();
-    this._binding = {
-      type: "value",
-      bindingId: uuidv4(),
-      value
-    };
+    this._type = "value";
+    this._value = value;
   }
 
   /**
@@ -94,13 +107,12 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
     this._ensureScopeable();
 
     // Can only be an instance creator from a default binding.
-    const binding = this._binding as InstanceCreatorBinding;
-    if (binding.createInScope !== undefined) {
+    if (this._createInScope !== undefined) {
       throw new BindingConfigurationError(
         "Binding target scope has already been established."
       );
     }
-    binding.createInScope = SingletonScope;
+    this._createInScope = SingletonScope;
   }
 
   /**
@@ -112,13 +124,12 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
     this._ensureScopeable();
 
     // Can only be an instance creator from a default binding.
-    const binding = this._binding as InstanceCreatorBinding;
-    if (binding.createInScope !== undefined) {
+    if (this._createInScope !== undefined) {
       throw new BindingConfigurationError(
         "Binding targetscope has already been established."
       );
     }
-    binding.createInScope = null;
+    this._createInScope = null;
   }
 
   /**
@@ -133,14 +144,12 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
     this._tryAutoBind();
     this._ensureScopeable();
 
-    // Can only be an instance creator from a default binding.
-    const binding = this._binding as InstanceCreatorBinding;
-    if (binding.createInScope !== undefined) {
+    if (this._createInScope !== undefined) {
       throw new BindingConfigurationError(
         "Binding target scope has already been established."
       );
     }
-    binding.createInScope = scope;
+    this._createInScope = scope;
   }
 
   /**
@@ -156,44 +165,58 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
     this._tryAutoBind();
     this._ensureScopeable();
 
-    const binding = this._binding as InstanceCreatorBinding;
-    if (binding.definesScope !== undefined) {
+    if (this._definesScope !== undefined) {
       throw new BindingConfigurationError(
         "Binding scope creation has already been established."
       );
     }
-    binding.definesScope = scope;
+    this._definesScope = scope;
   }
 
   private _tryAutoBind(): void {
-    if (!this._binding) {
-      if (typeof this._identifier !== "function") {
+    if (!this._type) {
+      if (typeof this._primaryIdentifier !== "function") {
         throw new BindingConfigurationError(
           `Binding for ${identifierToString(
-            this._identifier
+            this._primaryIdentifier
           )} was never established.  Auto-binding can only be used on injectable class constructors.`
         );
       }
 
-      if (isInjectable(this._identifier)) {
-        const ctor = this._identifier as Newable<T>;
+      if (isInjectable(this._primaryIdentifier)) {
+        const ctor = this._primaryIdentifier as Newable<T>;
         this.to(ctor);
-      } else if (isAutoBindFactory(this._identifier)) {
-        const factory = this._identifier as ServiceFactory;
+      } else if (isAutoBindFactory(this._primaryIdentifier)) {
+        const factory = this._primaryIdentifier as ServiceFactory;
         this.toDynamicValue(factory);
       } else {
         // This condition would throw for container.create(ctor), but we can give a more useful error message by knowing it was an auto-bind.
         throw new BindingConfigurationError(
           `Binding for identifier "${identifierToString(
-            this._identifier
+            this._primaryIdentifier
           )}" was never established.  Only @Factory functions or @Injectable classes may be auto-bound.`
         );
       }
     }
   }
 
+  private _ensureCanBind() {
+    if (this._type != null) {
+      throw new BindingConfigurationError(
+        `Cannot reconfigure binding for ${identifierToString(
+          this._primaryIdentifier
+        )}: Binding already established.`
+      );
+    }
+  }
+
   private _ensureScopeable() {
-    if (!this._binding || this._binding.type === "value") {
+    if (this._type == null) {
+      throw new BindingConfigurationError(
+        "Cannot scope a binding that has not yet been established."
+      );
+    }
+    if (this._type === "value") {
       throw new BindingConfigurationError("Value bindings cannot be scoped.");
     }
   }
@@ -209,7 +232,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
     // This will never happen, but we cannot tell typescript that
     //  _ensureOrAutoBind always creates a binding.  Especially as it does it
     //  in an offhand way through .to and .toDynamicValue
-    if (!this._binding) {
+    if (!this._type) {
       return;
     }
 
@@ -219,13 +242,13 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
     // _ensureOrAutoBind will turn the first form into the second, so we just have
     //  to check the binding type to find the auto bind source.
     let autoBindSource: any;
-    switch (this._binding.type) {
+    switch (this._type) {
       case "constructor": {
-        autoBindSource = this._binding.ctor;
+        autoBindSource = this._ctor!;
         break;
       }
       case "factory": {
-        autoBindSource = this._binding.factory;
+        autoBindSource = this._factory!;
         break;
       }
       default: {
@@ -236,37 +259,64 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
 
     // Again we are checking binding.type to make typescript happy.
     //  It will always not be value due to the switch statement above.
-    if (autoBindSource && this._binding.type !== "value") {
-      if (this._binding.definesScope === undefined) {
-        this._binding.definesScope = getAsScope(autoBindSource) || null;
+    if (autoBindSource && this._type !== "value") {
+      if (this._definesScope === undefined) {
+        this._definesScope = getAsScope(autoBindSource) || null;
       }
 
       // While we could handle this logic in .asScope(), we still
       //  need it here to support the auto-bind @AsScope() decorator.
-      if (this._binding.definesScope === SelfIdentifiedScopeSymbol) {
-        this._binding.definesScope = this._identifier;
+      if (this._definesScope === SelfIdentifiedScopeSymbol) {
+        this._definesScope = this._primaryIdentifier;
       }
 
-      if (this._binding.createInScope === undefined) {
-        this._binding.createInScope = getInScope(autoBindSource) || null;
+      if (this._createInScope === undefined) {
+        this._createInScope = getInScope(autoBindSource) || null;
       }
     }
   }
 
-  private _ensureCanBind() {
-    if (this._binding != null) {
-      throw new BindingConfigurationError(
-        `Cannot reconfigure binding for ${identifierToString(
-          this._identifier
-        )}: Binding already established.`
-      );
-    }
-  }
-
-  // TODO: It may be desirable to find a way of removing access to this from outside the library.
   _getBinding(): Binding {
     this._finalizeBinding();
 
-    return this._binding!;
+    switch (this._type) {
+      case "constructor": {
+        const binding: ConstructorBinding = {
+          type: "constructor",
+          identifiers: this._identifiers,
+          bindingId: this._bindingId,
+          ctor: this._ctor!,
+          ctorInjections: getConstructorInjections(this._ctor),
+          propInjections: getPropertyInjections(this._ctor),
+          createInScope: this._createInScope,
+          definesScope: this._definesScope
+        };
+        return binding;
+      }
+      case "factory": {
+        const binding: FactoryBinding = {
+          type: "factory",
+          identifiers: this._identifiers,
+          bindingId: this._bindingId,
+          factory: this._factory!,
+          createInScope: this._createInScope,
+          definesScope: this._definesScope
+        };
+        return binding;
+      }
+      case "value": {
+        const binding: ConstBinding = {
+          type: "value",
+          identifiers: this._identifiers,
+          bindingId: this._bindingId,
+          value: this._value
+        };
+        return binding;
+      }
+    }
+
+    throw new BindingConfigurationError(
+      `Unknown binding type "${this._type}".`
+    );
   }
 }
