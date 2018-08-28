@@ -9,6 +9,7 @@
 ## Refactors
 
 - Clean up planner logic.
+- Identifiers are tracked by the Binder, rather than the container.
 
 # 0.5.0
 
