@@ -7,7 +7,7 @@ This means:
 - No requirements for the invoking library to initialize reflect-metadata.
 - Support dependency injection when used on classes derived from non-DI-aware classes.
 - No monkey patching anything external to the library.
-- Mimimum overhead.
+- Minimum overhead.
 - Works if multiple libraries independently try to use it.
 - Works if npm installs multiple copies of the library.
 
