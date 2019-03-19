@@ -16,8 +16,6 @@ first three requirements.  The original incarnation of this library was born as 
 the subset of InversifyJS my projects were using.
 Despite this, microinject is not a fork.  It has been written from the ground up, and borrows InversifyJS conventions where appropriate.
 
-This incarnation of the library is once again a rewrite, as the original has been lost.
-
 # Design philosophy
 
 This library intends to remain minimalist while still covering a decent set of use cases for dependency injection.
