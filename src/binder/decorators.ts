@@ -1,24 +1,6 @@
-import { Identifier, ServiceFactory } from "../interfaces";
+import { Identifier } from "../interfaces";
 
-import { AutobindAsFactoryKey, AutobindIdentifiersKey } from "./symbols";
-
-/**
- * Marks the function as a factory function when auto-binding.
- * @param identifier An optional identifier to auto-bind this function as.  This is a shorthand for @Provide(identifier)
- */
-export function factory<TFunction extends ServiceFactory<T>, T = any>(
-  identifier?: Identifier
-): (target: TFunction) => void {
-  return function(target: any) {
-    target[AutobindAsFactoryKey] = true;
-    if (identifier) {
-      if (target[AutobindIdentifiersKey] == null) {
-        target[AutobindIdentifiersKey] = [];
-      }
-      target[AutobindIdentifiersKey].push(identifier);
-    }
-  };
-}
+import { AutobindIdentifiersKey } from "./symbols";
 
 /**
  * Specify that the given constructor or function provides the given identifier.

@@ -20,11 +20,10 @@ import { BindingConfigurationError } from "./errors";
 
 import { Binder, ScopedBinder } from "./interfaces";
 
-import { isAutoBindFactory, getProvidedIdentifiers } from "./utils";
+import { getProvidedIdentifiers } from "./utils";
 
 import {
   Binding,
-  InstanceCreatorBinding,
   BindingType,
   FactoryBinding,
   BindingFactoryFunction,
@@ -186,15 +185,12 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
       if (isInjectable(this._primaryIdentifier)) {
         const ctor = this._primaryIdentifier as Newable<T>;
         this.to(ctor);
-      } else if (isAutoBindFactory(this._primaryIdentifier)) {
-        const factory = this._primaryIdentifier as ServiceFactory;
-        this.toDynamicValue(factory);
       } else {
         // This condition would throw for container.create(ctor), but we can give a more useful error message by knowing it was an auto-bind.
         throw new BindingConfigurationError(
           `Binding for identifier "${identifierToString(
             this._primaryIdentifier
-          )}" was never established.  Only @Factory functions or @Injectable classes may be auto-bound.`
+          )}" was never established.  Only @Injectable classes may be auto-bound.`
         );
       }
     }

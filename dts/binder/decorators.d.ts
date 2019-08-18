@@ -1,9 +1,4 @@
-import { Identifier, ServiceFactory } from "../interfaces";
-/**
- * Marks the function as a factory function when auto-binding.
- * @param identifier An optional identifier to auto-bind this function as.  This is a shorthand for @Provide(identifier)
- */
-export declare function factory<TFunction extends ServiceFactory<T>, T = any>(identifier?: Identifier): (target: TFunction) => void;
+import { Identifier } from "../interfaces";
 /**
  * Specify that the given constructor or function provides the given identifier.
  * This is used when auto-binding is invoked by passing the object directly as the identifier.

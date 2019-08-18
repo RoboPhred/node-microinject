@@ -4,8 +4,6 @@ import { Identifier } from "../interfaces";
 
 import { injectable, inject } from "../injection";
 
-import { factory } from "./decorators";
-
 import { Scope, SingletonScope, inScope, asScope } from "../scope";
 
 import { BinderImpl } from "./binder-impl";
@@ -72,29 +70,6 @@ describe("@BinderImpl", function() {
           expect(binding)
             .property("ctor")
             .equals(TestAutoBindClass);
-        });
-      });
-
-      describe("with a @factory function identifier", function() {
-        function testFactory() {}
-        factory()(testFactory);
-
-        let binding: Binding;
-        before(function() {
-          const binder = new BinderImpl(testFactory);
-          binding = binder._getBinding();
-        });
-
-        it("generates a factory binding", function() {
-          expect(binding)
-            .property("type")
-            .equals("factory");
-        });
-
-        it("sets binding.factory to the factory", function() {
-          expect(binding)
-            .property("factory")
-            .equals(testFactory);
         });
       });
     });
