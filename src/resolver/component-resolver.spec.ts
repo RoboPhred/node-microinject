@@ -53,7 +53,7 @@ describe("defaultComponentResolvers", function() {
       resolvedValue = defaultComponentResolvers.factory(
         identifier,
         factoryNode,
-        stubResolver
+        stubResolver as DependencyGraphResolver
       );
     });
 
@@ -94,7 +94,11 @@ describe("defaultComponentResolvers", function() {
         ctorInjectionNodes: args,
         propInjectionNodes: new Map()
       };
-      return defaultComponentResolvers.ctor(identifier, creator, stubResolver);
+      return defaultComponentResolvers.ctor(
+        identifier,
+        creator,
+        stubResolver as DependencyGraphResolver
+      );
     }
 
     beforeEach(function() {
@@ -204,7 +208,11 @@ describe("defaultComponentResolvers", function() {
       stubResolver.getResolveStack.returns([classA, classB]);
 
       expect(() =>
-        defaultComponentResolvers.ctor(identifier, classB, stubResolver)
+        defaultComponentResolvers.ctor(
+          identifier,
+          classB,
+          stubResolver as DependencyGraphResolver
+        )
       ).to.throw(DependencyResolutionError, /cyclic/);
     });
   });
@@ -226,7 +234,7 @@ describe("defaultComponentResolvers", function() {
       resolvedValue = defaultComponentResolvers.const(
         identifier,
         valueNode,
-        stubResolver
+        stubResolver as DependencyGraphResolver
       );
     });
 

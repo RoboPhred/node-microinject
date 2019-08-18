@@ -40,7 +40,7 @@ export declare class Container {
      */
     reset(): void;
     create<T>(ctor: Newable<T>): T;
-    private _create<T>(ctor, resolver);
+    private _create;
     /**
      * Gets or creates the value represented by the identifier.
      * This method will throw DependencyResolutionError if there is not exactly one binding for the identifier.
@@ -48,7 +48,7 @@ export declare class Container {
      * @returns The object for the given identifier.
      */
     get<T>(identifier: Identifier<T>): T;
-    private _get<T>(identifier, resolver?);
+    private _get;
     /**
      * Gets all bound objects for an identifier.  This may create the objects if necessary depending on scope and previous creations.
      * This method will throw IdentifierNotBoundError if no bindings exist for the identifier.
@@ -56,7 +56,7 @@ export declare class Container {
      * @returns An array of all objects for the given identifier.
      */
     getAll<T>(identifier: Identifier<T>): T[];
-    private _getAll<T>(identifier, resolver?);
+    private _getAll;
     /**
      * Gets an array of values bound to the identifier.
      * If none are found, an empty array is returned.
@@ -67,14 +67,14 @@ export declare class Container {
      * @param identifier The identifier to get services for.
      * @param resolver The resolver to use to resolve instances of the identifier.
      */
-    private _getAllNoThrow<T>(identifier, resolver?);
+    private _getAllNoThrow;
     /**
      * Checks if the given identifier is known to the container.
      * @param identifier The identifier to check for.
      */
     has<T>(identifier: Identifier<T>): boolean;
-    private _resolveBindings(identifier);
-    private _finalizeBinders();
+    private _resolveBindings;
+    private _finalizeBinders;
     /**
      * Resolver for factory bindings.
      *
@@ -85,5 +85,5 @@ export declare class Container {
      * @param creator The factory component creator to be used to resolve the value.
      * @param childResolver A resolver capable of resolving correctly scoped child objects.
      */
-    private _factoryResolver(_identifier, creator, childResolver);
+    private _factoryResolver;
 }

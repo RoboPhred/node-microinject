@@ -86,10 +86,10 @@ export declare class BasicDependencyGraphResolver implements DependencyGraphReso
      * @param node The dependency graph node representing the object to resolve.
      */
     resolveInstance<T = any>(node: DependencyNode): T;
-    private _getNodeInstance(node);
-    private _getScopedNodeInstance(node);
-    private _createNodeInstance(node, register?);
-    private _postInstantiateNode(node, resolver, instance);
-    private _instantiateOwnedNodeInstance(node);
-    private _createChildResolver(scopeOwner?);
+    private _getNodeInstance;
+    private _getScopedNodeInstance;
+    private _createNodeInstance;
+    private _postInstantiateNode;
+    private _instantiateOwnedNodeInstance;
+    private _createChildResolver;
 }
