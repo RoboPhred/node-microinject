@@ -1,6 +1,6 @@
 import uuidv4 = require("uuid/v4");
 
-import { Context, Identifier, Newable, ServiceFactory } from "../interfaces";
+import { Context, Identifier, Newable } from "../interfaces";
 
 import { Scope, SingletonScope } from "../scope";
 

@@ -69,7 +69,7 @@ const greeter = container.get(Greeter);
 greeter.greet();
 ```
 
-### Injecting other identifiers into a class instance
+### Injecting identifiers by class constructor
 
 Now that we have a class being instantiated, it's time to apply some true dependency injection and request some identifiers from the class itself. This is done with the `@inject()` decorator.
 
@@ -86,6 +86,30 @@ class NamedGreeter implements Greeter {
   constructor(
     @inject(Name) private _name: string
   ) { }
+
+  greet() {
+    console.log("Hello", this._name);
+  }
+}
+
+container.bind(Greeter).to(NamedGreeter);
+
+const greeter = container.get(Greeter);
+greeter.greet();
+```
+
+### Injecting identifiers by properties
+
+In addition to constructor injections, property injections are also supported.
+
+```js
+import { Identifier, injectable, inject } from "microinject";
+
+@injectable()
+class NamedGreeter implements Greeter {
+
+  @inject(Name)
+  private _name: string;
 
   greet() {
     console.log("Hello", this._name);
