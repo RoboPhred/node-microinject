@@ -5,6 +5,7 @@ export declare type BindingType = "value" | "factory" | "constructor";
 export interface BindingCore {
     type: BindingType;
     bindingId: string;
+    identifiers: Identifier[];
 }
 export interface ConstBinding extends BindingCore {
     type: "value";
@@ -14,9 +15,12 @@ export interface InstanceCreatorBinding extends BindingCore {
     definesScope?: Scope;
     createInScope?: Scope;
 }
+export interface BindingFactoryFunction {
+    (context: Context): any;
+}
 export interface FactoryBinding extends InstanceCreatorBinding {
     type: "factory";
-    factory(context: Context): any;
+    factory: BindingFactoryFunction;
 }
 export interface ConstructorBinding extends InstanceCreatorBinding {
     type: "constructor";

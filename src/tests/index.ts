@@ -1,7 +1,6 @@
-
 // Integration tests
 
 describe("Integration", function() {
-    require("./auto-bind");
-    require("./injection");
+  require("./auto-bind");
+  require("./injection");
 });

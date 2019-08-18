@@ -1,12 +1,11 @@
-
 import { Binder } from "./binder";
 
 export class ContainerModule {
-    constructor(private _binder: (bind: (id: any) => Binder) => void) {}
+  constructor(private _binder: (bind: (id: any) => Binder) => void) {}
 
-    registry(bind: (id: any) => Binder): void {
-        this._binder(bind);
-    }
+  registry(bind: (id: any) => Binder): void {
+    this._binder(bind);
+  }
 }
 
 /**
@@ -14,7 +13,7 @@ export class ContainerModule {
  * @param modules The modules to combine.
  */
 export function composeModules(...modules: ContainerModule[]): ContainerModule {
-    return new ContainerModule(bind => {
-        modules.forEach(x => x.registry(bind));
-    });
+  return new ContainerModule(bind => {
+    modules.forEach(x => x.registry(bind));
+  });
 }

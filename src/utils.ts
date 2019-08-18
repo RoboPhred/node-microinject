@@ -1,18 +1,13 @@
+import { Identifier } from "./interfaces";
 
-import {
-    Identifier
-} from "./interfaces";
-
-import {
-    Scope
-} from "./scope";
+import { Scope } from "./scope";
 
 /**
  * Returns a string representation of the identifier.
  * @param identifier The identifier to stringify.
  */
 export function identifierToString(identifier: Identifier): string {
-    return String(identifier);
+  return String(identifier);
 }
 
 /**
@@ -20,5 +15,5 @@ export function identifierToString(identifier: Identifier): string {
  * @param scope The scope to stringify.
  */
 export function scopeToString(scope: Scope): string {
-    return String(scope);
+  return String(scope);
 }

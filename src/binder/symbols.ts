@@ -1,11 +1,7 @@
-
-
-import {
-    getSymbol as getParentSymbol
-} from "../symbols";
+import { getSymbol as getParentSymbol } from "../symbols";
 
 function getSymbol(id: string) {
-    return getParentSymbol(`/binder/${id}`);
+  return getParentSymbol(`/binder/${id}`);
 }
 
 /**

@@ -1,9 +1,10 @@
-import { Identifier } from "./interfaces";
+import { Identifier, Newable } from "./interfaces";
 import { ContainerModule } from "./module";
 import { Binder } from "./binder";
 export declare class Container {
     private _planner;
     private _resolver;
+    private _pendingBinders;
     private _bindingMap;
     /**
      * Container to use if a binding is not find in this container.
@@ -28,7 +29,6 @@ export declare class Container {
      * @returns A binder object to configure the binding.
      */
     bind<T>(identifier: Identifier<T>): Binder<T>;
-    private _addBinder<T>(identifier, binder);
     hasBinding(identifier: Identifier): boolean;
     /**
      * Clears out knowledge of all resolved identifiers and scopes.
@@ -39,6 +39,8 @@ export declare class Container {
      * configured bindings remain configured.
      */
     reset(): void;
+    create<T>(ctor: Newable<T>): T;
+    private _create<T>(ctor, resolver);
     /**
      * Gets or creates the value represented by the identifier.
      * This method will throw DependencyResolutionError if there is not exactly one binding for the identifier.
@@ -72,6 +74,7 @@ export declare class Container {
      */
     has<T>(identifier: Identifier<T>): boolean;
     private _resolveBindings(identifier);
+    private _finalizeBinders();
     /**
      * Resolver for factory bindings.
      *

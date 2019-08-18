@@ -22,13 +22,15 @@ export declare class DependencyGraphPlanner {
      * @param identifier The identifier to get a plan for.
      * @param binding An optional binding to use for the identifier.  Useful if multiple bindings may apply.
      */
-    getPlan(identifier: Identifier, binding?: Binding): DependencyNode;
+    getPlan(identifier: Identifier, binding?: Binding, noCache?: boolean): DependencyNode;
     private _getBindings(identifier);
     private _getDependencyNode(identifier, binding, scopeInstances);
     private _createDependencyNode(identifier, binding, scopeInstances);
     private _createFactoryNode(identifier, binding, scopeInstances);
     private _createConstructorNode(identifier, binding, scopeInstances);
-    private _createValueInjection(injection, childScopeInstances);
+    private _planInjection(injection, childScopeInstances);
+    private _planAllValuesInjection(injection, childScopeInstances);
+    private _planSingleValueInjection(injection, childScopeInstances);
     private _getScopedInstance(identifier, binding, scopeInstances);
     /**
      * Try to apply scoping data to the dependency node.
@@ -40,5 +42,5 @@ export declare class DependencyGraphPlanner {
      * @param scopeInstances The current set of scope instances.
      * @returns The set of scope instances to use for any child nodes.
      */
-    private _tryApplyScoping(identifier, binding, node, scopeInstances);
+    private _tryApplyScoping(identifier, node, scopeInstances);
 }
