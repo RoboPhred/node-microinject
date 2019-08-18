@@ -6,7 +6,7 @@ export declare type Identifier<T = any> = string | symbol | AutoBoundIdentifier<
 /**
  * Identifiers capable of being automatically bound based on decorators.
  */
-export declare type AutoBoundIdentifier<T = any> = Newable<T> | ServiceFactory<T>;
+export declare type AutoBoundIdentifier<T = any> = Newable<T>;
 /**
  * A constructor creating a new object of type T.
  */

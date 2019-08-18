@@ -43,13 +43,6 @@ describe("@BinderImpl", function() {
         expect(() => binder._getBinding()).to.throw(BindingConfigurationError);
       });
 
-      it("throws if the target is a non-factory function", function() {
-        function testFactory() {}
-        const binder = new BinderImpl(testFactory);
-
-        expect(() => binder._getBinding()).to.throw(BindingConfigurationError);
-      });
-
       describe("with an @injectable class identifier", function() {
         @injectable(identifier)
         class TestAutoBindClass {}
