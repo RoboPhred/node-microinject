@@ -14,14 +14,16 @@ This means:
 - No requirements for the invoking library to initialize reflect-metadata.
 - Support dependency injection when used on classes derived from non-DI-aware classes.
 - No monkey patching anything external to the library.
-- Mimimum overhead.
+- Minimum overhead.
 - Works if multiple libraries independently try to use it.
 - Works if npm installs multiple copies of the library.
 
-This project has its origins in [InversifyJS](https://github.com/inversify/InversifyJS) and its failure to deal with these requirements. The original incarnation of this library was born as an api-compatible replacement to
-the subset of InversifyJS my projects were using. Despite this, microinject is not a fork. It has been written from the ground up, and borrows InversifyJS conventions where appropriate.
+Originally, I had used [InversifyJS](https://github.com/inversify/InversifyJS). However, it failed against the
+first three requirements. The original incarnation of this library was born as an api-compatible replacement to
+the subset of InversifyJS my projects were using.
+Despite this, microinject is not a fork. It has been written from the ground up, and borrows InversifyJS conventions where appropriate.
 
-## Design philosophy
+# Design philosophy
 
 This library intends to remain minimalist while still covering a decent set of use cases for dependency injection.
 As this is intended to be used transparently by middleware libraries, it will not receive features intended for

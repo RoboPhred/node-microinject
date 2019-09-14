@@ -5,6 +5,7 @@ exclude_patterns:
   - ".vscode"
   - "examples/"
   - "lib/"
+  - "dts/"
   - "node_modules/"
   - "src/**/*.spec.ts"
   - "src/**/tests/"
