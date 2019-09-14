@@ -32,6 +32,7 @@ application-level IoC.
 ## Common features with InversifyJS
 
 - `container.bind.to`.
+- `container.bind.toSelf`.
 - `container.bind.toConstantValue`.
 - `container.bind.toDynamicValue`.
 - _container.bind.toFactory_ identical to `container.bind.toDynamicValue`.
