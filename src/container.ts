@@ -229,7 +229,6 @@ export class Container {
   }
 
   private _resolveBindings(identifier: Identifier): Binding[] {
-    debugger;
     this._finalizeBinders();
 
     return this._bindingMap.get(identifier) || [];

@@ -1,3 +1,7 @@
+# 0.6.1
+
+- Remove debugger statement.
+
 # 0.6.0
 
 ## Features
