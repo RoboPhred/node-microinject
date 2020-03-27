@@ -1,3 +1,7 @@
+# vNext
+
+- Add `provides()` to binder to allow binding multiple identifiers to one resolution.
+
 # 0.6.1
 
 - Remove debugger statement.
@@ -6,7 +10,7 @@
 
 ## Features
 
-- Add `@all()` decorator to specify all matching targets. Equivalent to`@inject(identifier, { all: true})`
+- Add `@all()` decorator to specify all matching targets. Equivalent to`@inject(identifier, { all: true })`
 - Add `Container.create` and factory `context.create` to directly instantiate and inject an arbitrary constructor.
 - Add `bind(Constructor).toSelf()`.
 

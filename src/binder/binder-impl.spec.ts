@@ -419,4 +419,29 @@ describe("@BinderImpl", function() {
       });
     });
   });
+
+  describe(".provides()", function() {
+    class TestBlankClass {}
+
+    const Identifier1 = Symbol("Identifier 1");
+    const Identifier2 = Symbol("Identifier 2");
+
+    let binding: Binding;
+    before(function() {
+      const binder = new BinderImpl(identifier);
+      binder
+        .to(TestBlankClass)
+        .provides(Identifier1)
+        .provides(Identifier2);
+      binding = binder._getBinding();
+      binding.identifiers;
+    });
+
+    it("attaches the additional identifiers", function() {
+      expect(binding)
+        .property("identifiers")
+        .contains(Identifier1)
+        .contains(Identifier2);
+    });
+  });
 });

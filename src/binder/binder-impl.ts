@@ -18,7 +18,7 @@ import { identifierToString } from "../utils";
 
 import { BindingConfigurationError } from "./errors";
 
-import { Binder, ScopedBinder } from "./interfaces";
+import { Binder, ScopedBinder, ConfiguredBinder } from "./interfaces";
 
 import { getProvidedIdentifiers } from "./utils";
 
@@ -39,7 +39,8 @@ import {
  *
  * Care must be taken to ensure members of this class cannot be called in a contradictory manner.
  */
-export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
+export class BinderImpl<T = any>
+  implements Binder<T>, ScopedBinder, ConfiguredBinder {
   private _isFinalized = false;
 
   private _identifiers: Identifier[] = [];
@@ -92,16 +93,17 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
     return this;
   }
 
-  toConstantValue(value: any): void {
+  toConstantValue(value: any): any {
     this._ensureCanBind();
     this._type = "value";
     this._value = value;
+    return this;
   }
 
   /**
    * Mark the binding as a singleton.  Only one will be created per container.
    */
-  inSingletonScope(): void {
+  inSingletonScope(): any {
     this._tryAutoBind();
     this._ensureScopeable();
 
@@ -112,13 +114,14 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
       );
     }
     this._createInScope = SingletonScope;
+    return this;
   }
 
   /**
    * Mark the binding as transient.  A new object will be created for every request.
    * This overrides any @Singleton() decorator if used on an identifier that would otherwise be auto-bound.
    */
-  inTransientScope(): void {
+  inTransientScope(): any {
     this._tryAutoBind();
     this._ensureScopeable();
 
@@ -129,13 +132,14 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
       );
     }
     this._createInScope = null;
+    return this;
   }
 
   /**
    * Create one instance of the bound service per specified scope.
    * @param scope The scope of the bound service.
    */
-  inScope(scope: Scope): void {
+  inScope(scope: Scope): any {
     if (scope == null) {
       throw new TypeError("Scope must be provided.");
     }
@@ -149,6 +153,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
       );
     }
     this._createInScope = scope;
+    return this;
   }
 
   /**
@@ -156,7 +161,7 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
    * If scope is not specified, the binding's identifier will be used as the scope identifier.
    * @param scope The optional scope identifier to use.  If not provided, the binding's identifier will be used.
    */
-  asScope(scope?: Scope): void {
+  asScope(scope?: Scope): any {
     if (!scope) {
       scope = SelfIdentifiedScopeSymbol;
     }
@@ -170,6 +175,12 @@ export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
       );
     }
     this._definesScope = scope;
+    return this;
+  }
+
+  provides(identifier: Identifier): any {
+    this._identifiers.push(identifier);
+    return this;
   }
 
   private _tryAutoBind(): void {

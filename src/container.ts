@@ -8,8 +8,6 @@ import { BinderImpl } from "./binder/binder-impl";
 
 import { Binding } from "./binder/binding";
 
-import { getProvidedIdentifiers } from "./binder/utils";
-
 import { DependencyGraphPlanner, FactoryDependencyNode } from "./planner";
 
 import {
