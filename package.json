@@ -9,7 +9,6 @@
     "format": "prettier --write \"./src/**/*.ts\"",
     "prebuild": "npm run clean",
     "build": "tsc -p src",
-    "lint": "tslint --project src -t verbose",
     "prewatch:build": "npm run clean",
     "watch:build": "tsc -p src -w",
     "watch:test": "mocha --require ./mocha.env.js --watch ./lib/**/*.spec.js ./lib/**/tests/index.js",
@@ -53,7 +52,6 @@
     "sinon": "^7.4.1",
     "sinon-chai": "^3.3.0",
     "source-map-support": "^0.5.13",
-    "tslint": "^5.18.0",
     "typescript": "^3.5.3"
   },
   "engines": {
