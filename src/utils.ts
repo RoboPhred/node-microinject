@@ -7,6 +7,9 @@ import { Scope } from "./scope";
  * @param identifier The identifier to stringify.
  */
 export function identifierToString(identifier: Identifier): string {
+  if (identifier.constructor) {
+    return identifier.constructor.name;
+  }
   return String(identifier);
 }
 

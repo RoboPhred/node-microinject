@@ -1,3 +1,7 @@
+# vNext
+
+- Improve error message when a class constructor binding is unresolved.
+
 # 0.7.1
 
 - Fix typings when `bind().provides` is used before the binding target.
