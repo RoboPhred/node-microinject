@@ -8,7 +8,7 @@ export interface Binder<T = any> {
      * Attach another identifier as being resolved by this binding.
      * @param identifier The identifier to resolve to this binding.
      */
-    provides(identifier: Identifier): ScopedBinder;
+    provides(identifier: Identifier): Binder<T>;
     /**
      * Binds the service identifier to a class constructor.
      * @param construct The constructor of the object to create.

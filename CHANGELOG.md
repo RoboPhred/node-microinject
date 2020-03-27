@@ -1,3 +1,7 @@
+# 0.7.1
+
+- Fix typings when `bind().provides` is used before the binding target.
+
 # 0.7.0
 
 - Add `provides()` to binder to allow binding multiple identifiers to one resolution.
