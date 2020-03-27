@@ -57,7 +57,7 @@ application-level IoC.
   - Inside a custom scope: `@inScope`.
   - Defining a custom scope: `@asScope`.
   - Can be overridden by standard binding api.
-- Multiple identifiers to a single binding (using `@provides`)
+- Multiple identifiers to a single binding (using `@provides` and `bind().provides()`)
 
 ## Missing features from InversifyJS
 
