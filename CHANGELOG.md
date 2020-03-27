@@ -1,4 +1,4 @@
-# vNext
+# 0.7.0
 
 - Add `provides()` to binder to allow binding multiple identifiers to one resolution.
 
