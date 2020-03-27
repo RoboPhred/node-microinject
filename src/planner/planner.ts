@@ -226,9 +226,7 @@ export class DependencyGraphPlanner {
         );
       } catch (err) {
         if (typeof err.message === "string") {
-          err.message = `Error injecting argument ${i} of bound constructor "${
-            ctor.name
-          }": ${err.message}`;
+          err.message = `Error injecting argument ${i} of bound constructor "${ctor.name}": ${err.message}`;
         }
         throw err;
       }
@@ -242,9 +240,7 @@ export class DependencyGraphPlanner {
         injectedValue = this._planInjection(injection, childScopeInstances);
       } catch (err) {
         if (typeof err.message === "string") {
-          err.message = `Error injecting property ${propName} of bound constructor "${
-            ctor.name
-          }": ${err.message}`;
+          err.message = `Error injecting property ${propName} of bound constructor "${ctor.name}": ${err.message}`;
         }
         throw err;
       }
@@ -259,9 +255,7 @@ export class DependencyGraphPlanner {
     injection: InjectionData,
     childScopeInstances: ScopeInstanceMap
   ): InjectedValue {
-    const { all, optional, identifier: dependencyIdentifier } = injection;
-
-    let injectedArg: InjectedValue;
+    const { all } = injection;
 
     if (all) {
       return this._planAllValuesInjection(injection, childScopeInstances);
