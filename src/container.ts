@@ -74,6 +74,17 @@ export class Container {
     return binder;
   }
 
+  /**
+   * Resolve all pending binding operations.
+   *
+   * This is useful to forcefully resolve all binding operations
+   * ahead of their actual use, and provides an ahead-of-time check
+   * for invalid bindings without waiting for those bindings to be used.
+   */
+  resolveAllBindings() {
+    this._finalizeBinders();
+  }
+
   hasBinding(identifier: Identifier): boolean {
     this._finalizeBinders(identifier);
 
@@ -245,6 +256,7 @@ export class Container {
         }
         bindingGroup.push(binding);
       }
+
       this._pendingBinders.delete(binder);
     }
   }

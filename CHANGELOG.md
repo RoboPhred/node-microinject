@@ -1,6 +1,8 @@
 # vNext
 
 - Improve error message when a class constructor binding is unresolved.
+- Only resolve relevant bindings when resolving identifiers.
+- Option to force resolve all bindings: `controller.resolveAllBindings`.
 
 # 0.7.1
 

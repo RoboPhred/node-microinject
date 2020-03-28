@@ -29,6 +29,14 @@ export declare class Container {
      * @returns A binder object to configure the binding.
      */
     bind<T>(identifier: Identifier<T>): Binder<T>;
+    /**
+     * Resolve all pending binding operations.
+     *
+     * This is useful to forcefully resolve all binding operations
+     * ahead of their actual use, and provides an ahead-of-time check
+     * for invalid bindings without waiting for those bindings to be used.
+     */
+    resolveAllBindings(): void;
     hasBinding(identifier: Identifier): boolean;
     /**
      * Clears out knowledge of all resolved identifiers and scopes.
