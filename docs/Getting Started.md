@@ -182,3 +182,8 @@ container.bind(CountingGreeter);
 const greeter = container.get(Greeter);
 greeter.greet();
 ```
+
+Note that binding values like this will create a deferred binding. As the binding framework also supports specifying bindings by chaining functions off of bind(), the framework cannot know that you are done with the binding chain.
+Instead, the framework will wait until an identifier is requested, then try to resolve all incomplete bindings relevant to that identifier. If the binding is incomplete or is missing decorators, this can result in an error being thrown late in the resolution process.
+
+To ensure all your bindings are correct, you can forcefully resolve all pending bindings using `container.resolveAllBindings()`.
