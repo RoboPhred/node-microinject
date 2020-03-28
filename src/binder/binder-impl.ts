@@ -63,6 +63,10 @@ export class BinderImpl<T = any>
     this._identifiers.push(...aliases);
   }
 
+  get identifiers(): Identifier[] {
+    return this._identifiers;
+  }
+
   to(ctor: Newable): ScopedBinder {
     if (typeof ctor !== "function") {
       throw new TypeError("Target must be a constructor.");

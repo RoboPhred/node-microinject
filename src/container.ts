@@ -75,9 +75,7 @@ export class Container {
   }
 
   hasBinding(identifier: Identifier): boolean {
-    // TODO: The side effect of finalizing bindings
-    //  might interfere with public usage of this function.
-    this._finalizeBinders();
+    this._finalizeBinders(identifier);
 
     const binders = this._bindingMap.get(identifier);
     return Boolean(binders && binders.length > 0);
@@ -227,13 +225,17 @@ export class Container {
   }
 
   private _resolveBindings(identifier: Identifier): Binding[] {
-    this._finalizeBinders();
+    this._finalizeBinders(identifier);
 
     return this._bindingMap.get(identifier) || [];
   }
 
-  private _finalizeBinders() {
+  private _finalizeBinders(identifier?: Identifier) {
     for (const binder of this._pendingBinders) {
+      if (identifier && binder.identifiers.indexOf(identifier) === -1) {
+        continue;
+      }
+
       const binding = binder._getBinding();
       for (const identifier of binding.identifiers) {
         let bindingGroup = this._bindingMap.get(identifier);
@@ -243,8 +245,8 @@ export class Container {
         }
         bindingGroup.push(binding);
       }
+      this._pendingBinders.delete(binder);
     }
-    this._pendingBinders.clear();
   }
 
   /**
