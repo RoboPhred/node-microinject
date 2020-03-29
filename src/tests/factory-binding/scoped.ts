@@ -43,7 +43,7 @@ describe("Scoped", function() {
       }
     }
 
-    @injectable(ScopeConsumerA)
+    @injectable()
     class ScopeConsumerAImpl implements ScopeConsumer {
       constructor(
         @inject(ScopedService) private _scopedService: InstanceIdProvider
@@ -54,7 +54,7 @@ describe("Scoped", function() {
       }
     }
 
-    @injectable(ScopeConsumerB)
+    @injectable()
     class ScopeConsumerBImpl implements ScopeConsumer {
       constructor(
         @inject(ScopedService) private _scopedService: InstanceIdProvider
@@ -65,8 +65,7 @@ describe("Scoped", function() {
       }
     }
 
-    @injectable(ScopedService)
-    @inScope(TargetScope)
+    @injectable()
     class ScopedServiceImpl implements InstanceIdProvider {
       private static nextInstanceId = 1;
       private _instanceId: number;
@@ -89,9 +88,12 @@ describe("Scoped", function() {
         return new ScopeRootImpl(consumerA, consumerB);
       })
       .asScope(TargetScope);
-    container.bind(ScopeConsumerAImpl);
-    container.bind(ScopeConsumerBImpl);
-    container.bind(ScopedServiceImpl);
+    container.bind(ScopeConsumerA).to(ScopeConsumerAImpl);
+    container.bind(ScopeConsumerB).to(ScopeConsumerBImpl);
+    container
+      .bind(ScopedService)
+      .to(ScopedServiceImpl)
+      .inScope(TargetScope);
 
     scopeRoots = Array.from(new Array(3), () => container.get(ScopeRoot));
   });

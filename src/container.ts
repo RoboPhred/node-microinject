@@ -117,11 +117,10 @@ export class Container {
 
   private _create<T>(ctor: Newable<T>, resolver: DependencyGraphResolver): T {
     // TODO: Allow passing values to decorated ctor args `@param("foo") myFoo: number`.
-    // TODO: Caching should be allowed if no args passed.  Store this binding in the map as create-${ctor.name}
     const binder = new BinderImpl(ctor);
     binder.to(ctor).inTransientScope();
     const binding = binder._getBinding();
-    const plan = this._planner.getPlan(ctor, binding, true);
+    const plan = this._planner.getPlan(ctor, binding);
     return resolver.resolveInstance(plan);
   }
 
