@@ -1,6 +1,6 @@
 import { Identifier } from "../interfaces";
 import { Binding } from "../binder/binding";
-import { DependencyNode } from "./interfaces";
+import { DependencyNode, ScopeInstanceMap } from "./interfaces";
 export declare type BindingResolver = (identifier: Identifier) => Binding[];
 export declare class DependencyGraphPlanner {
     private _bindingResolver;
@@ -16,7 +16,7 @@ export declare class DependencyGraphPlanner {
      * A map of scopes to scope instance data.
      */
     private _rootScopeInstances;
-    constructor(_bindingResolver: BindingResolver);
+    constructor(_bindingResolver: BindingResolver, initialStack?: Identifier[], scopeInstances?: ScopeInstanceMap);
     /**
      * Gets a plan for the identifier, optionally using a specific binding.
      * @param identifier The identifier to get a plan for.

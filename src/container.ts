@@ -137,14 +137,18 @@ export class Container {
 
   private _get<T>(
     identifier: Identifier<T>,
-    resolver?: DependencyGraphResolver
+    resolver?: DependencyGraphResolver,
+    planner?: DependencyGraphPlanner
   ): T {
     if (!resolver) {
       resolver = this._resolver;
     }
+    if (!planner) {
+      planner = this._planner;
+    }
 
     if (this.hasBinding(identifier)) {
-      const plan = this._planner.getPlan(identifier);
+      const plan = planner.getPlan(identifier);
       return resolver.resolveInstance(plan);
     }
 
@@ -171,9 +175,10 @@ export class Container {
 
   private _getAll<T>(
     identifier: Identifier<T>,
-    resolver?: DependencyGraphResolver
+    resolver?: DependencyGraphResolver,
+    planner?: DependencyGraphPlanner
   ) {
-    const values = this._getAllNoThrow(identifier, resolver);
+    const values = this._getAllNoThrow(identifier, resolver, planner);
 
     // This is the only point where we can throw, as we do not want an ancestor
     //  container throwing if it has none.
@@ -200,14 +205,18 @@ export class Container {
    */
   private _getAllNoThrow<T>(
     identifier: Identifier<T>,
-    resolver?: DependencyGraphResolver
+    resolver?: DependencyGraphResolver,
+    planner?: DependencyGraphPlanner
   ): T[] {
     if (!resolver) {
       resolver = this._resolver;
     }
+    if (!planner) {
+      planner = this._planner;
+    }
 
-    // Do not pass the resolver to the parent, as it is an entirely new container
-    //  with disjoint scopes.
+    // Do not pass the resolver or planner to the parent,
+    //  as it is an entirely new container with disjoint scopes.
     // Our scopes do not transcend containers.
     const values: T[] = this._parent
       ? this._parent._getAllNoThrow(identifier)
@@ -216,7 +225,7 @@ export class Container {
     const bindings = this._resolveBindings(identifier);
     if (bindings.length > 0) {
       const plans = bindings.map(binding =>
-        this._planner.getPlan(identifier, binding)
+        planner!.getPlan(identifier, binding)
       );
       values.push(...plans.map(plan => resolver!.resolveInstance(plan)));
     }
@@ -284,7 +293,7 @@ export class Container {
       },
 
       get: (identifier: Identifier) => {
-        return this._get(identifier, childResolver);
+        return this._get(identifier, childResolver, creator.planner);
       },
 
       getAll: (identifier: Identifier) => {

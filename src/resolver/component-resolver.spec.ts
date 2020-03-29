@@ -44,8 +44,9 @@ describe("defaultComponentResolvers", function() {
       identifiers: [identifier],
       identifier,
       bindingId: "factory-binding-id",
-      instanceId: "factory-component-id",
-      factory: factoryStub
+      nodeId: "factory-component-id",
+      factory: factoryStub,
+      planner: {} as any
     };
 
     let resolvedValue: any;
@@ -80,7 +81,7 @@ describe("defaultComponentResolvers", function() {
       identifiers: [identifier],
       identifier,
       bindingId: "ctor-binding-id",
-      instanceId: "ctor-instance-id",
+      nodeId: "ctor-node-id",
       ctor: constructorStub
     };
 
@@ -117,7 +118,7 @@ describe("defaultComponentResolvers", function() {
         identifiers: ["first-arg-identifier"],
         identifier: "first-arg-identifier",
         bindingId: "first-arg-binding-id",
-        instanceId: "first-arg-instance",
+        nodeId: "first-arg-instance",
         value: "first-arg-value"
       };
       const secondArg: ConstDependencyNode = {
@@ -125,7 +126,7 @@ describe("defaultComponentResolvers", function() {
         identifiers: ["second-arg-identifier"],
         identifier: "second-arg-identifier",
         bindingId: "second-arg-binding-id",
-        instanceId: "second-arg-instance",
+        nodeId: "second-arg-instance",
         value: "second-arg-value"
       };
 
@@ -143,7 +144,7 @@ describe("defaultComponentResolvers", function() {
         identifiers: ["first-arg-identifier"],
         identifier: "first-arg-identifier",
         bindingId: "first-arg-binding-id",
-        instanceId: "first-arg-instance",
+        nodeId: "first-arg-instance",
         value: firstArgValue
       };
 
@@ -153,7 +154,7 @@ describe("defaultComponentResolvers", function() {
         identifiers: ["second-arg-identifier"],
         identifier: "second-arg-identifier",
         bindingId: "second-arg-binding-id",
-        instanceId: "second-arg-instance",
+        nodeId: "second-arg-instance",
         value: secondArgValue
       };
 
@@ -172,7 +173,7 @@ describe("defaultComponentResolvers", function() {
         identifiers: [IdentifierA],
         identifier: IdentifierA,
         bindingId: "class-a-binding",
-        instanceId: "class-a-instance",
+        nodeId: "class-a-instance",
         ctor: stub() as any,
         ctorInjections: [],
         propInjections: new Map(),
@@ -185,7 +186,7 @@ describe("defaultComponentResolvers", function() {
         identifiers: [IdentifierB],
         identifier: IdentifierB,
         bindingId: "class-b-binding",
-        instanceId: "class-b-instance",
+        nodeId: "class-b-instance",
         ctor: stub() as any,
         ctorInjections: [
           {
@@ -225,7 +226,7 @@ describe("defaultComponentResolvers", function() {
       identifiers: [identifier],
       identifier,
       bindingId: "value-binding-id",
-      instanceId: "value-instance-id",
+      nodeId: "value-instance-id",
       value: returnValue
     };
 

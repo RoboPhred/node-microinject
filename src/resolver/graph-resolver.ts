@@ -187,7 +187,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
     //  to a scope is the resolver that resolved the instance which represents the scope.
     //  That is: the component is cached where component.containingScopeInstance was created.
 
-    const { instanceId, scopeOwnerInstanceId } = node;
+    const { nodeId: instanceId, scopeOwnerNodeId: scopeOwnerInstanceId } = node;
 
     if (node.createInScope === SingletonScope) {
       if (this._parent) {
@@ -203,7 +203,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
       );
     } else if (
       !this._ownedScope ||
-      scopeOwnerInstanceId !== this._ownedScope.instanceId
+      scopeOwnerInstanceId !== this._ownedScope.nodeId
     ) {
       // We do not own this instance, check the parent.
       if (!this._parent) {
@@ -245,7 +245,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
     let resolver: BasicDependencyGraphResolver;
     if (
       isNodeScopeCreator(node) &&
-      (!this._ownedScope || node.instanceId !== this._ownedScope.instanceId)
+      (!this._ownedScope || node.nodeId !== this._ownedScope.nodeId)
     ) {
       // If the node is defining a new scope which we do not own,
       //  we need to create a child resolver to hold the instances scoped to it.

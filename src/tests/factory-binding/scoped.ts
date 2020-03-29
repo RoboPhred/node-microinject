@@ -96,7 +96,7 @@ describe("Scoped", function() {
     scopeRoots = Array.from(new Array(3), () => container.get(ScopeRoot));
   });
 
-  it.only("creates a new scope root on each request", function() {
+  it("creates a new scope root on each request", function() {
     let firstRoot = scopeRoots[0];
     for (let i = 1; i < scopeRoots.length; i++) {
       const nextRoot = scopeRoots[i];

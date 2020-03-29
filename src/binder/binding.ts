@@ -7,8 +7,18 @@ import { InjectionData } from "../injection/utils";
 export type BindingType = "value" | "factory" | "constructor";
 
 export interface BindingCore {
+  /**
+   * The type of the binding.
+   */
   type: BindingType;
+  /**
+   * The ID of the binding.
+   */
   bindingId: string;
+
+  /**
+   * An array of identifiers that this binding supplies.
+   */
   identifiers: Identifier[];
 }
 

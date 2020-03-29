@@ -3,8 +3,17 @@ import { Scope } from "../scope";
 import { InjectionData } from "../injection/utils";
 export declare type BindingType = "value" | "factory" | "constructor";
 export interface BindingCore {
+    /**
+     * The type of the binding.
+     */
     type: BindingType;
+    /**
+     * The ID of the binding.
+     */
     bindingId: string;
+    /**
+     * An array of identifiers that this binding supplies.
+     */
     identifiers: Identifier[];
 }
 export interface ConstBinding extends BindingCore {

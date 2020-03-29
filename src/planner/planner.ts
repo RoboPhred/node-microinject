@@ -2,7 +2,7 @@ import uuidv4 = require("uuid/v4");
 
 import { Identifier } from "../interfaces";
 
-import { Scope, SingletonScope } from "../scope";
+import { SingletonScope } from "../scope";
 
 import {
   Binding,
@@ -22,26 +22,8 @@ import {
   DependencyNode,
   FactoryDependencyNode,
   InjectedValue,
-  ScopedDependenencyNode
+  ScopeInstanceMap
 } from "./interfaces";
-
-type ScopeDefiner = ScopedDependenencyNode | symbol;
-
-interface ScopeInstance {
-  /**
-   * The ComponentCreator that defined this scope.
-   *
-   * May be SingletonSymbol as a special case for singleton-scoped services.
-   */
-  definer: ScopeDefiner;
-
-  /**
-   * Instances of scopable component creators that are in this scope,
-   * keyed by the bindingId of the binding that created the given instance.
-   */
-  instances: Map<string, ScopedDependenencyNode>;
-}
-type ScopeInstanceMap = Map<Scope, ScopeInstance>;
 
 export type BindingResolver = (identifier: Identifier) => Binding[];
 
@@ -54,19 +36,34 @@ export class DependencyGraphPlanner {
   /**
    * The current stack of identifiers being planned.
    */
-  private _stack: Identifier[] = [];
+  private _stack: Identifier[];
 
   /**
    * A map of scopes to scope instance data.
    */
-  private _rootScopeInstances: ScopeInstanceMap = new Map();
+  private _rootScopeInstances: ScopeInstanceMap;
 
-  constructor(private _bindingResolver: BindingResolver) {
-    // Prepopulate our singleton scope.
-    this._rootScopeInstances.set(SingletonScope, {
-      definer: SingletonScope,
-      instances: new Map()
-    });
+  constructor(
+    private _bindingResolver: BindingResolver,
+    initialStack?: Identifier[],
+    scopeInstances?: ScopeInstanceMap
+  ) {
+    if (initialStack) {
+      this._stack = initialStack.slice();
+    } else {
+      this._stack = [];
+    }
+
+    if (scopeInstances) {
+      this._rootScopeInstances = scopeInstances;
+    } else {
+      // Prepopulate our singleton scope.
+      this._rootScopeInstances = new Map();
+      this._rootScopeInstances.set(SingletonScope, {
+        scopeDefiner: SingletonScope,
+        instances: new Map()
+      });
+    }
   }
 
   /**
@@ -84,13 +81,13 @@ export class DependencyGraphPlanner {
       if (rootBindings.length === 0) {
         throw new DependencyResolutionError(
           identifier,
-          [],
+          this._stack,
           "No bindings exist for the given identifier."
         );
       } else if (rootBindings.length > 1) {
         throw new DependencyResolutionError(
           identifier,
-          [],
+          this._stack,
           "More than one binding was resolved for the identifier."
         );
       }
@@ -156,7 +153,7 @@ export class DependencyGraphPlanner {
       return {
         ...binding,
         identifier,
-        instanceId: uuidv4()
+        nodeId: uuidv4()
       };
     }
 
@@ -180,10 +177,21 @@ export class DependencyGraphPlanner {
     const node: FactoryDependencyNode = {
       ...binding,
       identifier,
-      instanceId: uuidv4()
+      nodeId: uuidv4(),
+      planner: this
     };
 
-    this._tryApplyScoping(identifier, node, scopeInstances);
+    const childScopeInstances = this._tryApplyScoping(
+      identifier,
+      node,
+      scopeInstances
+    );
+
+    node.planner = new DependencyGraphPlanner(
+      this._bindingResolver,
+      this._stack,
+      childScopeInstances
+    );
 
     // We cannot plan for anything inside a factory, as the user will
     //  look stuff up at resolution time.
@@ -203,7 +211,7 @@ export class DependencyGraphPlanner {
     const node: ConstructorDependencyNode = {
       ...binding,
       identifier,
-      instanceId: uuidv4(),
+      nodeId: uuidv4(),
       ctor,
       ctorInjectionNodes,
       propInjectionNodes
@@ -417,8 +425,8 @@ export class DependencyGraphPlanner {
       instanceData.instances.set(node.bindingId, node);
 
       // We might be being defined by a special case symbol, such as SingletonSymbol.
-      if (typeof instanceData.definer !== "symbol") {
-        node.scopeOwnerInstanceId = instanceData.definer.instanceId;
+      if (typeof instanceData.scopeDefiner !== "symbol") {
+        node.scopeOwnerNodeId = instanceData.scopeDefiner.nodeId;
       }
     }
 
@@ -430,7 +438,7 @@ export class DependencyGraphPlanner {
       //  We still need to copy the outer scopes, however.  A scope is available to all children unless overrode with another
       //  object defining the same scope.
       return new Map(scopeInstances).set(definesScope, {
-        definer: node,
+        scopeDefiner: node,
         instances: new Map()
       });
     }
