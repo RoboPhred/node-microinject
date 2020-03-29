@@ -80,3 +80,5 @@ export interface ConfiguredBinder {
    */
   provides(identifier: Identifier): ConfiguredBinder;
 }
+
+export type BindFunction = (id: any) => Binder;

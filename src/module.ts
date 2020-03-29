@@ -1,9 +1,9 @@
-import { Binder } from "./binder";
+import { BindFunction } from "./binder";
 
 export class ContainerModule {
-  constructor(private _binder: (bind: (id: any) => Binder) => void) {}
+  constructor(private _binder: (bind: BindFunction) => void) {}
 
-  registry(bind: (id: any) => Binder): void {
+  registry(bind: BindFunction): void {
     this._binder(bind);
   }
 }
