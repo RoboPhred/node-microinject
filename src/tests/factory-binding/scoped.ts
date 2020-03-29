@@ -1,6 +1,6 @@
 import { expect } from "chai";
 
-import { Container, Identifier, injectable, inject, inScope } from "../..";
+import { Container, Identifier, injectable, inject } from "../..";
 
 describe("Scoped", function() {
   interface InstanceIdProvider {
