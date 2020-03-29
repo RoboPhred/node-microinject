@@ -15,6 +15,8 @@ import { scopeToString } from "../utils";
 
 import { DependencyResolutionError } from "../errors";
 
+import { InjectionData } from "../injection/utils";
+
 import {
   ConstructorDependencyNode,
   DependencyNode,
@@ -22,7 +24,6 @@ import {
   InjectedValue,
   ScopedDependenencyNode
 } from "./interfaces";
-import { InjectionData } from "../injection/utils";
 
 type ScopeDefiner = ScopedDependenencyNode | symbol;
 
@@ -35,9 +36,10 @@ interface ScopeInstance {
   definer: ScopeDefiner;
 
   /**
-   * Instances of scopable component creators that are in this scope.
+   * Instances of scopable component creators that are in this scope,
+   * keyed by the bindingId of the binding that created the given instance.
    */
-  instances: Map<Identifier, ScopedDependenencyNode>;
+  instances: Map<string, ScopedDependenencyNode>;
 }
 type ScopeInstanceMap = Map<Scope, ScopeInstance>;
 
