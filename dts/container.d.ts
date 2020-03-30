@@ -1,5 +1,4 @@
-import { Identifier, Newable } from "./interfaces";
-import { ContainerModule } from "./module";
+import { Identifier, Newable, RegistryBinder } from "./interfaces";
 import { Binder } from "./binder";
 export declare class Container {
     private _planner;
@@ -16,7 +15,7 @@ export declare class Container {
      * Loads bindings from Inversify-style container modules.
      * @param modules The Inversify-compatible container modules to load.
      */
-    load(...modules: ContainerModule[]): void;
+    load(...modules: RegistryBinder[]): void;
     /**
      * Create a binder to bind a service identifier to an implementation.
      *

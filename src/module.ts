@@ -1,6 +1,7 @@
 import { BindFunction } from "./binder";
+import { RegistryBinder } from "./interfaces";
 
-export class ContainerModule {
+export class ContainerModule implements RegistryBinder {
   constructor(private _binder: (bind: BindFunction) => void) {}
 
   registry(bind: BindFunction): void {
