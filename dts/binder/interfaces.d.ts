@@ -1,7 +1,7 @@
 import { Context, Newable, Identifier } from "../interfaces";
 import { Scope } from "../scope";
 /**
- * An interface providing a fluent api to bind a ServiceIdentifier to an implementation.
+ * An interface providing a fluent api to bind an Identifier to an implementation.
  */
 export interface Binder<T = any> {
     /**
@@ -36,11 +36,6 @@ export interface Binder<T = any> {
  */
 export interface ScopedBinder {
     /**
-     * Attach another identifier as being resolved by this binding.
-     * @param identifier The identifier to resolve to this binding.
-     */
-    provides(identifier: Identifier): ScopedBinder;
-    /**
      * Mark the binding as a singleton.  Only one will be created per container.
      */
     inSingletonScope(): ConfiguredBinder;
@@ -62,10 +57,5 @@ export interface ScopedBinder {
     asScope(scope?: Scope): ConfiguredBinder;
 }
 export interface ConfiguredBinder {
-    /**
-     * Attach another identifier as being resolved by this binding.
-     * @param identifier The identifier to resolve to this binding.
-     */
-    provides(identifier: Identifier): ConfiguredBinder;
 }
 export declare type BindFunction = (id: any) => Binder;

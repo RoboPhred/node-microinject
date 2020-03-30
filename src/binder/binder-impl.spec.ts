@@ -430,9 +430,9 @@ describe("@BinderImpl", function() {
     before(function() {
       const binder = new BinderImpl(identifier);
       binder
-        .to(TestBlankClass)
         .provides(Identifier1)
-        .provides(Identifier2);
+        .provides(Identifier2)
+        .to(TestBlankClass);
       binding = binder._getBinding();
       binding.identifiers;
     });
