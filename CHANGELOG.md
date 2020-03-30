@@ -4,8 +4,8 @@
 - Only resolve relevant bindings when resolving identifiers.
 - Option to force resolve all bindings: `controller.resolveAllBindings`.
 - Renamed `.toDynamicValue` to `.toFactory`.
-- Support scope usage from factory / toFactory bindings.
-- `.provides()` must now be used before binding to a target.
+- Support scope usage from toFactory bindings.
+- `bind().provides()` now type-checks the target and must be used before binding.
 - `@provides()` now type-checks the target class against the identifier.
 
 # 0.7.1
