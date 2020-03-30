@@ -1,4 +1,4 @@
-# vNext
+# 0.8.0
 
 - Improve error message when a class constructor binding is unresolved.
 - Only resolve relevant bindings when resolving identifiers.
