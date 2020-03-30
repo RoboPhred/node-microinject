@@ -1,4 +1,4 @@
-import { Identifier } from "../interfaces";
+import { Identifier, Newable } from "../interfaces";
 
 import { AutobindIdentifiersKey } from "./symbols";
 
@@ -8,8 +8,8 @@ import { AutobindIdentifiersKey } from "./symbols";
  * This decorator can be used more than once to mark the object as providing multiple services.
  * @param identifier The identifier to automatically bind this class to when bound without additional configuration.
  */
-export function provides<TFunction extends Function>(
-  identifier: Identifier
+export function provides<TIdentifier, TFunction extends Newable<TIdentifier>>(
+  identifier: Identifier<TIdentifier>
 ): (target: TFunction) => void {
   return function(target: any) {
     if (target[AutobindIdentifiersKey] == null) {

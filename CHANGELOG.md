@@ -3,7 +3,10 @@
 - Improve error message when a class constructor binding is unresolved.
 - Only resolve relevant bindings when resolving identifiers.
 - Option to force resolve all bindings: `controller.resolveAllBindings`.
-- Support scope usage from factory / toDynamicValue bindings.
+- Renamed `.toDynamicValue` to `.toFactory`.
+- Support scope usage from factory / toFactory bindings.
+- `.provides()` must now be used before binding to a target.
+- `@provides()` now type-checks the target class against the identifier.
 
 # 0.7.1
 
