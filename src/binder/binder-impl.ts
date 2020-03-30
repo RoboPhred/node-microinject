@@ -85,7 +85,7 @@ export class BinderImpl<T = any>
     return this.to(ctor as Newable);
   }
 
-  toDynamicValue(factory: (context: Context) => any): ScopedBinder {
+  toFactory(factory: (context: Context) => any): ScopedBinder {
     if (typeof factory !== "function") {
       throw new TypeError("Factory must be a function.");
     }
@@ -242,14 +242,14 @@ export class BinderImpl<T = any>
 
     // This will never happen, but we cannot tell typescript that
     //  _ensureOrAutoBind always creates a binding.  Especially as it does it
-    //  in an offhand way through .to and .toDynamicValue
+    //  in an offhand way through .to and .toFactory
     if (!this._type) {
       return;
     }
 
     // The auto-bind setting source could be multiple things here:
     //  this._identifier if we never had a .to()
-    //  this._binding[ctor|factory] if we had a .to() or .toDynamicValue
+    //  this._binding[ctor|factory] if we had a .to() or .toFactory
     // _ensureOrAutoBind will turn the first form into the second, so we just have
     //  to check the binding type to find the auto bind source.
     let autoBindSource: any;

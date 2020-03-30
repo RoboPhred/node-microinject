@@ -113,13 +113,13 @@ describe("@BinderImpl", function() {
       });
     });
 
-    describe(".toDynamicValue()", function() {
+    describe(".toFactory()", function() {
       function testFactory() {}
 
       let binding: Binding;
       before(function() {
         const binder = new BinderImpl(identifier);
-        binder.toDynamicValue(testFactory);
+        binder.toFactory(testFactory);
         binding = binder._getBinding();
       });
 

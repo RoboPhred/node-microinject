@@ -24,7 +24,7 @@ export interface Binder<T = any> {
      * Binds the service identifier to a value factory function.
      * @param factory The factory function to provide the value.
      */
-    toDynamicValue<N extends T>(factory: (context: Context) => N): ScopedBinder;
+    toFactory<N extends T>(factory: (context: Context) => N): ScopedBinder;
     /**
      * Binds the service identifier to the constant value.
      * @param obj The constant value to return.

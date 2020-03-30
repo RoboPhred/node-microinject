@@ -90,7 +90,7 @@ describe("Scopes", function() {
       container = new Container();
       container
         .bind(ScopeRoot)
-        .toDynamicValue(context => {
+        .toFactory(context => {
           const consumerA = context.get(ScopeConsumerA);
           const consumerB = context.get(ScopeConsumerB);
           return new ScopeRootImpl(consumerA, consumerB);

@@ -25,7 +25,7 @@ export declare class BinderImpl<T = any> implements Binder<T>, ScopedBinder, Con
     readonly identifiers: Identifier[];
     to(ctor: Newable): ScopedBinder;
     toSelf(): ScopedBinder;
-    toDynamicValue(factory: (context: Context) => any): ScopedBinder;
+    toFactory(factory: (context: Context) => any): ScopedBinder;
     toConstantValue(value: any): any;
     /**
      * Mark the binding as a singleton.  Only one will be created per container.

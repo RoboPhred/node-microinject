@@ -31,7 +31,7 @@ describe("multi-provider", function() {
         container
           .bind(Left)
           .provides(Right)
-          .toDynamicValue(factory)
+          .toFactory(factory)
           .inSingletonScope();
         left = container.get(Left);
         right = container.get(Right);
