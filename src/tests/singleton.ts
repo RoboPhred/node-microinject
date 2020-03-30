@@ -1,6 +1,6 @@
 import { expect } from "chai";
 
-import { Container, Identifier, injectable, singleton } from "../..";
+import { Container, Identifier, injectable, singleton } from "..";
 
 describe("Singleton", function() {
   interface TestSingleton {

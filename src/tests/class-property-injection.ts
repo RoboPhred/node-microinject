@@ -8,9 +8,9 @@ import {
   optional,
   singleton,
   all
-} from "../..";
+} from "..";
 
-describe("Property Injection", function() {
+describe("Class Property Injection", function() {
   const InjectedValue = Symbol("InjectedValue");
   const preValue = Symbol("pre-inject-value");
 

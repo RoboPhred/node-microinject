@@ -8,9 +8,9 @@ import {
   optional,
   DependencyResolutionError,
   all
-} from "../..";
+} from "..";
 
-describe("Constructor Injection", function() {
+describe("Class Constructor Injection", function() {
   @injectable()
   class FirstArgImpl {}
   const FirstArg = Symbol("FirstArg");
