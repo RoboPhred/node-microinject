@@ -51,6 +51,6 @@ export interface Context extends ServiceLocator {
 /**
  * An object capable of creating bindings against a container.
  */
-export interface RegistryBinder {
+export interface RegistryModule {
   registry(bind: BindFunction): void;
 }

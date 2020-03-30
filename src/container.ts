@@ -1,4 +1,4 @@
-import { Context, Identifier, Newable, RegistryBinder } from "./interfaces";
+import { Context, Identifier, Newable, RegistryModule } from "./interfaces";
 
 import { ContainerModule } from "./module";
 
@@ -51,7 +51,7 @@ export class Container {
    * Loads bindings from Inversify-style container modules.
    * @param modules The Inversify-compatible container modules to load.
    */
-  load(...modules: RegistryBinder[]) {
+  load(...modules: RegistryModule[]) {
     const bind = this.bind.bind(this);
     modules.forEach(x => x.registry(bind));
   }
