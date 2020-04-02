@@ -27,6 +27,10 @@ import {
 
 export type BindingResolver = (identifier: Identifier) => Binding[];
 
+export interface GetPlanOptions {
+  noCache?: boolean;
+}
+
 export class DependencyGraphPlanner {
   /**
    * Maps binding IDs to their plan cache.
@@ -71,7 +75,11 @@ export class DependencyGraphPlanner {
    * @param identifier The identifier to get a plan for.
    * @param binding An optional binding to use for the identifier.  Useful if multiple bindings may apply.
    */
-  getPlan(identifier: Identifier, binding?: Binding): DependencyNode {
+  getPlan(
+    identifier: Identifier,
+    binding: Binding | undefined = undefined,
+    opts: GetPlanOptions = {}
+  ): DependencyNode {
     if (!binding) {
       const rootBindings = this._getBindings(identifier);
       if (rootBindings.length === 0) {
@@ -93,7 +101,8 @@ export class DependencyGraphPlanner {
     const dependencyNode = this._getDependencyNode(
       identifier,
       binding,
-      this._rootScopeInstances
+      this._rootScopeInstances,
+      opts
     );
 
     return dependencyNode;
@@ -106,12 +115,13 @@ export class DependencyGraphPlanner {
   private _getDependencyNode(
     identifier: Identifier,
     binding: Binding,
-    scopeInstances: ScopeInstanceMap
+    scopeInstances: ScopeInstanceMap,
+    opts: GetPlanOptions
   ): DependencyNode {
     this._stack.push(identifier);
     let dependencyNode: DependencyNode;
     try {
-      if (this._planCache.has(binding.bindingId)) {
+      if (!opts.noCache && this._planCache.has(binding.bindingId)) {
         return this._planCache.get(binding.bindingId)!;
       }
 
@@ -127,7 +137,9 @@ export class DependencyGraphPlanner {
       }
       dependencyNode = node;
 
-      this._planCache.set(binding.bindingId, dependencyNode);
+      if (!opts.noCache) {
+        this._planCache.set(binding.bindingId, dependencyNode);
+      }
     } finally {
       this._stack.pop();
     }

@@ -120,7 +120,7 @@ export class Container {
     const binder = new BinderImpl(ctor);
     binder.to(ctor).inTransientScope();
     const binding = binder._getBinding();
-    const plan = this._planner.getPlan(ctor, binding);
+    const plan = this._planner.getPlan(ctor, binding, { noCache: true });
     return resolver.resolveInstance(plan);
   }
 
