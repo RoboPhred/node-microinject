@@ -22,7 +22,7 @@ export declare class BinderImpl<T = any> implements Binder<T>, ScopedBinder, Con
     private _definesScope;
     private _createInScope;
     constructor(_primaryIdentifier: Identifier<T>);
-    readonly identifiers: Identifier[];
+    get identifiers(): Identifier[];
     to(ctor: Newable): ScopedBinder;
     toSelf(): ScopedBinder;
     toFactory(factory: (context: Context) => any): ScopedBinder;

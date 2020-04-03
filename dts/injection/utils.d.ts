@@ -1,10 +1,16 @@
 import { Identifier } from "../interfaces";
-import { InjectionOptions } from "./interfaces";
+import { IdentifierInjectionOptions, ParameterInjectionOptions } from "./interfaces";
 /**
  * Data associated with an injection.
  */
-export interface InjectionData extends InjectionOptions {
+export declare type InjectionData = IdentifierInjectionData | ParameterInjectionData;
+export interface IdentifierInjectionData extends IdentifierInjectionOptions {
+    type: "identifier";
     identifier: Identifier;
+}
+export interface ParameterInjectionData extends ParameterInjectionOptions {
+    type: "parameter";
+    paramKey: string | symbol;
 }
 /**
  * Returns a value indicating whether the target has been marked as injectable.

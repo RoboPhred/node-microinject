@@ -5,9 +5,7 @@ import {
   Container,
   injectable,
   inject,
-  optional,
-  DependencyResolutionError,
-  all
+  DependencyResolutionError
 } from "..";
 
 describe("Class Constructor Injection", function() {
@@ -111,8 +109,7 @@ describe("Class Constructor Injection", function() {
     @injectable()
     class TestTarget {
       constructor(
-        @inject(InjectedService)
-        @all()
+        @inject(InjectedService, { all: true })
         public injected: any[]
       ) {}
     }
@@ -150,8 +147,7 @@ describe("Class Constructor Injection", function() {
     @injectable(Target)
     class TargetImpl implements Target {
       constructor(
-        @inject(FirstArg)
-        @optional()
+        @inject(FirstArg, { optional: true })
         public firstArg: any
       ) {}
     }

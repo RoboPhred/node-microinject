@@ -10,3 +10,4 @@ export declare function identifierToString(identifier: Identifier): string;
  * @param scope The scope to stringify.
  */
 export declare function scopeToString(scope: Scope): string;
+export declare function has(obj: any, key: string | symbol): boolean;

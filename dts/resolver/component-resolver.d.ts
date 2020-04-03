@@ -1,21 +1,19 @@
-import { Identifier } from "../interfaces";
 import { ConstDependencyNode, ConstructorDependencyNode, DependencyNode, FactoryDependencyNode } from "../planner";
-import { DependencyGraphResolver } from "./interfaces";
+import { DependencyGraphResolver, ResolveOpts } from "./interfaces";
 export interface ComponentResolvers {
     /**
      * Resolve a constant value from a dependency node.
      * @param identifier The identifier being resolved.
-     * @param creator The dependency node describing the resolution.
+     * @param node The dependency node describing the resolution.
      * @param childResolver A dependency resolver scoped to children of this resolved node.
      */
-    const(identifier: Identifier, creator: ConstDependencyNode, childResolver: DependencyGraphResolver): any;
+    const(node: ConstDependencyNode, childResolver: DependencyGraphResolver, opts: ResolveOpts): any;
     /**
      * Resolve a factory-created value from a dependency node.
-     * @param identifier The identifier being resolved.
-     * @param creator The dependency node describing the resolution.
+     * @param node The dependency node describing the resolution.
      * @param childResolver A dependency resolver scoped to children of this resolved node.
      */
-    factory(identifier: Identifier, creator: FactoryDependencyNode, childResolver: DependencyGraphResolver): any;
+    factory(node: FactoryDependencyNode, childResolver: DependencyGraphResolver, opts: ResolveOpts): any;
     /**
      * Instantiate or resolve a constructor from a dependency node.
      *
@@ -30,12 +28,11 @@ export interface ComponentResolvers {
      * as we are able to resolve values for properties that might refer to us in their
      * constructor injections.  This is a common way of handling circular dependencies.
      *
-     * @param identifier The identifier being resolved.
-     * @param creator The dependency node describing the resolution.
+     * @param node The dependency node describing the resolution.
      * @param childResolver A dependency resolver scoped to children of this resolved node.
      * @see postInstantiate
      */
-    ctor(identifier: Identifier, creator: ConstructorDependencyNode, childResolver: DependencyGraphResolver): any;
+    ctor(node: ConstructorDependencyNode, childResolver: DependencyGraphResolver, opts: ResolveOpts): any;
     /**
      * Handle post-instantiation tasks for the resolved dependency node instance.
      *
@@ -46,10 +43,10 @@ export interface ComponentResolvers {
      * to resolve its property injections.
      *
      * @param identifier The identifier being resolved.
-     * @param creator The dependency node describing the resolution.
+     * @param node The dependency node describing the resolution.
      * @param childResolver A dependency resolver scoped to children of this resolved node.
      * @see ctorProps
      */
-    postInstantiate?(identifier: Identifier, creator: DependencyNode, resolver: DependencyGraphResolver, instance: object): any;
+    postInstantiate?(node: DependencyNode, resolver: DependencyGraphResolver, instance: object, opts: ResolveOpts): any;
 }
 export declare const defaultComponentResolvers: ComponentResolvers;

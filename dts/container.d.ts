@@ -10,7 +10,8 @@ export declare class Container {
      */
     private _parent;
     constructor();
-    parent: Container | null;
+    get parent(): Container | null;
+    set parent(value: Container | null);
     /**
      * Loads bindings from Inversify-style container modules.
      * @param modules The Inversify-compatible container modules to load.

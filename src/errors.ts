@@ -34,3 +34,30 @@ export class DependencyResolutionError extends Error {
     this.code = "DEPENDENCY_RESOLUTION_FAILED";
   }
 }
+
+/**
+ * Indicates a parameter injection failed to resolve.
+ */
+export class ParameterNotSuppliedError extends Error {
+  /**
+   * The error code.
+   */
+  code: string;
+
+  /**
+   * The parameter key that failed to resolve.
+   */
+  paramKey: string | symbol;
+
+  constructor(paramKey: string | symbol, message?: string) {
+    message = `Failed to resolve value for parameter "${identifierToString(
+      paramKey
+    )}"${message ? ": " + message : "."}`;
+    super(message);
+    Object.setPrototypeOf(this, ParameterNotSuppliedError.prototype);
+    this.paramKey = paramKey;
+    this.message = message;
+    this.name = "ParameterNotSuppliedError";
+    this.code = "PARAMETER_RESOLUTION_FAILED";
+  }
+}

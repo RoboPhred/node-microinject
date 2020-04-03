@@ -1,5 +1,6 @@
 import { Container } from "./container";
 import { BindFunction } from "./binder";
+import { ParameterRecord } from "./resolver";
 /**
  * An object that may be used to represent and request a container-managed object.
  */
@@ -40,6 +41,7 @@ export interface Context extends ServiceLocator {
      * To get scoped items, use Context.get() and Context.getAll()
      */
     readonly container: Container;
+    readonly parameters: ParameterRecord;
 }
 /**
  * An object capable of creating bindings against a container.

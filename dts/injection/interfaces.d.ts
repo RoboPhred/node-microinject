@@ -1,7 +1,7 @@
 /**
  * Options for content injections.
  */
-export interface InjectionOptions {
+export interface IdentifierInjectionOptions {
     /**
      * If true, the injected value will be null if no viable object is found in the container
      * If false, an error will be thrown at class creation time.
@@ -16,4 +16,11 @@ export interface InjectionOptions {
      * If both 'optional' and 'all' are true, then an empty array will be set if no objects are found.
      */
     all?: boolean;
+}
+export interface ParameterInjectionOptions {
+    /**
+     * Whether this parameter is not required to be injected.
+     * If false, the value `null` will be injected if the parameter is not defined.
+     */
+    optional?: boolean;
 }

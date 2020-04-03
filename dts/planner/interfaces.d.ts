@@ -17,11 +17,7 @@ export interface ScopeInstance {
     instances: Map<string, ScopedDependenencyNode>;
 }
 export declare type ScopeInstanceMap = Map<Scope, ScopeInstance>;
-export interface DependencyNodeBase extends BindingCore {
-    /**
-     * The service identifier this node represents.
-     */
-    identifier: Identifier;
+export interface DependencyNodeBase {
     /**
      * The specific instance of this node relative to its containing scope.
      * This does not correspond to the instance of the created value,
@@ -29,17 +25,28 @@ export interface DependencyNodeBase extends BindingCore {
      */
     nodeId: string;
 }
-export interface ConstDependencyNode extends DependencyNodeBase, ConstBinding {
+export interface ParamDependencyNode {
+    type: "param";
+    optional: boolean;
+    paramKey: string | symbol;
+}
+export interface BindingDependencyNodeBase extends DependencyNodeBase, BindingCore {
+    /**
+     * The service identifier this node represents.
+     */
+    identifier: Identifier;
+}
+export interface ConstDependencyNode extends BindingDependencyNodeBase, ConstBinding {
     type: "value";
 }
-export interface ScopedDependencyNodeBase extends DependencyNodeBase {
+export interface ScopedBindingDependencyNodeBase extends BindingDependencyNodeBase {
     /**
      * The instance of the node that defines the scope this
      * node is contained in.
      */
     scopeOwnerNodeId?: string;
 }
-export interface FactoryDependencyNode extends ScopedDependencyNodeBase, FactoryBinding {
+export interface FactoryDependencyNode extends ScopedBindingDependencyNodeBase, FactoryBinding {
     type: "factory";
     /**
      * The planner responsible for planning requests
@@ -47,7 +54,7 @@ export interface FactoryDependencyNode extends ScopedDependencyNodeBase, Factory
      */
     planner: DependencyGraphPlanner;
 }
-export interface ConstructorDependencyNode extends ScopedDependencyNodeBase, ConstructorBinding {
+export interface ConstructorDependencyNode extends ScopedBindingDependencyNodeBase, ConstructorBinding {
     type: "constructor";
     /**
      * An array whose indexes correspond to resolved injected constructor arguments.
@@ -74,5 +81,8 @@ export interface ConstructorDependencyNode extends ScopedDependencyNodeBase, Con
     propInjectionNodes: Map<string, InjectedValue>;
 }
 export declare type InjectedValue = DependencyNode | DependencyNode[] | null;
-export declare type DependencyNode = ConstDependencyNode | FactoryDependencyNode | ConstructorDependencyNode;
+export declare type DependencyNode = ParamDependencyNode | ConstDependencyNode | FactoryDependencyNode | ConstructorDependencyNode;
+export declare type BindingDependencyNode = ConstDependencyNode | FactoryDependencyNode | ConstructorDependencyNode;
 export declare type ScopedDependenencyNode = FactoryDependencyNode | ConstructorDependencyNode;
+export declare function isBindingDependencyNode(node: DependencyNode): node is BindingDependencyNode;
+export declare function getDependencyNodeIdentifier(node: DependencyNode): Identifier<any>;

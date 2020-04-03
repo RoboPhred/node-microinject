@@ -29,12 +29,7 @@ export interface ScopeInstance {
 }
 export type ScopeInstanceMap = Map<Scope, ScopeInstance>;
 
-export interface DependencyNodeBase extends BindingCore {
-  /**
-   * The service identifier this node represents.
-   */
-  identifier: Identifier;
-
+export interface DependencyNodeBase {
   /**
    * The specific instance of this node relative to its containing scope.
    * This does not correspond to the instance of the created value,
@@ -43,11 +38,29 @@ export interface DependencyNodeBase extends BindingCore {
   nodeId: string;
 }
 
-export interface ConstDependencyNode extends DependencyNodeBase, ConstBinding {
+export interface ParamDependencyNode {
+  type: "param";
+  optional: boolean;
+  paramKey: string | symbol;
+}
+
+export interface BindingDependencyNodeBase
+  extends DependencyNodeBase,
+    BindingCore {
+  /**
+   * The service identifier this node represents.
+   */
+  identifier: Identifier;
+}
+
+export interface ConstDependencyNode
+  extends BindingDependencyNodeBase,
+    ConstBinding {
   type: "value";
 }
 
-export interface ScopedDependencyNodeBase extends DependencyNodeBase {
+export interface ScopedBindingDependencyNodeBase
+  extends BindingDependencyNodeBase {
   /**
    * The instance of the node that defines the scope this
    * node is contained in.
@@ -56,7 +69,7 @@ export interface ScopedDependencyNodeBase extends DependencyNodeBase {
 }
 
 export interface FactoryDependencyNode
-  extends ScopedDependencyNodeBase,
+  extends ScopedBindingDependencyNodeBase,
     FactoryBinding {
   type: "factory";
 
@@ -68,7 +81,7 @@ export interface FactoryDependencyNode
 }
 
 export interface ConstructorDependencyNode
-  extends ScopedDependencyNodeBase,
+  extends ScopedBindingDependencyNodeBase,
     ConstructorBinding {
   type: "constructor";
   /**
@@ -100,6 +113,12 @@ export interface ConstructorDependencyNode
 export type InjectedValue = DependencyNode | DependencyNode[] | null;
 
 export type DependencyNode =
+  | ParamDependencyNode
+  | ConstDependencyNode
+  | FactoryDependencyNode
+  | ConstructorDependencyNode;
+
+export type BindingDependencyNode =
   | ConstDependencyNode
   | FactoryDependencyNode
   | ConstructorDependencyNode;
@@ -107,3 +126,20 @@ export type DependencyNode =
 export type ScopedDependenencyNode =
   | FactoryDependencyNode
   | ConstructorDependencyNode;
+
+export function isBindingDependencyNode(
+  node: DependencyNode
+): node is BindingDependencyNode {
+  return (
+    node.type === "value" ||
+    node.type === "factory" ||
+    node.type === "constructor"
+  );
+}
+
+export function getDependencyNodeIdentifier(node: DependencyNode) {
+  if (isBindingDependencyNode(node)) {
+    return node.identifier;
+  }
+  return node.paramKey;
+}

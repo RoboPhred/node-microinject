@@ -2,6 +2,9 @@ import { Identifier } from "../interfaces";
 import { Binding } from "../binder/binding";
 import { DependencyNode, ScopeInstanceMap } from "./interfaces";
 export declare type BindingResolver = (identifier: Identifier) => Binding[];
+export interface GetPlanOptions {
+    noCache?: boolean;
+}
 export declare class DependencyGraphPlanner {
     private _bindingResolver;
     /**
@@ -22,13 +25,14 @@ export declare class DependencyGraphPlanner {
      * @param identifier The identifier to get a plan for.
      * @param binding An optional binding to use for the identifier.  Useful if multiple bindings may apply.
      */
-    getPlan(identifier: Identifier, binding?: Binding): DependencyNode;
+    getPlan(identifier: Identifier, binding?: Binding | undefined, opts?: GetPlanOptions): DependencyNode;
     private _getBindings;
     private _getDependencyNode;
     private _createDependencyNode;
     private _createFactoryNode;
     private _createConstructorNode;
     private _planInjection;
+    private _planParamValueInjection;
     private _planAllValuesInjection;
     private _planSingleValueInjection;
     private _getScopedInstance;

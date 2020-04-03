@@ -1,17 +1,18 @@
 import { SingletonScope } from "../scope";
 
-import { DependencyNode, ScopedDependenencyNode } from "../planner";
+import { DependencyNode, ScopedDependenencyNode, isBindingDependencyNode } from "../planner";
 
 import { isScopeableBinding } from "../binder/binding";
 
-import { identifierToString } from "../utils";
+import { identifierToString, has } from "../utils";
 
-import { DependencyGraphResolver } from "./interfaces";
+import { DependencyGraphResolver, ResolveOpts } from "./interfaces";
 
 import {
   ComponentResolvers,
   defaultComponentResolvers
 } from "./component-resolver";
+import { ParameterNotSuppliedError } from "../errors";
 
 /*
 Scopes and GC:
@@ -28,12 +29,12 @@ and resolutions.
 */
 
 function isNodeScoped(node: DependencyNode): node is ScopedDependenencyNode {
-  return isScopeableBinding(node) && node.createInScope != null;
+  return isBindingDependencyNode(node) && isScopeableBinding(node) && node.createInScope != null;
 }
 function isNodeScopeCreator(
   node: DependencyNode
 ): node is ScopedDependenencyNode {
-  return isScopeableBinding(node) && node.definesScope != null;
+  return isBindingDependencyNode(node) && isScopeableBinding(node) && node.definesScope != null;
 }
 
 /**
@@ -157,26 +158,26 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
    * the object returned may have been pre-created.
    * @param node The dependency graph node representing the object to resolve.
    */
-  resolveInstance<T = any>(node: DependencyNode): T {
+  resolveInstance<T = any>(node: DependencyNode, opts: ResolveOpts = {}): T {
     this._resolutionStack.push(node);
     try {
-      return this._getNodeInstance(node);
+      return this._getNodeInstance(node, opts);
     } finally {
       this._resolutionStack.pop();
     }
   }
 
-  private _getNodeInstance(node: DependencyNode): any {
+  private _getNodeInstance(node: DependencyNode, opts: ResolveOpts): any {
     if (isNodeScoped(node)) {
       // If the component is in a scope, we need to find the resolver that owns the scope.
-      return this._getScopedNodeInstance(node);
+      return this._getScopedNodeInstance(node, opts);
     } else {
       // Not scoped, so we do not need to try to get an existing instance.
-      return this._createNodeInstance(node);
+      return this._createNodeInstance(node, opts);
     }
   }
 
-  private _getScopedNodeInstance(node: ScopedDependenencyNode): any {
+  private _getScopedNodeInstance(node: ScopedDependenencyNode, opts: ResolveOpts): any {
     if (!node.createInScope) {
       throw new Error("_getScopedNodeInstance called on non-scoped component.");
     }
@@ -192,7 +193,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
     if (node.createInScope === SingletonScope) {
       if (this._parent) {
         // singleton is handled by root resolver.
-        return this._parent._getScopedNodeInstance(node);
+        return this._parent._getScopedNodeInstance(node, opts);
       }
       // We are root, we own it.
       //  Continue below to look up or create the instance.
@@ -215,7 +216,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
           )}".`
         );
       }
-      return this._parent._getScopedNodeInstance(node);
+      return this._parent._getScopedNodeInstance(node, opts);
     }
 
     // At this point, we are the owner of the node.
@@ -230,7 +231,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
     // Did not create it yet.  Create it.
     //  Store the instance from the register callback, so
     //  it is available to postInstantiate
-    const instance = this._createNodeInstance(node, instance =>
+    const instance = this._createNodeInstance(node, opts, instance =>
       this._scopedInstances.set(instanceId, instance)
     );
 
@@ -239,6 +240,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
 
   private _createNodeInstance(
     node: DependencyNode,
+    opts: ResolveOpts,
     register?: (instance: any) => void
   ): any {
     let instance: any;
@@ -254,10 +256,10 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
 
       // We are certain that we want to create a new node, rather than resolving
       //  an existing one.
-      instance = resolver._createNodeInstance(node);
+      instance = resolver._createNodeInstance(node, opts);
     } else {
       // Not defining a scope, or we own the scope.  No special handling.
-      instance = this._instantiateOwnedNodeInstance(node);
+      instance = this._instantiateOwnedNodeInstance(node, opts);
       resolver = this;
     }
 
@@ -265,7 +267,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
       register(instance);
     }
 
-    this._postInstantiateNode(node, resolver, instance);
+    this._postInstantiateNode(node, resolver, instance, opts);
 
     return instance;
   }
@@ -273,30 +275,41 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
   private _postInstantiateNode(
     node: DependencyNode,
     resolver: DependencyGraphResolver,
-    instance: any
+    instance: any,
+    opts: ResolveOpts
   ): void {
     if (this._resolvers.postInstantiate) {
       this._resolvers.postInstantiate(
-        node.identifier,
         node,
         resolver,
-        instance
+        instance,
+        opts.parameters ?? {}
       );
     }
   }
 
-  private _instantiateOwnedNodeInstance(node: DependencyNode): any {
+  private _instantiateOwnedNodeInstance(node: DependencyNode, opts: ResolveOpts): any {
     this._instantiationStack.push(node);
     try {
       switch (node.type) {
         case "constructor":
-          return this._resolvers.ctor(node.identifier, node, this);
+          return this._resolvers.ctor(node, this, opts);
         case "factory":
-          return this._resolvers.factory(node.identifier, node, this);
+          return this._resolvers.factory(node, this, opts);
         case "value":
           // We still allow external resolution of simple values.
           //  This is for wrapping, proxying, monkey-patching, and other such cross-cutting tomfoolery.
-          return this._resolvers.const(node.identifier, node, this);
+          return this._resolvers.const(node, this, opts);
+        case "param": {
+            const params = opts.parameters ?? {};
+            if (!has(params, node.paramKey)) {
+              if (node.optional) {
+                return null;
+              }
+              throw new ParameterNotSuppliedError(node.paramKey)
+            }
+            return params[node.paramKey as any];
+          }
         default:
           return throwUnknownNodeType(node);
       }

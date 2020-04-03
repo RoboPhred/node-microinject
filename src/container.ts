@@ -12,7 +12,9 @@ import { DependencyGraphPlanner, FactoryDependencyNode } from "./planner";
 
 import {
   BasicDependencyGraphResolver,
-  DependencyGraphResolver
+  DependencyGraphResolver,
+  ResolveOpts,
+  ParameterRecord
 } from "./resolver";
 
 import { DependencyResolutionError } from "./errors";
@@ -111,17 +113,21 @@ export class Container {
     //  so the plans are still valid.
   }
 
-  create<T>(ctor: Newable<T>) {
-    return this._create(ctor, this._resolver);
+  create<T>(ctor: Newable<T>, parameters: ParameterRecord = {}) {
+    return this._create(ctor, this._resolver, parameters);
   }
 
-  private _create<T>(ctor: Newable<T>, resolver: DependencyGraphResolver): T {
+  private _create<T>(
+    ctor: Newable<T>,
+    resolver: DependencyGraphResolver,
+    parameters: ParameterRecord
+  ): T {
     // TODO: Allow passing values to decorated ctor args `@param("foo") myFoo: number`.
     const binder = new BinderImpl(ctor);
     binder.to(ctor).inTransientScope();
     const binding = binder._getBinding();
     const plan = this._planner.getPlan(ctor, binding, { noCache: true });
-    return resolver.resolveInstance(plan);
+    return resolver.resolveInstance(plan, { parameters });
   }
 
   /**
@@ -280,12 +286,19 @@ export class Container {
    * @param childResolver A resolver capable of resolving correctly scoped child objects.
    */
   private _factoryResolver(
-    _identifier: Identifier,
     creator: FactoryDependencyNode,
-    childResolver: DependencyGraphResolver
+    childResolver: DependencyGraphResolver,
+    opts: ResolveOpts
   ): any {
+    const self = this;
     const context: Context = {
-      container: this,
+      get container() {
+        return self;
+      },
+
+      get parameters() {
+        return Object.seal({ ...opts.parameters });
+      },
 
       create: <T>(ctor: Newable<T>): T => {
         return this._create(ctor, childResolver);

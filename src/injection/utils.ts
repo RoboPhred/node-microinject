@@ -1,6 +1,9 @@
 import { Identifier } from "../interfaces";
 
-import { InjectionOptions } from "./interfaces";
+import {
+  IdentifierInjectionOptions,
+  ParameterInjectionOptions
+} from "./interfaces";
 
 import {
   ClassIsInjectableKey,
@@ -11,8 +14,16 @@ import {
 /**
  * Data associated with an injection.
  */
-export interface InjectionData extends InjectionOptions {
+export type InjectionData = IdentifierInjectionData | ParameterInjectionData;
+
+export interface IdentifierInjectionData extends IdentifierInjectionOptions {
+  type: "identifier";
   identifier: Identifier;
+}
+
+export interface ParameterInjectionData extends ParameterInjectionOptions {
+  type: "parameter";
+  paramKey: string | symbol;
 }
 
 /**

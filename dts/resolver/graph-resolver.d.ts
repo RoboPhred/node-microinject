@@ -1,5 +1,5 @@
 import { DependencyNode } from "../planner";
-import { DependencyGraphResolver } from "./interfaces";
+import { DependencyGraphResolver, ResolveOpts } from "./interfaces";
 import { ComponentResolvers } from "./component-resolver";
 /**
  * A basic dependency graph resolver, capable of handling scopes
@@ -85,7 +85,7 @@ export declare class BasicDependencyGraphResolver implements DependencyGraphReso
      * the object returned may have been pre-created.
      * @param node The dependency graph node representing the object to resolve.
      */
-    resolveInstance<T = any>(node: DependencyNode): T;
+    resolveInstance<T = any>(node: DependencyNode, opts?: ResolveOpts): T;
     private _getNodeInstance;
     private _getScopedNodeInstance;
     private _createNodeInstance;

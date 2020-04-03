@@ -5,9 +5,7 @@ import {
   DependencyResolutionError,
   inject,
   injectable,
-  optional,
-  singleton,
-  all
+  singleton
 } from "..";
 
 describe("Class Property Injection", function() {
@@ -84,8 +82,7 @@ describe("Class Property Injection", function() {
 
     @injectable()
     class TestTarget {
-      @inject(InjectedValue)
-      @optional()
+      @inject(InjectedValue, { optional: true })
       injectedValueProp: any = preValue;
     }
 
@@ -115,8 +112,7 @@ describe("Class Property Injection", function() {
 
     @injectable()
     class TestTarget {
-      @inject(InjectedValue)
-      @all()
+      @inject(InjectedValue, { all: true })
       public allInjections: string[] | undefined;
     }
 

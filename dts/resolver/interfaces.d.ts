@@ -1,5 +1,15 @@
 import { DependencyNode } from "../planner";
 /**
+ * A map of parameters to provide when resolving param injections.
+ */
+export declare type ParameterRecord = Record<string | number | symbol, any>;
+/**
+ * Options for resolving a dependency graph.
+ */
+export interface ResolveOpts {
+    parameters?: ParameterRecord;
+}
+/**
  * An object capable of resolving a dependency graph.
  */
 export interface DependencyGraphResolver {
@@ -32,5 +42,5 @@ export interface DependencyGraphResolver {
      * the object returned may have been pre-created.
      * @param node The dependency graph node representing the object to resolve.
      */
-    resolveInstance<T = any>(node: DependencyNode): T;
+    resolveInstance<T = any>(node: DependencyNode, opts?: ResolveOpts): T;
 }

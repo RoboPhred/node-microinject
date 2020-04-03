@@ -2,7 +2,10 @@ import { provides } from "../binder";
 
 import { Identifier } from "../interfaces";
 
-import { InjectionOptions } from "./interfaces";
+import {
+  IdentifierInjectionOptions,
+  ParameterInjectionOptions
+} from "./interfaces";
 
 import {
   ClassIsInjectableKey,
@@ -10,7 +13,11 @@ import {
   PropertyInjectionsKey
 } from "./symbols";
 
-import { InjectionData } from "./utils";
+import {
+  InjectionData,
+  ParameterInjectionData,
+  IdentifierInjectionData
+} from "./utils";
 
 /**
  * Marks this class as injectable.
@@ -69,36 +76,32 @@ function getInjectionTargetData(
  * @param identifier The identifier of the binding to inject.
  * @param opts Additional injection options.
  */
-export function inject(identifier: Identifier, opts?: InjectionOptions) {
+export function inject(
+  identifier: Identifier,
+  opts?: IdentifierInjectionOptions
+) {
   return function(target: any, targetKey: string | symbol, index?: number) {
     const data = getInjectionTargetData(target, targetKey, index);
     Object.assign(data, opts, {
+      type: "identifier",
       identifier
-    });
+    } as IdentifierInjectionData);
   };
 }
 
 /**
- * Marks a constructor argument or object property as being optional.
- * This has no effect if the argument is not annotated with @Inject().
- * This decorator is not order sensitive.  It can come before or after @Inject().
+ * Marks a constructor argument as receiving a param when created from `ServiceLocator.create()`.
+ * @param paramName The identifier of the parameter to use.
  */
-export function optional() {
-  return function(target: any, targetKey: string, index?: number) {
+export function param(
+  paramKey: string | number | symbol,
+  opts?: ParameterInjectionOptions
+) {
+  return function(target: any, targetKey: string | symbol, index?: number) {
     const data = getInjectionTargetData(target, targetKey, index);
-    data.optional = true;
-  };
-}
-
-/**
- * Marks a constructor argument or object property as receiving all injectable values.
- * The target value will be set to an array of all registered objects.
- * This has no effect if the argument is not annotated with @Inject().
- * This decorator is not order sensitive.  It can come before or after @Inject().
- */
-export function all() {
-  return function(target: any, targetKey: string, index?: number) {
-    const data = getInjectionTargetData(target, targetKey, index);
-    data.all = true;
+    Object.assign(data, opts, {
+      type: "parameter",
+      paramKey: paramKey
+    } as ParameterInjectionData);
   };
 }

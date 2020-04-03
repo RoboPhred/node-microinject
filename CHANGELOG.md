@@ -1,3 +1,8 @@
+# vNext
+
+- Introduce parameter injections for supplying data at request time.
+- Remove @optional() and @all() decorators. Use options argument in @inject and @param.
+
 # 0.8.0
 
 - Improve error message when a class constructor binding is unresolved.

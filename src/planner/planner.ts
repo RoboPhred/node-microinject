@@ -15,14 +15,15 @@ import { scopeToString } from "../utils";
 
 import { DependencyResolutionError } from "../errors";
 
-import { InjectionData } from "../injection/utils";
+import { InjectionData, ParameterInjectionData, IdentifierInjectionData } from "../injection/utils";
 
 import {
   ConstructorDependencyNode,
   DependencyNode,
   FactoryDependencyNode,
   InjectedValue,
-  ScopeInstanceMap
+  ScopeInstanceMap,
+  isBindingDependencyNode
 } from "./interfaces";
 
 export type BindingResolver = (identifier: Identifier) => Binding[];
@@ -116,7 +117,7 @@ export class DependencyGraphPlanner {
     identifier: Identifier,
     binding: Binding,
     scopeInstances: ScopeInstanceMap,
-    opts: GetPlanOptions
+    opts: GetPlanOptions = {}
   ): DependencyNode {
     this._stack.push(identifier);
     let dependencyNode: DependencyNode;
@@ -268,17 +269,30 @@ export class DependencyGraphPlanner {
     injection: InjectionData,
     childScopeInstances: ScopeInstanceMap
   ): InjectedValue {
-    const { all } = injection;
-
-    if (all) {
-      return this._planAllValuesInjection(injection, childScopeInstances);
+    switch(injection.type) {
+      case "parameter": {
+        return this._planParamValueInjection(injection);
+      }
+      case "identifier": {
+        if (injection.all) {
+          return this._planAllValuesInjection(injection, childScopeInstances);
+        }
+        return this._planSingleValueInjection(injection, childScopeInstances);
+      }
     }
+  }
 
-    return this._planSingleValueInjection(injection, childScopeInstances);
+  private _planParamValueInjection(injection: ParameterInjectionData): InjectedValue {
+    const { paramKey, optional } = injection;
+    return {
+      type: "param",
+      optional: optional ?? false,
+      paramKey
+    }
   }
 
   private _planAllValuesInjection(
-    injection: InjectionData,
+    injection: IdentifierInjectionData,
     childScopeInstances: ScopeInstanceMap
   ): InjectedValue {
     const { optional, identifier: dependencyIdentifier } = injection;
@@ -305,7 +319,7 @@ export class DependencyGraphPlanner {
   }
 
   private _planSingleValueInjection(
-    injection: InjectionData,
+    injection: IdentifierInjectionData,
     childScopeInstances: ScopeInstanceMap
   ): InjectedValue {
     const { optional, identifier: dependencyIdentifier } = injection;
@@ -402,7 +416,7 @@ export class DependencyGraphPlanner {
     scopeInstances: ScopeInstanceMap
   ): ScopeInstanceMap {
     // A node that cannot be placed in a scope also cannot serve as a scope.
-    if (!isScopeableBinding(node)) {
+    if (!isBindingDependencyNode(node) || !isScopeableBinding(node)) {
       return scopeInstances;
     }
 

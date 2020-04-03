@@ -13,7 +13,8 @@ import {
   DependencyNode,
   ConstDependencyNode,
   FactoryDependencyNode,
-  ConstructorDependencyNode
+  ConstructorDependencyNode,
+  isBindingDependencyNode
 } from "../planner";
 
 import { DependencyGraphResolver } from "./interfaces";
@@ -52,9 +53,9 @@ describe("defaultComponentResolvers", function() {
     let resolvedValue: any;
     before(function() {
       resolvedValue = defaultComponentResolvers.factory(
-        identifier,
         factoryNode,
-        stubResolver as DependencyGraphResolver
+        stubResolver as DependencyGraphResolver,
+        {}
       );
     });
 
@@ -68,16 +69,12 @@ describe("defaultComponentResolvers", function() {
   });
 
   describe(".ctor", function() {
-    const firstArgIdent: Identifier = Symbol("first-arg");
-    const secondArgIdent: Identifier = Symbol("second-arg");
-
     // constructors are just functions, so we can use a stub for them.
     const constructorStub: SinonStub & Newable = stub() as any;
     const identifier: Identifier = Symbol("ctor-identifier");
 
     const partialCtorCreator = {
-      // Explicitly tag type to make TS happy when building the real creator.
-      type: "constructor" as "constructor",
+      type: "constructor" as const,
       identifiers: [identifier],
       identifier,
       bindingId: "ctor-binding-id",
@@ -88,17 +85,28 @@ describe("defaultComponentResolvers", function() {
     function invokeResolver(args: DependencyNode[]) {
       const creator: ConstructorDependencyNode = {
         ...partialCtorCreator,
-        ctorInjections: args.map(arg => ({
-          identifier: arg.identifier
-        })),
+        ctorInjections: args.map(arg => {
+          if (isBindingDependencyNode(arg)) {
+            return {
+              type: "identifier",
+              identifier: arg.identifier
+            };
+          } else {
+            return {
+              type: "parameter",
+              optional: arg.optional,
+              paramKey: arg.paramKey
+            };
+          }
+        }),
         propInjections: new Map(),
         ctorInjectionNodes: args,
         propInjectionNodes: new Map()
       };
       return defaultComponentResolvers.ctor(
-        identifier,
         creator,
-        stubResolver as DependencyGraphResolver
+        stubResolver as DependencyGraphResolver,
+        {}
       );
     }
 
@@ -190,6 +198,7 @@ describe("defaultComponentResolvers", function() {
         ctor: stub() as any,
         ctorInjections: [
           {
+            type: "identifier",
             identifier: classA.identifier
           }
         ],
@@ -198,6 +207,7 @@ describe("defaultComponentResolvers", function() {
         propInjectionNodes: new Map()
       };
       classA.ctorInjections.push({
+        type: "identifier",
         identifier: classB.identifier
       });
       classA.ctorInjectionNodes.push({ ...classB });
@@ -210,9 +220,9 @@ describe("defaultComponentResolvers", function() {
 
       expect(() =>
         defaultComponentResolvers.ctor(
-          identifier,
           classB,
-          stubResolver as DependencyGraphResolver
+          stubResolver as DependencyGraphResolver,
+          {}
         )
       ).to.throw(DependencyResolutionError, /cyclic/);
     });
@@ -233,9 +243,9 @@ describe("defaultComponentResolvers", function() {
     let resolvedValue: any;
     before(function() {
       resolvedValue = defaultComponentResolvers.const(
-        identifier,
         valueNode,
-        stubResolver as DependencyGraphResolver
+        stubResolver as DependencyGraphResolver,
+        {}
       );
     });
 

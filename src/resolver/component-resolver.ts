@@ -5,36 +5,37 @@ import {
   ConstructorDependencyNode,
   DependencyNode,
   FactoryDependencyNode,
-  InjectedValue
+  InjectedValue,
+  BindingDependencyNode,
+  getDependencyNodeIdentifier
 } from "../planner";
 
 import { DependencyResolutionError } from "../errors";
 
-import { DependencyGraphResolver } from "./interfaces";
+import { DependencyGraphResolver, ResolveOpts } from "./interfaces";
 
 export interface ComponentResolvers {
   /**
    * Resolve a constant value from a dependency node.
    * @param identifier The identifier being resolved.
-   * @param creator The dependency node describing the resolution.
+   * @param node The dependency node describing the resolution.
    * @param childResolver A dependency resolver scoped to children of this resolved node.
    */
   const(
-    identifier: Identifier,
-    creator: ConstDependencyNode,
-    childResolver: DependencyGraphResolver
+    node: ConstDependencyNode,
+    childResolver: DependencyGraphResolver,
+    opts: ResolveOpts
   ): any;
 
   /**
    * Resolve a factory-created value from a dependency node.
-   * @param identifier The identifier being resolved.
-   * @param creator The dependency node describing the resolution.
+   * @param node The dependency node describing the resolution.
    * @param childResolver A dependency resolver scoped to children of this resolved node.
    */
   factory(
-    identifier: Identifier,
-    creator: FactoryDependencyNode,
-    childResolver: DependencyGraphResolver
+    node: FactoryDependencyNode,
+    childResolver: DependencyGraphResolver,
+    opts: ResolveOpts
   ): any;
 
   /**
@@ -51,15 +52,14 @@ export interface ComponentResolvers {
    * as we are able to resolve values for properties that might refer to us in their
    * constructor injections.  This is a common way of handling circular dependencies.
    *
-   * @param identifier The identifier being resolved.
-   * @param creator The dependency node describing the resolution.
+   * @param node The dependency node describing the resolution.
    * @param childResolver A dependency resolver scoped to children of this resolved node.
    * @see postInstantiate
    */
   ctor(
-    identifier: Identifier,
-    creator: ConstructorDependencyNode,
-    childResolver: DependencyGraphResolver
+    node: ConstructorDependencyNode,
+    childResolver: DependencyGraphResolver,
+    opts: ResolveOpts
   ): any;
 
   /**
@@ -72,32 +72,35 @@ export interface ComponentResolvers {
    * to resolve its property injections.
    *
    * @param identifier The identifier being resolved.
-   * @param creator The dependency node describing the resolution.
+   * @param node The dependency node describing the resolution.
    * @param childResolver A dependency resolver scoped to children of this resolved node.
    * @see ctorProps
    */
   postInstantiate?(
-    identifier: Identifier,
-    creator: DependencyNode,
+    node: DependencyNode,
     resolver: DependencyGraphResolver,
-    instance: object
+    instance: object,
+    opts: ResolveOpts
   ): any;
 }
 
 export const defaultComponentResolvers: ComponentResolvers = {
-  const(_identifier, creator, _childResolver) {
-    return creator.value;
+  const(node, _childResolver) {
+    return node.value;
   },
-  factory(_identifier, creator, _childResolver) {
+  factory(node, _childResolver) {
     // Stub out Context.
     //  Cannot make a context or resolve plans without
     //  knowing our container or planner.
     // Previously, we treated factory as a function with arbitrary
     //  arguments, but now that FactoryDependencyNode pulls in
     //  FactoryBinding, we are contracted to the Context argument.
-    return creator.factory({
+    return node.factory({
       get container(): any {
         throw new Error("Property not implemented.");
+      },
+      get parameters(): any {
+        return Object.seal({});
       },
       create() {
         throw new Error("Method not implemented.");
@@ -113,21 +116,21 @@ export const defaultComponentResolvers: ComponentResolvers = {
       }
     });
   },
-  ctor(identifier, creator, childResolver) {
-    const args = creator.ctorInjectionNodes.map(inj =>
-      resolveInjectedArg(childResolver, inj)
+  ctor(node, childResolver, opts) {
+    const args = node.ctorInjectionNodes.map(inj =>
+      resolveInjectedArg(childResolver, inj, opts)
     );
-    return new creator.ctor(...args);
+    return new node.ctor(...args);
   },
   postInstantiate(
-    identifier: Identifier,
     creator: DependencyNode,
     resolver: DependencyGraphResolver,
-    instance: any
+    instance: any,
+    opts: ResolveOpts
   ): any {
     if (creator.type === "constructor") {
       for (let [propName, injection] of creator.propInjectionNodes) {
-        const injectedValue = resolveInjectedArg(resolver, injection);
+        const injectedValue = resolveInjectedArg(resolver, injection, opts);
         instance[propName] = injectedValue;
       }
     }
@@ -136,24 +139,27 @@ export const defaultComponentResolvers: ComponentResolvers = {
 
 function resolveInjectionInstance(
   resolver: DependencyGraphResolver,
-  node: DependencyNode
+  node: DependencyNode,
+  opts: ResolveOpts
 ): any {
   if (resolver.isInstantiating(node)) {
-    throwCyclicDependency(node.identifier, resolver);
+    // Only identifier nodes can cause cyclinc dependencies.
+    throwCyclicDependency((node as BindingDependencyNode).identifier, resolver);
   }
-  return resolver.resolveInstance(node);
+  return resolver.resolveInstance(node, opts);
 }
 
 function resolveInjectedArg(
   resolver: DependencyGraphResolver,
-  injection: InjectedValue
+  injection: InjectedValue,
+  opts: ResolveOpts
 ): any {
   if (injection == null) {
     return null;
   } else if (Array.isArray(injection)) {
-    return injection.map(inj => resolveInjectionInstance(resolver, inj));
+    return injection.map(inj => resolveInjectionInstance(resolver, inj, opts));
   } else {
-    return resolveInjectionInstance(resolver, injection);
+    return resolveInjectionInstance(resolver, injection, opts);
   }
 }
 
@@ -163,7 +169,7 @@ function throwCyclicDependency(
 ): never {
   const identifierStack = childResolver
     .getResolveStack()
-    .map(x => x.identifier);
+    .map(getDependencyNodeIdentifier);
   identifierStack.push(cyclicIdentifier);
   throw new DependencyResolutionError(
     cyclicIdentifier,

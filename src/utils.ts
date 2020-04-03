@@ -25,3 +25,7 @@ export function identifierToString(identifier: Identifier): string {
 export function scopeToString(scope: Scope): string {
   return String(scope);
 }
+
+export function has(obj: any, key: string | symbol) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
