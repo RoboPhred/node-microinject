@@ -17,4 +17,4 @@ export declare function inject(identifier: Identifier, opts?: IdentifierInjectio
  * Marks a constructor argument as receiving a param when created from `ServiceLocator.create()`.
  * @param paramName The identifier of the parameter to use.
  */
-export declare function param(paramKey: string | number | symbol, opts?: ParameterInjectionOptions): (target: any, targetKey: string | symbol, index?: number | undefined) => void;
+export declare function injectParam(paramKey: string | number | symbol, opts?: ParameterInjectionOptions): (target: any, targetKey: string | symbol, index?: number | undefined) => void;

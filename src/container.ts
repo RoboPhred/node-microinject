@@ -114,13 +114,13 @@ export class Container {
   }
 
   create<T>(ctor: Newable<T>, parameters: ParameterRecord = {}) {
-    return this._create(ctor, this._resolver, parameters);
+    return this._create(ctor, parameters, this._resolver);
   }
 
   private _create<T>(
     ctor: Newable<T>,
-    resolver: DependencyGraphResolver,
-    parameters: ParameterRecord
+    parameters: ParameterRecord,
+    resolver: DependencyGraphResolver
   ): T {
     // TODO: Allow passing values to decorated ctor args `@param("foo") myFoo: number`.
     const binder = new BinderImpl(ctor);
@@ -136,12 +136,13 @@ export class Container {
    * @param identifier The identifier of the object to get.
    * @returns The object for the given identifier.
    */
-  get<T>(identifier: Identifier<T>): T {
-    return this._get(identifier);
+  get<T>(identifier: Identifier<T>, parameters: ParameterRecord = {}): T {
+    return this._get(identifier, parameters);
   }
 
   private _get<T>(
     identifier: Identifier<T>,
+    parameters: ParameterRecord,
     resolver?: DependencyGraphResolver,
     planner?: DependencyGraphPlanner
   ): T {
@@ -154,7 +155,7 @@ export class Container {
 
     if (this.hasBinding(identifier)) {
       const plan = planner.getPlan(identifier);
-      return resolver.resolveInstance(plan);
+      return resolver.resolveInstance(plan, { parameters });
     }
 
     if (this._parent) {
@@ -282,11 +283,11 @@ export class Container {
    * and we need to pass it the root container as part of the InversifyJS api.
    *
    * @param identifier The identifier that was resolved to the factory we are resolving.
-   * @param creator The factory component creator to be used to resolve the value.
+   * @param node The factory component creator to be used to resolve the value.
    * @param childResolver A resolver capable of resolving correctly scoped child objects.
    */
   private _factoryResolver(
-    creator: FactoryDependencyNode,
+    node: FactoryDependencyNode,
     childResolver: DependencyGraphResolver,
     opts: ResolveOpts
   ): any {
@@ -300,12 +301,12 @@ export class Container {
         return Object.seal({ ...opts.parameters });
       },
 
-      create: <T>(ctor: Newable<T>): T => {
-        return this._create(ctor, childResolver);
+      create: <T>(ctor: Newable<T>, parameters: ParameterRecord = {}): T => {
+        return this._create(ctor, parameters, childResolver);
       },
 
-      get: (identifier: Identifier) => {
-        return this._get(identifier, childResolver, creator.planner);
+      get: (identifier: Identifier, parameters: ParameterRecord = {}) => {
+        return this._get(identifier, parameters, childResolver, node.planner);
       },
 
       getAll: (identifier: Identifier) => {
@@ -317,6 +318,6 @@ export class Container {
       has: this.has.bind(this)
     };
 
-    return creator.factory(context);
+    return node.factory(context);
   }
 }

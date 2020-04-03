@@ -93,7 +93,7 @@ export function inject(
  * Marks a constructor argument as receiving a param when created from `ServiceLocator.create()`.
  * @param paramName The identifier of the parameter to use.
  */
-export function param(
+export function injectParam(
   paramKey: string | number | symbol,
   opts?: ParameterInjectionOptions
 ) {

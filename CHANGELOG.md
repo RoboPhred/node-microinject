@@ -1,6 +1,9 @@
 # vNext
 
 - Introduce parameter injections for supplying data at request time.
+  - `@injectParam` decorator
+  - Parameter map as second argument to `container.create()`
+  - `context.parameters` on factory context.
 - Remove @optional() and @all() decorators. Use options argument in @inject and @param.
 
 # 0.8.0

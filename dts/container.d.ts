@@ -1,5 +1,6 @@
 import { Identifier, Newable, RegistryModule } from "./interfaces";
 import { Binder } from "./binder";
+import { ParameterRecord } from "./resolver";
 export declare class Container {
     private _planner;
     private _resolver;
@@ -47,7 +48,7 @@ export declare class Container {
      * configured bindings remain configured.
      */
     reset(): void;
-    create<T>(ctor: Newable<T>): T;
+    create<T>(ctor: Newable<T>, parameters?: ParameterRecord): T;
     private _create;
     /**
      * Gets or creates the value represented by the identifier.
@@ -55,7 +56,7 @@ export declare class Container {
      * @param identifier The identifier of the object to get.
      * @returns The object for the given identifier.
      */
-    get<T>(identifier: Identifier<T>): T;
+    get<T>(identifier: Identifier<T>, parameters?: ParameterRecord): T;
     private _get;
     /**
      * Gets all bound objects for an identifier.  This may create the objects if necessary depending on scope and previous creations.
@@ -90,7 +91,7 @@ export declare class Container {
      * and we need to pass it the root container as part of the InversifyJS api.
      *
      * @param identifier The identifier that was resolved to the factory we are resolving.
-     * @param creator The factory component creator to be used to resolve the value.
+     * @param node The factory component creator to be used to resolve the value.
      * @param childResolver A resolver capable of resolving correctly scoped child objects.
      */
     private _factoryResolver;

@@ -51,29 +51,21 @@ application-level IoC.
 ## New features over InversifyJS
 
 - Custom scopes: `container.bind.[toScope | inScope]` - create services shared based on other objects further up the chain.
-- auto-binding: `container.bind(ClassConstructor)` will preconfigure the binding from annotations on the object.
+- Per-request parameters: Supply per-request options to constructed instance in addition to traditional bindings.
+  - Constructor parameter injection: `constructor(@injectParam("MyParam") myParam: string)`
+  - Supply parameters during object request: `container.get(MyObjectIdentifier, {MyParam: "hello world"})`
+- Decorator based binding: `container.bind(ClassConstructor)` will read annotations on the object:
   - Binding aliases: `@provides(identifier)`.
   - As a singleton: `@singleton`.
   - Inside a custom scope: `@inScope`.
   - Defining a custom scope: `@asScope`.
   - Can be overridden by standard binding api.
-- Multiple identifiers to a single binding (using `@provides` and `bind().provides()`)
-
-## Missing features from InversifyJS
-
-- unbinding
-- [tagged binding](https://github.com/inversify/InversifyJS/blob/master/wiki/tagged_bindings.md).
-- [debug tools](https://github.com/inversify/inversify-chrome-devtools)
-- async modules.
-- async resolution.
-- snapshotting.
-
-## Benefits over InfersifyJS
-
-- Intuitive, decorator based binding configuration.
-- Scoped binding support.
-- No [monkey patching of base or third party superclasses](https://github.com/inversify/InversifyJS/issues/619#issuecomment-352218311).
-- No requirement for the root node application to call [reflect-metadata](https://github.com/inversify/InversifyJS/issues/737). No risk of interfering with modules that also use it.
+- Instantiate objects dynamically without bindings: `container.create()`
+- Provide a single binding for multiple identifiers (using `@provides` and `bind().provides()`)
+  - Simplify code by providing a single implementation while still keeping seperation of concerns
+    with seperate identifiers.
+- No [monkey patching required to extend NodeJS or third party classes](https://github.com/inversify/InversifyJS/issues/619#issuecomment-352218311).
+- No requirement for the root node application to call [reflect-metadata](https://github.com/inversify/InversifyJS/issues/737). No risk of interfering with other modules that also use it.
 - Minimialist API: No [redundant functions](https://github.com/inversify/InversifyJS/issues/697) for varying names of the same behavior.
 - Lighter weight
   - node_module sizes (including explicit and implicit dependencies)
@@ -83,24 +75,37 @@ application-level IoC.
     - `inversify@4.11.1 ./lib` = 85.5 KB
     - `microinject@0.4.1 ./lib` = 53.6 KB
 
-## Drawbacks over InversifyJS
+## Missing features from InversifyJS
 
-- Missing IoC capabilities. See "Missing features from InversifyJS" above.
-- Missing debug tools.
-- No typescript-based injection-by-type. _requires reflect-metadata._
-
-## Which one should I choose?
-
-If you are making a third party library for consumption by others, and do not want to require them to adopt InversifyJS and its usage requirements, consider using Microinject.
-
-If you are making a NodeJS application and want a full featured and robust dependency injection / IoC suite, use [InversifyJS](https://github.com/inversify/InversifyJS).
-
-## Compatibility
-
-The primary target of this library is NodeJS libraries. However, it will work with modern browsers or babel so long as ES6 Symbol and Map are supported.
+- unbinding / rebinding
+- [tagged binding](https://github.com/inversify/InversifyJS/blob/master/wiki/tagged_bindings.md)
+  - Binding aliases (`bind().provides()`) provides a more flexible solution to this use case.
+- [debug tools](https://github.com/inversify/inversify-chrome-devtools)
+- async modules
+- async resolution
+  - Use async provider objects instead: `class FooProvider { async getFoo() { ... }}`
+- snapshotting
+- Auto injection based on typescript typings
+  - This requires using `reflect-metadata` and will not be supported.
 
 ## Alternatives
 
-- [InversifyJS](https://github.com/inversify/InversifyJS) - Typescript-based full featured Dependency Injection. Recommended for most application-level projects.
+- [InversifyJS](https://github.com/inversify/InversifyJS) - Typescript-based full featured Dependency Injection.
 - [Electrolyte](https://github.com/jaredhanson/electrolyte) - A commonjs-centric dependency injection mechanism that functions at the module level.
 - [typescript-ioc](https://www.npmjs.com/package/typescript-ioc) - Single-container global-scoped IOC using Typescript and reflect-metadata.
+
+### Which one should I choose?
+
+If you are making a third party library for consumption by others, and want to avoid monkey patching, global state, and other leaky concepts, consider using microinject.
+
+If your application generates a hierarchy of components where some components have multiple instances, and you need to share services within each instance, you may find microinject's scoped bindings useful.
+
+If your application needs to pass instance specific data when generating multiple instances of the same identifier, microinject's parameter injection is what you need.
+
+If you want your DI container to automatically determine your bindings from used types, use [InversifyJS](https://github.com/inversify/InversifyJS).
+
+If you are working with older environments, or want to stay closer to the commonjs module format, use [Electrolyte](https://github.com/jaredhanson/electrolyte).
+
+## JS Environment Compatibility
+
+The primary target of this library is NodeJS v10 and up. However, it will work with modern browsers or babel so long as Symbol and Map are supported.
