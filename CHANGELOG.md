@@ -1,4 +1,4 @@
-# vNext
+# 0.9.0
 
 - Introduce parameter injections for supplying data at request time.
   - Specify a param injection with the `@injectParam` decorator.
