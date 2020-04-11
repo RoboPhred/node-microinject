@@ -168,6 +168,14 @@ export class DependencyGraphPlanner {
       case "constructor": {
         return this._createConstructorNode(identifier, binding, scopeInstances);
       }
+      case "parent": {
+        return {
+          type: "parent",
+          ...binding,
+          nodeId: uuidv4(),
+          identifier
+        };
+      }
       default:
         return assertKnownBinding(binding);
     }

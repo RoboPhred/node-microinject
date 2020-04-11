@@ -5,7 +5,8 @@ import {
   BindingType,
   ConstBinding,
   ConstructorBinding,
-  FactoryBinding
+  FactoryBinding,
+  ParentBinding
 } from "../binder/binding";
 
 import { Scope } from "../scope";
@@ -51,6 +52,12 @@ export interface BindingDependencyNodeBase
    * The service identifier this node represents.
    */
   identifier: Identifier;
+}
+
+export interface ParentDependencyNode
+  extends BindingDependencyNodeBase,
+    ParentBinding {
+  type: "parent";
 }
 
 export interface ConstDependencyNode
@@ -114,6 +121,7 @@ export type InjectedValue = DependencyNode | DependencyNode[] | null;
 
 export type DependencyNode =
   | ParamDependencyNode
+  | ParentDependencyNode
   | ConstDependencyNode
   | FactoryDependencyNode
   | ConstructorDependencyNode;
@@ -141,5 +149,10 @@ export function getDependencyNodeIdentifier(node: DependencyNode) {
   if (isBindingDependencyNode(node)) {
     return node.identifier;
   }
-  return node.paramKey;
+  switch (node.type) {
+    case "param":
+      return node.paramKey;
+    case "parent":
+      return node.identifier;
+  }
 }

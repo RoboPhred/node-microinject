@@ -7,7 +7,8 @@ import {
   FactoryDependencyNode,
   InjectedValue,
   BindingDependencyNode,
-  getDependencyNodeIdentifier
+  getDependencyNodeIdentifier,
+  ParentDependencyNode
 } from "../planner";
 
 import { DependencyResolutionError } from "../errors";
@@ -61,6 +62,13 @@ export interface ComponentResolvers {
     childResolver: DependencyGraphResolver,
     opts: ResolveOpts
   ): any;
+
+  /**
+   * Resolves an identifier that comes from the parent container.
+   * @param node The dependency node describing the resolution.
+   * @param opts
+   */
+  parentIdentifier(node: ParentDependencyNode, opts: ResolveOpts): any;
 
   /**
    * Handle post-instantiation tasks for the resolved dependency node instance.
@@ -121,6 +129,9 @@ export const defaultComponentResolvers: ComponentResolvers = {
       resolveInjectedArg(childResolver, inj, opts)
     );
     return new node.ctor(...args);
+  },
+  parentIdentifier(node, opts) {
+    throw new Error("Method not implemented.");
   },
   postInstantiate(
     creator: DependencyNode,

@@ -1,7 +1,7 @@
 import { Context, Identifier, Newable } from "../interfaces";
 import { Scope } from "../scope";
 import { InjectionData } from "../injection/utils";
-export declare type BindingType = "value" | "factory" | "constructor";
+export declare type BindingType = "value" | "factory" | "constructor" | "parent";
 export interface BindingCore {
     /**
      * The type of the binding.
@@ -37,7 +37,10 @@ export interface ConstructorBinding extends InstanceCreatorBinding {
     ctorInjections: InjectionData[];
     propInjections: Map<string, InjectionData>;
 }
-export declare type Binding = ConstBinding | FactoryBinding | ConstructorBinding;
+export interface ParentBinding extends BindingCore {
+    type: "parent";
+}
+export declare type Binding = ConstBinding | FactoryBinding | ConstructorBinding | ParentBinding;
 export declare type ScopeableBinding = FactoryBinding | ConstructorBinding;
 export declare type BindingMap = ReadonlyMap<Identifier, Binding[]>;
 /**

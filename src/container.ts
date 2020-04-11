@@ -8,7 +8,11 @@ import { BinderImpl } from "./binder/binder-impl";
 
 import { Binding } from "./binder/binding";
 
-import { DependencyGraphPlanner, FactoryDependencyNode } from "./planner";
+import {
+  DependencyGraphPlanner,
+  FactoryDependencyNode,
+  ParentDependencyNode
+} from "./planner";
 
 import {
   BasicDependencyGraphResolver,
@@ -37,7 +41,8 @@ export class Container {
     );
 
     this._resolver = new BasicDependencyGraphResolver({
-      factory: this._factoryResolver.bind(this)
+      factory: this._factoryResolver.bind(this),
+      parentIdentifier: this._parentResolver.bind(this)
     });
   }
 
@@ -253,7 +258,17 @@ export class Container {
   private _resolveBindings(identifier: Identifier): Binding[] {
     this._finalizeBinders(identifier);
 
-    return this._bindingMap.get(identifier) || [];
+    const bindings = this._bindingMap.get(identifier) || [];
+
+    if (this._parent && this._parent.has(identifier)) {
+      bindings.push({
+        bindingId: "parent",
+        identifiers: [identifier],
+        type: "parent"
+      });
+    }
+
+    return bindings;
   }
 
   private _finalizeBinders(identifier?: Identifier) {
@@ -319,5 +334,16 @@ export class Container {
     };
 
     return node.factory(context);
+  }
+
+  private _parentResolver(node: ParentDependencyNode, opts: ResolveOpts) {
+    if (!this._parent) {
+      throw new DependencyResolutionError(
+        node.identifier,
+        [],
+        "Dependency graph planned a parent injection, but no parent container is available."
+      );
+    }
+    return this._parent.get(node.identifier);
   }
 }

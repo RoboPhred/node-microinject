@@ -1,4 +1,4 @@
-import { ConstDependencyNode, ConstructorDependencyNode, DependencyNode, FactoryDependencyNode } from "../planner";
+import { ConstDependencyNode, ConstructorDependencyNode, DependencyNode, FactoryDependencyNode, ParentDependencyNode } from "../planner";
 import { DependencyGraphResolver, ResolveOpts } from "./interfaces";
 export interface ComponentResolvers {
     /**
@@ -33,6 +33,12 @@ export interface ComponentResolvers {
      * @see postInstantiate
      */
     ctor(node: ConstructorDependencyNode, childResolver: DependencyGraphResolver, opts: ResolveOpts): any;
+    /**
+     * Resolves an identifier that comes from the parent container.
+     * @param node The dependency node describing the resolution.
+     * @param opts
+     */
+    parentIdentifier(node: ParentDependencyNode, opts: ResolveOpts): any;
     /**
      * Handle post-instantiation tasks for the resolved dependency node instance.
      *

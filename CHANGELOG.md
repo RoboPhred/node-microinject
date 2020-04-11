@@ -1,3 +1,7 @@
+# vNext
+
+- Support resolving parent identifiers.
+
 # 0.9.0
 
 - Introduce parameter injections for supplying data at request time.

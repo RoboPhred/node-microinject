@@ -1,5 +1,5 @@
 import { Identifier } from "../interfaces";
-import { BindingCore, ConstBinding, ConstructorBinding, FactoryBinding } from "../binder/binding";
+import { BindingCore, ConstBinding, ConstructorBinding, FactoryBinding, ParentBinding } from "../binder/binding";
 import { Scope } from "../scope";
 import { DependencyGraphPlanner } from "./planner";
 export declare type ScopeDefiner = ScopedDependenencyNode | symbol;
@@ -35,6 +35,9 @@ export interface BindingDependencyNodeBase extends DependencyNodeBase, BindingCo
      * The service identifier this node represents.
      */
     identifier: Identifier;
+}
+export interface ParentDependencyNode extends BindingDependencyNodeBase, ParentBinding {
+    type: "parent";
 }
 export interface ConstDependencyNode extends BindingDependencyNodeBase, ConstBinding {
     type: "value";
@@ -81,7 +84,7 @@ export interface ConstructorDependencyNode extends ScopedBindingDependencyNodeBa
     propInjectionNodes: Map<string, InjectedValue>;
 }
 export declare type InjectedValue = DependencyNode | DependencyNode[] | null;
-export declare type DependencyNode = ParamDependencyNode | ConstDependencyNode | FactoryDependencyNode | ConstructorDependencyNode;
+export declare type DependencyNode = ParamDependencyNode | ParentDependencyNode | ConstDependencyNode | FactoryDependencyNode | ConstructorDependencyNode;
 export declare type BindingDependencyNode = ConstDependencyNode | FactoryDependencyNode | ConstructorDependencyNode;
 export declare type ScopedDependenencyNode = FactoryDependencyNode | ConstructorDependencyNode;
 export declare function isBindingDependencyNode(node: DependencyNode): node is BindingDependencyNode;

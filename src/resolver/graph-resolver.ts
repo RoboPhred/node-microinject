@@ -310,6 +310,8 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
             }
             return params[node.paramKey as any];
           }
+        case "parent":
+          return this._resolvers.parentIdentifier(node, opts);
         default:
           return throwUnknownNodeType(node);
       }

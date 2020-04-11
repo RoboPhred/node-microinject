@@ -95,4 +95,5 @@ export declare class Container {
      * @param childResolver A resolver capable of resolving correctly scoped child objects.
      */
     private _factoryResolver;
+    private _parentResolver;
 }

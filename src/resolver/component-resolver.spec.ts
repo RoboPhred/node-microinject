@@ -3,7 +3,7 @@ import { use as chaiUse, expect } from "chai";
 import sinonChai = require("sinon-chai");
 chaiUse(sinonChai);
 
-import { SinonStub, stub, spy, match, SinonStubbedInstance } from "sinon";
+import { SinonStub, stub, SinonStubbedInstance } from "sinon";
 
 import { Identifier, Newable } from "../interfaces";
 
@@ -14,7 +14,7 @@ import {
   ConstDependencyNode,
   FactoryDependencyNode,
   ConstructorDependencyNode,
-  isBindingDependencyNode
+  BindingDependencyNode
 } from "../planner";
 
 import { DependencyGraphResolver } from "./interfaces";
@@ -82,22 +82,14 @@ describe("defaultComponentResolvers", function() {
       ctor: constructorStub
     };
 
-    function invokeResolver(args: DependencyNode[]) {
+    function invokeResolver(args: BindingDependencyNode[]) {
       const creator: ConstructorDependencyNode = {
         ...partialCtorCreator,
         ctorInjections: args.map(arg => {
-          if (isBindingDependencyNode(arg)) {
-            return {
-              type: "identifier",
-              identifier: arg.identifier
-            };
-          } else {
-            return {
-              type: "parameter",
-              optional: arg.optional,
-              paramKey: arg.paramKey
-            };
-          }
+          return {
+            type: "identifier",
+            identifier: arg.identifier
+          };
         }),
         propInjections: new Map(),
         ctorInjectionNodes: args,
@@ -228,7 +220,7 @@ describe("defaultComponentResolvers", function() {
     });
   });
 
-  describe(".value", function() {
+  describe(".const", function() {
     const identifier: Identifier = Symbol("value-identifier");
     const returnValue = Symbol("return-value");
     const valueNode: ConstDependencyNode = {
@@ -249,7 +241,7 @@ describe("defaultComponentResolvers", function() {
       );
     });
 
-    it("returns the value result", function() {
+    it("returns the const result", function() {
       expect(resolvedValue).equals(returnValue);
     });
   });

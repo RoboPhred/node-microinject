@@ -4,7 +4,7 @@ import { Scope } from "../scope";
 
 import { InjectionData } from "../injection/utils";
 
-export type BindingType = "value" | "factory" | "constructor";
+export type BindingType = "value" | "factory" | "constructor" | "parent";
 
 export interface BindingCore {
   /**
@@ -47,7 +47,15 @@ export interface ConstructorBinding extends InstanceCreatorBinding {
   propInjections: Map<string, InjectionData>;
 }
 
-export type Binding = ConstBinding | FactoryBinding | ConstructorBinding;
+export interface ParentBinding extends BindingCore {
+  type: "parent";
+}
+
+export type Binding =
+  | ConstBinding
+  | FactoryBinding
+  | ConstructorBinding
+  | ParentBinding;
 export type ScopeableBinding = FactoryBinding | ConstructorBinding;
 
 export type BindingMap = ReadonlyMap<Identifier, Binding[]>;
