@@ -1,6 +1,6 @@
 {
   "name": "microinject",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "A Tiny, standalone, library-friendly dependency injection.",
   "main": "lib/index.js",
   "types": "dts/index.d.ts",
