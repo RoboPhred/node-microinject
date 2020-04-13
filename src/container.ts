@@ -1,6 +1,6 @@
-import { Context, Identifier, Newable, RegistryModule } from "./interfaces";
+import { v4 as uuidV4 } from "uuid";
 
-import { ContainerModule } from "./module";
+import { Context, Identifier, Newable, RegistryModule } from "./interfaces";
 
 import { Binder } from "./binder";
 
@@ -262,7 +262,7 @@ export class Container {
 
     if (this._parent && this._parent.has(identifier)) {
       bindings.push({
-        bindingId: "parent",
+        bindingId: uuidV4(),
         identifiers: [identifier],
         type: "parent"
       });

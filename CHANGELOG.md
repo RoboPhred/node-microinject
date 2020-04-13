@@ -1,3 +1,7 @@
+# 0.9.2
+
+- Fix resolving multiple parent identifiers during injections.
+
 # 0.9.1
 
 - Fix resolving parent identifiers from injections.
