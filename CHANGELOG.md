@@ -1,6 +1,6 @@
-# vNext
+# 0.9.1
 
-- Support resolving parent identifiers.
+- Fix resolving parent identifiers from injections.
 
 # 0.9.0
 
