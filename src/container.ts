@@ -11,14 +11,14 @@ import { Binding } from "./binder/binding";
 import {
   DependencyGraphPlanner,
   FactoryDependencyNode,
-  ParentDependencyNode
+  ParentDependencyNode,
 } from "./planner";
 
 import {
   BasicDependencyGraphResolver,
   DependencyGraphResolver,
   ResolveOpts,
-  ParameterRecord
+  ParameterRecord,
 } from "./resolver";
 
 import { DependencyResolutionError } from "./errors";
@@ -42,7 +42,7 @@ export class Container {
 
     this._resolver = new BasicDependencyGraphResolver({
       factory: this._factoryResolver.bind(this),
-      parentIdentifier: this._parentResolver.bind(this)
+      parentIdentifier: this._parentResolver.bind(this),
     });
   }
 
@@ -60,7 +60,7 @@ export class Container {
    */
   load(...modules: RegistryModule[]) {
     const bind = this.bind.bind(this);
-    modules.forEach(x => x.registry(bind));
+    modules.forEach((x) => x.registry(bind));
   }
 
   /**
@@ -111,7 +111,7 @@ export class Container {
     // Clearing the entire scope stack is as simple as getting
     //  a new graph resolver.
     this._resolver = new BasicDependencyGraphResolver({
-      factory: this._factoryResolver.bind(this)
+      factory: this._factoryResolver.bind(this),
     });
 
     // No need to clear the cached plans.  Bindings are kept,
@@ -233,12 +233,12 @@ export class Container {
       ? this._parent._getAllNoThrow(identifier)
       : [];
 
-    const bindings = this._resolveBindings(identifier);
+    const bindings = this._resolveBindings(identifier, false);
     if (bindings.length > 0) {
-      const plans = bindings.map(binding =>
+      const plans = bindings.map((binding) =>
         planner!.getPlan(identifier, binding)
       );
-      values.push(...plans.map(plan => resolver!.resolveInstance(plan)));
+      values.push(...plans.map((plan) => resolver!.resolveInstance(plan)));
     }
 
     return values;
@@ -255,16 +255,19 @@ export class Container {
     );
   }
 
-  private _resolveBindings(identifier: Identifier): Binding[] {
+  private _resolveBindings(
+    identifier: Identifier,
+    includeParent = true
+  ): Binding[] {
     this._finalizeBinders(identifier);
 
     const bindings = this._bindingMap.get(identifier) || [];
 
-    if (this._parent && this._parent.has(identifier)) {
+    if (includeParent && this._parent && this._parent.has(identifier)) {
       bindings.push({
         bindingId: uuidV4(),
         identifiers: [identifier],
-        type: "parent"
+        type: "parent",
       });
     }
 
@@ -330,7 +333,7 @@ export class Container {
 
       // "has" is simply interested if we have at least one binding for the identifier.
       //  Scope has no bearing on its value, so it is not interested in
-      has: this.has.bind(this)
+      has: this.has.bind(this),
     };
 
     return node.factory(context);
