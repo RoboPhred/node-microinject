@@ -1,3 +1,7 @@
+# 0.9.3
+
+- Fix duplicate entries in getAll due to parent bindings.
+
 # 0.9.2
 
 - Fix resolving multiple parent identifiers during injections.
