@@ -17,6 +17,11 @@ export interface IdentifierInjectionOptions {
    * If both 'optional' and 'all' are true, then an empty array will be set if no objects are found.
    */
   all?: boolean;
+
+  /**
+   * Parameters to request when resolving the injected value.
+   */
+  params?: Record<string, any>;
 }
 
 export interface ParameterInjectionOptions {

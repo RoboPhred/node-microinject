@@ -1,9 +1,11 @@
 import { SingletonScope } from "../scope";
 
-import { DependencyNode, ScopedDependenencyNode, isBindingDependencyNode } from "../planner";
+import { DependencyNode, DynamicDependenencyNode, isBindingDependencyNode, isDynamicDependenencyNode, getDependencyNodeIdentifier } from "../planner";
 
 import { isScopeableBinding } from "../binder/binding";
 
+import { Identifier } from "../interfaces";
+import { DependencyResolutionError, ParameterNotSuppliedError } from "../errors";
 import { identifierToString, has } from "../utils";
 
 import { DependencyGraphResolver, ResolveOpts } from "./interfaces";
@@ -12,7 +14,7 @@ import {
   ComponentResolvers,
   defaultComponentResolvers
 } from "./component-resolver";
-import { ParameterNotSuppliedError } from "../errors";
+
 
 /*
 Scopes and GC:
@@ -25,15 +27,14 @@ is the case where we need to keep the ability to further create objects after we
 our current resolve cycle.
 Right now, this only comes up with factory functions, which can receive a context to make further plans
 and resolutions.
-
 */
 
-function isNodeScoped(node: DependencyNode): node is ScopedDependenencyNode {
+function isNodeScoped(node: DependencyNode): node is DynamicDependenencyNode {
   return isBindingDependencyNode(node) && isScopeableBinding(node) && node.createInScope != null;
 }
 function isNodeScopeCreator(
   node: DependencyNode
-): node is ScopedDependenencyNode {
+): node is DynamicDependenencyNode {
   return isBindingDependencyNode(node) && isScopeableBinding(node) && node.definesScope != null;
 }
 
@@ -95,7 +96,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
    * as typescript grumbles about using the private ScopedDependencyNode
    * in the public constructor, and re-exporting it causes trouble down the line.
    */
-  private _ownedScope?: ScopedDependenencyNode | null = null;
+  private _ownedScope?: DynamicDependenencyNode | null = null;
 
   constructor(resolvers?: Partial<ComponentResolvers>) {
     // Make sure to fill in any resolvers that the user didn't specify.
@@ -159,6 +160,24 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
    * @param node The dependency graph node representing the object to resolve.
    */
   resolveInstance<T = any>(node: DependencyNode, opts: ResolveOpts = {}): T {
+    // The node may come with its own parameters.
+    // This node is 'deeper' than the original injection request, so override original parameters
+    //  with the node parameters.
+    if (isDynamicDependenencyNode(node)) {
+      // Only dynamic nodes can cause cyclic dependencies.
+      if (this.isInstantiating(node)) {
+        throwCyclicDependency(node.identifier, this);
+      }
+
+      opts = {
+        ...opts,
+        parameters: {
+          ...(opts.parameters ?? {}),
+          ...node.parameters
+        }
+      }
+    }
+
     this._resolutionStack.push(node);
     try {
       return this._getNodeInstance(node, opts);
@@ -177,7 +196,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
     }
   }
 
-  private _getScopedNodeInstance(node: ScopedDependenencyNode, opts: ResolveOpts): any {
+  private _getScopedNodeInstance(node: DynamicDependenencyNode, opts: ResolveOpts): any {
     if (!node.createInScope) {
       throw new Error("_getScopedNodeInstance called on non-scoped component.");
     }
@@ -321,7 +340,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
   }
 
   private _createChildResolver(
-    scopeOwner?: ScopedDependenencyNode
+    scopeOwner?: DynamicDependenencyNode
   ): BasicDependencyGraphResolver {
     const resolver = new BasicDependencyGraphResolver(this._resolvers);
     resolver._ownedScope = scopeOwner || null;
@@ -332,4 +351,19 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
 
 function throwUnknownNodeType(c: never): never {
   throw new Error(`Unknown node type "${(c as DependencyNode).type}".`);
+}
+
+function throwCyclicDependency(
+  cyclicIdentifier: Identifier,
+  childResolver: DependencyGraphResolver
+): never {
+  const identifierStack = childResolver
+    .getResolveStack()
+    .map(getDependencyNodeIdentifier);
+  identifierStack.push(cyclicIdentifier);
+  throw new DependencyResolutionError(
+    cyclicIdentifier,
+    identifierStack,
+    `Cannot resolve cyclic dependency.`
+  );
 }

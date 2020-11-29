@@ -1,6 +1,12 @@
 import { v4 as uuidV4 } from "uuid";
 
-import { Context, Identifier, Newable, RegistryModule } from "./interfaces";
+import {
+  Context,
+  Identifier,
+  Newable,
+  RegistryModule,
+  ParameterRecord,
+} from "./interfaces";
 
 import { Binder } from "./binder";
 
@@ -18,7 +24,6 @@ import {
   BasicDependencyGraphResolver,
   DependencyGraphResolver,
   ResolveOpts,
-  ParameterRecord,
 } from "./resolver";
 
 import { DependencyResolutionError } from "./errors";
@@ -332,7 +337,7 @@ export class Container {
       },
 
       // "has" is simply interested if we have at least one binding for the identifier.
-      //  Scope has no bearing on its value, so it is not interested in
+      //  Scope has no bearing on its value.
       has: this.has.bind(this),
     };
 

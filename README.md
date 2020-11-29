@@ -44,7 +44,7 @@ application-level IoC.
 - `container.load`.
 - `@injectable()`.
 - `@inject(identifier)` - Constructor and Property injection supported. Identifier must be specified; inject-by-type not supported.
-- `@optional` modifier for @inject.
+- _@optional()_ = `@inject(identifier, {optional: true})`.
 - _@injectAll()_ = `@inject(identifier, {all: true})`.
 - _child containers_ as `childContainer.parent = parentContainer;`;
 
@@ -83,7 +83,7 @@ application-level IoC.
 - [debug tools](https://github.com/inversify/inversify-chrome-devtools)
 - async modules
 - async resolution
-  - Use async provider objects instead: `class FooProvider { async getFoo() { ... }}`
+  - Use async methods on provider objects or return promises from factories instead.
 - snapshotting
 - Auto injection based on typescript typings
   - This requires using `reflect-metadata` and will not be supported.

@@ -20,18 +20,18 @@ export interface ConstBinding extends BindingCore {
     type: "value";
     value: any;
 }
-export interface InstanceCreatorBinding extends BindingCore {
+export interface DynamicBinding extends BindingCore {
     definesScope?: Scope;
     createInScope?: Scope;
 }
 export interface BindingFactoryFunction {
     (context: Context): any;
 }
-export interface FactoryBinding extends InstanceCreatorBinding {
+export interface FactoryBinding extends DynamicBinding {
     type: "factory";
     factory: BindingFactoryFunction;
 }
-export interface ConstructorBinding extends InstanceCreatorBinding {
+export interface ConstructorBinding extends DynamicBinding {
     type: "constructor";
     ctor: Newable;
     ctorInjections: InjectionData[];

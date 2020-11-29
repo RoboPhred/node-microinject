@@ -8,12 +8,15 @@ import {
   InjectedValue,
   BindingDependencyNode,
   getDependencyNodeIdentifier,
-  ParentDependencyNode
+  ParentDependencyNode,
+  isBindingDependencyNode,
+  isDynamicDependenencyNode,
 } from "../planner";
 
 import { DependencyResolutionError } from "../errors";
 
 import { DependencyGraphResolver, ResolveOpts } from "./interfaces";
+import { openStdin } from "process";
 
 export interface ComponentResolvers {
   /**
@@ -121,11 +124,11 @@ export const defaultComponentResolvers: ComponentResolvers = {
       },
       getAll() {
         throw new Error("Method not implemented.");
-      }
+      },
     });
   },
   ctor(node, childResolver, opts) {
-    const args = node.ctorInjectionNodes.map(inj =>
+    const args = node.ctorInjectionNodes.map((inj) =>
       resolveInjectedArg(childResolver, inj, opts)
     );
     return new node.ctor(...args);
@@ -145,20 +148,8 @@ export const defaultComponentResolvers: ComponentResolvers = {
         instance[propName] = injectedValue;
       }
     }
-  }
+  },
 };
-
-function resolveInjectionInstance(
-  resolver: DependencyGraphResolver,
-  node: DependencyNode,
-  opts: ResolveOpts
-): any {
-  if (resolver.isInstantiating(node)) {
-    // Only identifier nodes can cause cyclinc dependencies.
-    throwCyclicDependency((node as BindingDependencyNode).identifier, resolver);
-  }
-  return resolver.resolveInstance(node, opts);
-}
 
 function resolveInjectedArg(
   resolver: DependencyGraphResolver,
@@ -168,23 +159,8 @@ function resolveInjectedArg(
   if (injection == null) {
     return null;
   } else if (Array.isArray(injection)) {
-    return injection.map(inj => resolveInjectionInstance(resolver, inj, opts));
+    return injection.map((inj) => resolver.resolveInstance(inj, opts));
   } else {
-    return resolveInjectionInstance(resolver, injection, opts);
+    return resolver.resolveInstance(injection, opts);
   }
-}
-
-function throwCyclicDependency(
-  cyclicIdentifier: Identifier,
-  childResolver: DependencyGraphResolver
-): never {
-  const identifierStack = childResolver
-    .getResolveStack()
-    .map(getDependencyNodeIdentifier);
-  identifierStack.push(cyclicIdentifier);
-  throw new DependencyResolutionError(
-    cyclicIdentifier,
-    identifierStack,
-    `Cannot resolve cyclic dependency.`
-  );
 }

@@ -1,6 +1,6 @@
 import uuidv4 = require("uuid/v4");
 
-import { Identifier } from "../interfaces";
+import { Identifier, ParameterRecord } from "../interfaces";
 
 import { SingletonScope } from "../scope";
 
@@ -117,12 +117,15 @@ export class DependencyGraphPlanner {
     identifier: Identifier,
     binding: Binding,
     scopeInstances: ScopeInstanceMap,
-    opts: GetPlanOptions = {}
+    opts: GetPlanOptions = {},
+    parameters: ParameterRecord = {}
   ): DependencyNode {
+    const noCache = opts.noCache || Object.keys(parameters).length > 0;
+
     this._stack.push(identifier);
     let dependencyNode: DependencyNode;
     try {
-      if (!opts.noCache && this._planCache.has(binding.bindingId)) {
+      if (!noCache && this._planCache.has(binding.bindingId)) {
         return this._planCache.get(binding.bindingId)!;
       }
 
@@ -131,14 +134,16 @@ export class DependencyGraphPlanner {
         binding,
         scopeInstances
       );
+      
       if (!node) {
         // If the binding is in a scope, this will register the resulting ComponentCreator with that scope.
         //  This is to support reference loops during dependency lookup.
-        node = this._createDependencyNode(identifier, binding, scopeInstances);
+        node = this._createDependencyNode(identifier, binding, scopeInstances, parameters);
       }
+
       dependencyNode = node;
 
-      if (!opts.noCache) {
+      if (!noCache) {
         this._planCache.set(binding.bindingId, dependencyNode);
       }
     } finally {
@@ -151,7 +156,8 @@ export class DependencyGraphPlanner {
   private _createDependencyNode(
     identifier: Identifier,
     binding: Binding,
-    scopeInstances: ScopeInstanceMap
+    scopeInstances: ScopeInstanceMap,
+    parameters: ParameterRecord
   ): DependencyNode {
     if (binding.type === "value") {
       return {
@@ -163,15 +169,15 @@ export class DependencyGraphPlanner {
 
     switch (binding.type) {
       case "factory": {
-        return this._createFactoryNode(identifier, binding, scopeInstances);
+        return this._createFactoryNode(identifier, binding, scopeInstances, parameters);
       }
       case "constructor": {
-        return this._createConstructorNode(identifier, binding, scopeInstances);
+        return this._createConstructorNode(identifier, binding, scopeInstances, parameters);
       }
       case "parent": {
         return {
-          type: "parent",
           ...binding,
+          type: "parent",
           nodeId: uuidv4(),
           identifier
         };
@@ -184,13 +190,15 @@ export class DependencyGraphPlanner {
   private _createFactoryNode(
     identifier: Identifier,
     binding: FactoryBinding,
-    scopeInstances: ScopeInstanceMap
+    scopeInstances: ScopeInstanceMap,
+    parameters: ParameterRecord
   ): FactoryDependencyNode {
     const node: FactoryDependencyNode = {
       ...binding,
       identifier,
       nodeId: uuidv4(),
-      planner: this
+      parameters,
+      planner: this,
     };
 
     const childScopeInstances = this._tryApplyScoping(
@@ -213,7 +221,8 @@ export class DependencyGraphPlanner {
   private _createConstructorNode(
     identifier: Identifier,
     binding: ConstructorBinding,
-    scopeInstances: ScopeInstanceMap
+    scopeInstances: ScopeInstanceMap,
+    parameters: ParameterRecord
   ): ConstructorDependencyNode {
     const { ctor, ctorInjections } = binding;
 
@@ -226,7 +235,8 @@ export class DependencyGraphPlanner {
       nodeId: uuidv4(),
       ctor,
       ctorInjectionNodes,
-      propInjectionNodes
+      propInjectionNodes,
+      parameters
     };
 
     // If we are part of a scope, add it before resolving the dependencies.

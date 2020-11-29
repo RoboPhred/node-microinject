@@ -1,8 +1,8 @@
-import { Identifier } from "../interfaces";
+import { Identifier, ParameterRecord } from "../interfaces";
 import { BindingCore, ConstBinding, ConstructorBinding, FactoryBinding, ParentBinding } from "../binder/binding";
 import { Scope } from "../scope";
 import { DependencyGraphPlanner } from "./planner";
-export declare type ScopeDefiner = ScopedDependenencyNode | symbol;
+export declare type ScopeDefiner = DynamicDependenencyNode | symbol;
 export interface ScopeInstance {
     /**
      * The ComponentCreator that defined this scope.
@@ -14,7 +14,7 @@ export interface ScopeInstance {
      * Instances of scopable component creators that are in this scope,
      * keyed by the bindingId of the binding that created the given instance.
      */
-    instances: Map<string, ScopedDependenencyNode>;
+    instances: Map<string, DynamicDependenencyNode>;
 }
 export declare type ScopeInstanceMap = Map<Scope, ScopeInstance>;
 export interface DependencyNodeBase {
@@ -52,6 +52,10 @@ export interface ScopedBindingDependencyNodeBase extends BindingDependencyNodeBa
 export interface FactoryDependencyNode extends ScopedBindingDependencyNodeBase, FactoryBinding {
     type: "factory";
     /**
+     * Parameters this node provides to the resolver.
+     */
+    parameters: ParameterRecord;
+    /**
      * The planner responsible for planning requests
      * made by this factory.
      */
@@ -60,6 +64,10 @@ export interface FactoryDependencyNode extends ScopedBindingDependencyNodeBase, 
 export interface ConstructorDependencyNode extends ScopedBindingDependencyNodeBase, ConstructorBinding {
     type: "constructor";
     /**
+     * Parameters this node provides to the resolver.
+     */
+    parameters: ParameterRecord;
+    /**
      * An array whose indexes correspond to resolved injected constructor arguments.
      *
      * The elements may be a single DependencyNode, an array of
@@ -67,7 +75,7 @@ export interface ConstructorDependencyNode extends ScopedBindingDependencyNodeBa
      * If the value is a node, the node should be resolved and rejected.
      * If the value is an array of nodes, the nodes should be resolved
      * and the array of resolved values injected.
-     * If the value is ```null``, then ```null``` should be injected.
+     * If the value is `null`, then `null` should be injected.
      */
     ctorInjectionNodes: InjectedValue[];
     /**
@@ -84,8 +92,18 @@ export interface ConstructorDependencyNode extends ScopedBindingDependencyNodeBa
     propInjectionNodes: Map<string, InjectedValue>;
 }
 export declare type InjectedValue = DependencyNode | DependencyNode[] | null;
+/**
+ * A node in the dependency graph.
+ */
 export declare type DependencyNode = ParamDependencyNode | ParentDependencyNode | ConstDependencyNode | FactoryDependencyNode | ConstructorDependencyNode;
+/**
+ * A dependency graph node that represents a binding.
+ */
 export declare type BindingDependencyNode = ConstDependencyNode | FactoryDependencyNode | ConstructorDependencyNode;
-export declare type ScopedDependenencyNode = FactoryDependencyNode | ConstructorDependencyNode;
+/**
+ * A dependency graph node whose value is dynamically obtained.
+ */
+export declare type DynamicDependenencyNode = FactoryDependencyNode | ConstructorDependencyNode;
 export declare function isBindingDependencyNode(node: DependencyNode): node is BindingDependencyNode;
+export declare function isDynamicDependenencyNode(node: DependencyNode): node is DynamicDependenencyNode;
 export declare function getDependencyNodeIdentifier(node: DependencyNode): Identifier<any>;

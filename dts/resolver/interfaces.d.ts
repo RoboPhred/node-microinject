@@ -1,8 +1,5 @@
+import { ParameterRecord } from "../interfaces";
 import { DependencyNode } from "../planner";
-/**
- * A map of parameters to provide when resolving param injections.
- */
-export declare type ParameterRecord = Record<string | number | symbol, any>;
 /**
  * Options for resolving a dependency graph.
  */

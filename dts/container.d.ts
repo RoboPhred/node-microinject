@@ -1,6 +1,5 @@
-import { Identifier, Newable, RegistryModule } from "./interfaces";
+import { Identifier, Newable, RegistryModule, ParameterRecord } from "./interfaces";
 import { Binder } from "./binder";
-import { ParameterRecord } from "./resolver";
 export declare class Container {
     private _planner;
     private _resolver;

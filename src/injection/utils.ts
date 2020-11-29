@@ -1,14 +1,14 @@
-import { Identifier } from "../interfaces";
+import { Identifier, ParameterRecord } from "../interfaces";
 
 import {
   IdentifierInjectionOptions,
-  ParameterInjectionOptions
+  ParameterInjectionOptions,
 } from "./interfaces";
 
 import {
   ClassIsInjectableKey,
   ConstructorInjectionsKey,
-  PropertyInjectionsKey
+  PropertyInjectionsKey,
 } from "./symbols";
 
 /**
@@ -18,7 +18,16 @@ export type InjectionData = IdentifierInjectionData | ParameterInjectionData;
 
 export interface IdentifierInjectionData extends IdentifierInjectionOptions {
   type: "identifier";
+
+  /**
+   * The identifier being injected.
+   */
   identifier: Identifier;
+
+  /**
+   * Parameters this injection is requesting.
+   */
+  parameters: ParameterRecord;
 }
 
 export interface ParameterInjectionData extends ParameterInjectionOptions {
