@@ -186,9 +186,9 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
     //  when requested from a child resolver.
     // We first establish that the "owner" of all instances of a node belonging
     //  to a scope is the resolver that resolved the instance which represents the scope.
-    //  That is: the component is cached where component.containingScopeInstance was created.
+    //  That is: the component is cached where component.scopeOwnerNodeId was created.
 
-    const { nodeId: instanceId, scopeOwnerNodeId: scopeOwnerInstanceId } = node;
+    const { nodeId, scopeOwnerNodeId } = node;
 
     if (node.createInScope === SingletonScope) {
       if (this._parent) {
@@ -197,14 +197,14 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
       }
       // We are root, we own it.
       //  Continue below to look up or create the instance.
-    } else if (!scopeOwnerInstanceId) {
+    } else if (!scopeOwnerNodeId) {
       // Not a special scope, but the dependency graph didn't specify our owner instance.
       throw new Error(
-        "_getScopedNodeInstance called on a scoped component without a containingScopeInstance."
+        "_getScopedNodeInstance called on a scoped component without a scopeOwnerNodeId."
       );
     } else if (
       !this._ownedScope ||
-      scopeOwnerInstanceId !== this._ownedScope.nodeId
+      scopeOwnerNodeId !== this._ownedScope.nodeId
     ) {
       // We do not own this instance, check the parent.
       if (!this._parent) {
@@ -224,15 +224,15 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
     // We still have to use .has() when looking for the instance,
     //  as its possible to store null or undefined as a scoped
     //  value through a factory binding.
-    if (this._scopedInstances.has(instanceId)) {
-      return this._scopedInstances.get(instanceId);
+    if (this._scopedInstances.has(nodeId)) {
+      return this._scopedInstances.get(nodeId);
     }
 
     // Did not create it yet.  Create it.
     //  Store the instance from the register callback, so
     //  it is available to postInstantiate
     const instance = this._createNodeInstance(node, opts, instance =>
-      this._scopedInstances.set(instanceId, instance)
+      this._scopedInstances.set(nodeId, instance)
     );
 
     return instance;
