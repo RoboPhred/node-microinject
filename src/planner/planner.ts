@@ -170,7 +170,6 @@ export class DependencyGraphPlanner {
       }
       case "parent": {
         return {
-          type: "parent",
           ...binding,
           nodeId: uuidv4(),
           identifier

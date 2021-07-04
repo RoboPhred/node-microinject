@@ -1,8 +1,7 @@
 import { expect } from "chai";
 import { Container } from "../container";
-import { injectable, injectParam, inject } from "../injection";
+import { injectable, injectParam } from "../injection";
 import { ParameterNotSuppliedError } from "../errors";
-import { Identifier } from "../interfaces";
 
 describe("Parameters", function() {
   describe("container.get()", function() {
@@ -28,7 +27,7 @@ describe("Parameters", function() {
     it("injects the param on the created instance", function() {
       const paramValue = 42;
       const instance = container.get(ParamReceiver, {
-        [paramName]: paramValue
+        [paramName]: paramValue,
       });
       expect(instance.param).to.equal(paramValue);
     });
@@ -67,7 +66,7 @@ describe("Parameters", function() {
 
     it("injects the param on the created instance", function() {
       const instance = container.create(ParamReceiver, {
-        [param1]: param1Value
+        [param1]: param1Value,
       });
       expect(instance.param1).to.equal(param1Value);
     });
