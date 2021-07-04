@@ -8,14 +8,18 @@ import {
   Binding,
   ConstructorBinding,
   FactoryBinding,
-  isScopeableBinding
+  isScopeableBinding,
 } from "../binder/binding";
 
 import { scopeToString } from "../utils";
 
 import { DependencyResolutionError } from "../errors";
 
-import { InjectionData, ParameterInjectionData, IdentifierInjectionData } from "../injection/utils";
+import {
+  InjectionData,
+  ParameterInjectionData,
+  IdentifierInjectionData,
+} from "../injection/utils";
 
 import {
   ConstructorDependencyNode,
@@ -23,7 +27,7 @@ import {
   FactoryDependencyNode,
   InjectedValue,
   ScopeInstanceMap,
-  isBindingDependencyNode
+  isBindingDependencyNode,
 } from "./interfaces";
 
 export type BindingResolver = (identifier: Identifier) => Binding[];
@@ -66,7 +70,7 @@ export class DependencyGraphPlanner {
       this._rootScopeInstances = new Map();
       this._rootScopeInstances.set(SingletonScope, {
         scopeDefiner: SingletonScope,
-        instances: new Map()
+        instances: new Map(),
       });
     }
   }
@@ -157,7 +161,7 @@ export class DependencyGraphPlanner {
       return {
         ...binding,
         identifier,
-        nodeId: uuidv4()
+        nodeId: uuidv4(),
       };
     }
 
@@ -172,7 +176,7 @@ export class DependencyGraphPlanner {
         return {
           ...binding,
           nodeId: uuidv4(),
-          identifier
+          identifier,
         };
       }
       default:
@@ -189,7 +193,7 @@ export class DependencyGraphPlanner {
       ...binding,
       identifier,
       nodeId: uuidv4(),
-      planner: this
+      planner: this,
     };
 
     const childScopeInstances = this._tryApplyScoping(
@@ -214,6 +218,15 @@ export class DependencyGraphPlanner {
     binding: ConstructorBinding,
     scopeInstances: ScopeInstanceMap
   ): ConstructorDependencyNode {
+    // If we have tried to resolve this constructor previously, we are circular.
+    if (this._stack.indexOf(identifier) !== this._stack.length - 1) {
+      throw new DependencyResolutionError(
+        identifier,
+        this._stack,
+        "Circular dependency detected."
+      );
+    }
+
     const { ctor, ctorInjections } = binding;
 
     const ctorInjectionNodes: InjectedValue[] = [];
@@ -225,7 +238,7 @@ export class DependencyGraphPlanner {
       nodeId: uuidv4(),
       ctor,
       ctorInjectionNodes,
-      propInjectionNodes
+      propInjectionNodes,
     };
 
     // If we are part of a scope, add it before resolving the dependencies.
@@ -276,7 +289,7 @@ export class DependencyGraphPlanner {
     injection: InjectionData,
     childScopeInstances: ScopeInstanceMap
   ): InjectedValue {
-    switch(injection.type) {
+    switch (injection.type) {
       case "parameter": {
         return this._planParamValueInjection(injection);
       }
@@ -289,13 +302,15 @@ export class DependencyGraphPlanner {
     }
   }
 
-  private _planParamValueInjection(injection: ParameterInjectionData): InjectedValue {
+  private _planParamValueInjection(
+    injection: ParameterInjectionData
+  ): InjectedValue {
     const { paramKey, optional } = injection;
     return {
       type: "param",
       optional: optional ?? false,
-      paramKey
-    }
+      paramKey,
+    };
   }
 
   private _planAllValuesInjection(
@@ -314,7 +329,7 @@ export class DependencyGraphPlanner {
       );
     }
 
-    const injectedArg = dependencyBindings.map(dependencyBinding =>
+    const injectedArg = dependencyBindings.map((dependencyBinding) =>
       this._getDependencyNode(
         dependencyIdentifier,
         dependencyBinding,
@@ -463,7 +478,7 @@ export class DependencyGraphPlanner {
       //  object defining the same scope.
       return new Map(scopeInstances).set(definesScope, {
         scopeDefiner: node,
-        instances: new Map()
+        instances: new Map(),
       });
     }
 

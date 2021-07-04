@@ -24,7 +24,7 @@ export interface ComponentResolvers {
      * for potential circular dependencies.  If a circular dependency is not handled,
      * a stack overflow will occur.
      *
-     * It is advisable to deferr prop injection resolution until postInstantiate,
+     * It is advisable to defer prop injection resolution until postInstantiate,
      * as we are able to resolve values for properties that might refer to us in their
      * constructor injections.  This is a common way of handling circular dependencies.
      *
@@ -51,7 +51,7 @@ export interface ComponentResolvers {
      * @param identifier The identifier being resolved.
      * @param node The dependency node describing the resolution.
      * @param childResolver A dependency resolver scoped to children of this resolved node.
-     * @see ctorProps
+     * @see ctor
      */
     postInstantiate?(node: DependencyNode, resolver: DependencyGraphResolver, instance: object, opts: ResolveOpts): any;
 }

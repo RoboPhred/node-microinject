@@ -5,14 +5,14 @@ import {
   DependencyResolutionError,
   inject,
   injectable,
-  singleton
+  singleton,
 } from "..";
 
-describe("Class Property Injection", function() {
+describe("Class Property Injection", function () {
   const InjectedValue = Symbol("InjectedValue");
   const preValue = Symbol("pre-inject-value");
 
-  describe("default", function() {
+  describe("default", function () {
     const testValue = Symbol("test-value");
 
     @injectable()
@@ -21,8 +21,8 @@ describe("Class Property Injection", function() {
       injectedValueProp: any = preValue;
     }
 
-    describe("when injected identifier is bound", function() {
-      it("injects the value into the property", function() {
+    describe("when injected identifier is bound", function () {
+      it("injects the value into the property", function () {
         const container = new Container();
         container.bind(InjectedValue).toConstantValue(testValue);
         container.bind(TestTarget).to(TestTarget);
@@ -32,8 +32,8 @@ describe("Class Property Injection", function() {
       });
     });
 
-    describe("when injected identifier is not bound", function() {
-      it("throws an error if the value is not found", function() {
+    describe("when injected identifier is not bound", function () {
+      it("throws an error if the value is not found", function () {
         const container = new Container();
         container.bind(TestTarget).to(TestTarget);
 
@@ -45,7 +45,7 @@ describe("Class Property Injection", function() {
     });
   });
 
-  describe("circular", function() {
+  describe("circular through constructor", function () {
     @injectable()
     @singleton()
     class TestTarget {
@@ -58,26 +58,58 @@ describe("Class Property Injection", function() {
       constructor(@inject(TestTarget) public injected: TestTarget) {}
     }
 
-    describe("when injected identifier is bound", function() {
+    describe("when injected identifier is bound", function () {
       let instance: TestTarget;
-      before(function() {
+      before(function () {
         const container = new Container();
         container.bind(InjectedValue).to(TestInjected);
         container.bind(TestTarget).to(TestTarget);
         instance = container.get(TestTarget);
       });
 
-      it("injects the value into the property", function() {
+      it("injects the value into the property", function () {
         expect(instance.injectedValueProp).to.be.instanceof(TestInjected);
       });
 
-      it("uses the singleton instance", function() {
+      it("uses the singleton instance", function () {
         expect(instance.injectedValueProp!.injected).to.equal(instance);
       });
     });
   });
 
-  describe("optional", function() {
+  describe("circular through properties", function () {
+    @injectable()
+    @singleton()
+    class TestTarget {
+      @inject(InjectedValue)
+      injectedValueProp: TestInjected | null = null;
+    }
+
+    @injectable(InjectedValue)
+    class TestInjected {
+      @inject(TestTarget) public injected!: TestTarget;
+    }
+
+    describe("when injected identifier is bound", function () {
+      let instance: TestTarget;
+      before(function () {
+        const container = new Container();
+        container.bind(InjectedValue).to(TestInjected);
+        container.bind(TestTarget).to(TestTarget);
+        instance = container.get(TestTarget);
+      });
+
+      it("injects the value into the property", function () {
+        expect(instance.injectedValueProp).to.be.instanceof(TestInjected);
+      });
+
+      it("uses the singleton instance", function () {
+        expect(instance.injectedValueProp!.injected).to.equal(instance);
+      });
+    });
+  });
+
+  describe("optional", function () {
     const testValue = Symbol("test-value");
 
     @injectable()
@@ -86,8 +118,8 @@ describe("Class Property Injection", function() {
       injectedValueProp: any = preValue;
     }
 
-    describe("when injected identifier is bound", function() {
-      it("injects the value into the property when available", function() {
+    describe("when injected identifier is bound", function () {
+      it("injects the value into the property when available", function () {
         const container = new Container();
         container.bind(InjectedValue).toConstantValue(testValue);
         container.bind(TestTarget).to(TestTarget);
@@ -96,8 +128,8 @@ describe("Class Property Injection", function() {
       });
     });
 
-    describe("when injected identifier is not bound", function() {
-      it("sets the property to null", function() {
+    describe("when injected identifier is not bound", function () {
+      it("sets the property to null", function () {
         const container = new Container();
         container.bind(TestTarget).to(TestTarget);
         const instance = container.get(TestTarget);
@@ -106,7 +138,7 @@ describe("Class Property Injection", function() {
     });
   });
 
-  describe("all", function() {
+  describe("all", function () {
     const firstValue = "foo";
     const secondValue = "bar";
 
@@ -117,14 +149,14 @@ describe("Class Property Injection", function() {
     }
 
     let container: Container;
-    before(function() {
+    before(function () {
       container = new Container();
       container.bind(InjectedValue).toConstantValue(firstValue);
       container.bind(InjectedValue).toConstantValue(secondValue);
       container.bind(TestTarget).to(TestTarget);
     });
 
-    it("receives all values", function() {
+    it("receives all values", function () {
       const instance = container.get(TestTarget);
       const injected = instance.allInjections!;
       expect(injected.length).equals(2);

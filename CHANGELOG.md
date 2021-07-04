@@ -1,3 +1,7 @@
+# next
+
+- Throw BindingResolutionError when unresolvable circular dependencies are encountered.
+
 # 0.9.3
 
 - Fix duplicate entries in getAll due to parent bindings.
