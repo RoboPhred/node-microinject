@@ -21,7 +21,7 @@ export interface DependencyGraphResolver {
    * a circular dependency.
    *
    * @param node The node to check if we are instantiating.
-   * @returns ```true``` if the node is being resolved, or ```false```.
+   * @returns `true` if the node is being resolved, or `false`.
    */
   isInstantiating(node: DependencyNode): boolean;
 
@@ -46,5 +46,9 @@ export interface DependencyGraphResolver {
    */
   resolveInstance<T = any>(node: DependencyNode, opts?: ResolveOpts): T;
 
+  /**
+   * Get the instance that represents the root of the given scope.
+   * @param scope The scope to get the root instance for.
+   */
   getScopeRoot(scope: Scope): any;
 }
