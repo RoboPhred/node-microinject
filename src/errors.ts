@@ -23,9 +23,12 @@ export class DependencyResolutionError extends Error {
   path: Identifier[];
 
   constructor(identifier: Identifier, path: Identifier[], message?: string) {
-    message = `Failed to resolve value for identifier "${identifierToString(
-      identifier
-    )}"${message ? ": " + message : "."}`;
+    const identifierPath = [...path, identifier]
+      .map(identifierToString)
+      .join(" => ");
+    message = `Failed to resolve value for identifier ${identifierPath}${
+      message ? ": " + message : "."
+    }`;
     super(message);
     Object.setPrototypeOf(this, DependencyResolutionError.prototype);
     this.identifier = identifier;

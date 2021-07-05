@@ -364,7 +364,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
           if (scope === undefined) {
             throw new ScopeNotFoundError(
               node.scope,
-              this.getResolveStack().map(getDependencyNodeIdentifier),
+              this.getResolveStack(node).map(getDependencyNodeIdentifier),
               "The requested scope was not found."
             );
           }

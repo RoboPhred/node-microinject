@@ -11,8 +11,8 @@ export function identifierToString(identifier: Identifier): string {
     return String(identifier);
   }
 
-  if (typeof identifier === "function" && identifier.constructor) {
-    return identifier.constructor.name;
+  if (typeof identifier === "function") {
+    return identifier.name;
   }
 
   return String(identifier);
