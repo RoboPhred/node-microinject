@@ -1,13 +1,12 @@
-import { Identifier, Newable, RegistryModule } from "./interfaces";
+import { Identifier, Newable, RegistryModule, ParameterRecord } from "./interfaces";
 import { Binder } from "./binder";
-import { ParameterRecord } from "./resolver";
 export declare class Container {
     private _planner;
     private _resolver;
     private _pendingBinders;
     private _bindingMap;
     /**
-     * Container to use if a binding is not find in this container.
+     * Container to use if a binding is not found in this container.
      */
     private _parent;
     constructor();

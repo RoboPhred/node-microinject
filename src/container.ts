@@ -1,6 +1,12 @@
 import { v4 as uuidV4 } from "uuid";
 
-import { Context, Identifier, Newable, RegistryModule } from "./interfaces";
+import {
+  Context,
+  Identifier,
+  Newable,
+  RegistryModule,
+  ParameterRecord,
+} from "./interfaces";
 
 import { Binder } from "./binder";
 
@@ -18,7 +24,6 @@ import {
   BasicDependencyGraphResolver,
   DependencyGraphResolver,
   ResolveOpts,
-  ParameterRecord,
 } from "./resolver";
 
 import { DependencyResolutionError } from "./errors";
@@ -31,7 +36,7 @@ export class Container {
   private _bindingMap = new Map<Identifier, Binding[]>();
 
   /**
-   * Container to use if a binding is not find in this container.
+   * Container to use if a binding is not found in this container.
    */
   private _parent: Container | null = null;
 
@@ -320,11 +325,19 @@ export class Container {
       },
 
       create: <T>(ctor: Newable<T>, parameters: ParameterRecord = {}): T => {
-        return this._create(ctor, parameters, childResolver);
+        const finalParams = {
+          ...(opts.parameters ?? {}),
+          ...parameters,
+        };
+        return this._create(ctor, finalParams, childResolver);
       },
 
       get: (identifier: Identifier, parameters: ParameterRecord = {}) => {
-        return this._get(identifier, parameters, childResolver, node.planner);
+        const finalParams = {
+          ...(opts.parameters ?? {}),
+          ...parameters,
+        };
+        return this._get(identifier, finalParams, childResolver, node.planner);
       },
 
       getAll: (identifier: Identifier) => {

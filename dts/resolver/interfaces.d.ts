@@ -1,9 +1,6 @@
+import { ParameterRecord } from "../interfaces";
 import { DependencyNode } from "../planner";
 import { Scope } from "../scope";
-/**
- * A map of parameters to provide when resolving param injections.
- */
-export declare type ParameterRecord = Record<string | number | symbol, any>;
 /**
  * Options for resolving a dependency graph.
  */
@@ -22,7 +19,7 @@ export interface DependencyGraphResolver {
      * a circular dependency.
      *
      * @param node The node to check if we are instantiating.
-     * @returns ```true``` if the node is being resolved, or ```false```.
+     * @returns `true` if the node is being resolved, or `false`.
      */
     isInstantiating(node: DependencyNode): boolean;
     /**
@@ -44,5 +41,9 @@ export interface DependencyGraphResolver {
      * @param node The dependency graph node representing the object to resolve.
      */
     resolveInstance<T = any>(node: DependencyNode, opts?: ResolveOpts): T;
+    /**
+     * Get the instance that represents the root of the given scope.
+     * @param scope The scope to get the root instance for.
+     */
     getScopeRoot(scope: Scope): any;
 }

@@ -2,9 +2,10 @@ import { expect } from "chai";
 import { Container } from "../container";
 import { injectable, injectParam } from "../injection";
 import { ParameterNotSuppliedError } from "../errors";
+import { Context, Identifier } from "..";
 
-describe("Parameters", function() {
-  describe("container.get()", function() {
+describe("Parameters", function () {
+  describe("container.get()", function () {
     const paramName = "Param1";
 
     class ParamReceiver {
@@ -24,7 +25,7 @@ describe("Parameters", function() {
       container.bind(OptionalParamReceiver).toSelf();
     });
 
-    it("injects the param on the created instance", function() {
+    it("injects the param on the created instance", function () {
       const paramValue = 42;
       const instance = container.get(ParamReceiver, {
         [paramName]: paramValue,
@@ -32,18 +33,18 @@ describe("Parameters", function() {
       expect(instance.param).to.equal(paramValue);
     });
 
-    it("when a non-optional parameter is not supplied it throws an error", function() {
+    it("when a non-optional parameter is not supplied it throws an error", function () {
       const create = () => container.get(ParamReceiver);
       expect(create).throws(ParameterNotSuppliedError, /Param1/);
     });
 
-    it("when an optional parameter is not supplied it injects null", function() {
+    it("when an optional parameter is not supplied it injects null", function () {
       const instance = container.get(OptionalParamReceiver);
       expect(instance.param).to.be.null;
     });
   });
 
-  describe("container.create()", function() {
+  describe("container.create()", function () {
     let container: Container;
     const param1 = "Param1";
     const param1Value = 1;
@@ -64,21 +65,65 @@ describe("Parameters", function() {
       container = new Container();
     });
 
-    it("injects the param on the created instance", function() {
+    it("injects the param on the created instance", function () {
       const instance = container.create(ParamReceiver, {
         [param1]: param1Value,
       });
       expect(instance.param1).to.equal(param1Value);
     });
 
-    it("when a non-optional parameter is not supplied it throws an error", function() {
+    it("when a non-optional parameter is not supplied it throws an error", function () {
       const create = () => container.create(ParamReceiver);
       expect(create).throws(ParameterNotSuppliedError, /Param1/);
     });
 
-    it("when an optional parameter is not supplied it injects null", function() {
+    it("when an optional parameter is not supplied it injects null", function () {
       const instance = container.create(OptionalParamReceiver);
       expect(instance.param1).to.be.null;
+    });
+  });
+
+  describe("factory.get()", function () {
+    let container: Container;
+    let FactoryIdentifier: Identifier<ParamReceiver> = "factory";
+    let ReceiverIdentifier: Identifier<ParamReceiver> = "receiver";
+    const paramFromContainer = "ParamFromContainer";
+    const paramFromFactory = "ParamFromFactory";
+    const paramFromContainerValue = "from-container";
+    const paramFromFactoryValue = "from-factory";
+
+    function factory(context: Context) {
+      return context.get(ReceiverIdentifier, {
+        [paramFromFactory]: paramFromFactoryValue,
+      });
+    }
+
+    @injectable()
+    class ParamReceiver {
+      constructor(
+        @injectParam(paramFromContainer) public paramFromContainer: string,
+        @injectParam(paramFromFactory) public paramFromFactory: string
+      ) {}
+    }
+
+    beforeEach(() => {
+      container = new Container();
+      container.bind(FactoryIdentifier).toFactory(factory);
+      container.bind(ReceiverIdentifier).to(ParamReceiver);
+    });
+
+    it("Receives the container get parameter", function () {
+      const receiver = container.get(FactoryIdentifier, {
+        [paramFromContainer]: paramFromContainerValue,
+      });
+      expect(receiver.paramFromContainer).to.equal(paramFromContainerValue);
+    });
+
+    it("Receives the factory get parameter", function () {
+      const receiver = container.get(FactoryIdentifier, {
+        [paramFromContainer]: paramFromContainerValue,
+      });
+      expect(receiver.paramFromFactory).to.equal(paramFromFactoryValue);
     });
   });
 });

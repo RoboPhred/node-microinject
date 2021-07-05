@@ -1,3 +1,7 @@
+# next
+
+- Carry container instantiation parameters through factory context instantiation.
+
 # 0.10.0
 
 - Throw BindingResolutionError when unresolvable circular dependencies are encountered.

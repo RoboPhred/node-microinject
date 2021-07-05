@@ -1,6 +1,5 @@
 import { Container } from "./container";
 import { BindFunction } from "./binder";
-import { ParameterRecord } from "./resolver";
 /**
  * An object that may be used to represent and request a container-managed object.
  */
@@ -9,6 +8,10 @@ export declare type Identifier<T = any> = string | symbol | AutoBoundIdentifier<
  * Identifiers capable of being automatically bound based on decorators.
  */
 export declare type AutoBoundIdentifier<T = any> = Newable<T>;
+/**
+ * A map of parameters to provide when resolving param injections.
+ */
+export declare type ParameterRecord = Record<string | number | symbol, any>;
 /**
  * A constructor creating a new object of type T.
  */
