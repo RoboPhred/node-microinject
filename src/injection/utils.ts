@@ -1,20 +1,24 @@
 import { Identifier } from "../interfaces";
+import { Scope } from "../scope";
 
 import {
   IdentifierInjectionOptions,
-  ParameterInjectionOptions
+  ParameterInjectionOptions,
 } from "./interfaces";
 
 import {
   ClassIsInjectableKey,
   ConstructorInjectionsKey,
-  PropertyInjectionsKey
+  PropertyInjectionsKey,
 } from "./symbols";
 
 /**
  * Data associated with an injection.
  */
-export type InjectionData = IdentifierInjectionData | ParameterInjectionData;
+export type InjectionData =
+  | IdentifierInjectionData
+  | ParameterInjectionData
+  | ScopeInjectionData;
 
 export interface IdentifierInjectionData extends IdentifierInjectionOptions {
   type: "identifier";
@@ -24,6 +28,11 @@ export interface IdentifierInjectionData extends IdentifierInjectionOptions {
 export interface ParameterInjectionData extends ParameterInjectionOptions {
   type: "parameter";
   paramKey: string | symbol;
+}
+
+export interface ScopeInjectionData {
+  type: "scope";
+  scope: Scope;
 }
 
 /**

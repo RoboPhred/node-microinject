@@ -1,6 +1,6 @@
 import { Context, Identifier, Newable } from "../interfaces";
 import { Scope } from "../scope";
-import { Binder, ScopedBinder, ConfiguredBinder } from "./interfaces";
+import { Binder, ScopedBinder } from "./interfaces";
 import { Binding } from "./binding";
 /**
  * The implementation of the Binder fluent api.
@@ -10,7 +10,7 @@ import { Binding } from "./binding";
  *
  * Care must be taken to ensure members of this class cannot be called in a contradictory manner.
  */
-export declare class BinderImpl<T = any> implements Binder<T>, ScopedBinder, ConfiguredBinder {
+export declare class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
     private _primaryIdentifier;
     private _isFinalized;
     private _identifiers;

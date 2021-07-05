@@ -29,7 +29,7 @@ export interface Binder<T = any> {
      * Binds the service identifier to the constant value.
      * @param obj The constant value to return.
      */
-    toConstantValue<N extends T>(obj: N): ConfiguredBinder;
+    toConstantValue<N extends T>(obj: N): void;
 }
 /**
  * Additional binder behaviors for scoped bindings.
@@ -38,24 +38,22 @@ export interface ScopedBinder {
     /**
      * Mark the binding as a singleton.  Only one will be created per container.
      */
-    inSingletonScope(): ConfiguredBinder;
+    inSingletonScope(): ScopedBinder;
     /**
      * Mark the binding as transient.  A new object will be created for every request.
      * This overrides any @Singleton() decorator if used on an identifier that would otherwise be auto-bound.
      */
-    inTransientScope(): ConfiguredBinder;
+    inTransientScope(): ScopedBinder;
     /**
      * Create one instance of the bound service per specified scope.
      * @param scope The scope of the bound service.
      */
-    inScope(scope: Scope): ConfiguredBinder;
+    inScope(scope: Scope): ScopedBinder;
     /**
      * Mark this service as creating a scope.
      * If scope is not specified, the binding's identifier will be used as the scope identifier.
      * @param scope The optional scope identifier to use.  If not provided, the binding's identifier will be used.
      */
-    asScope(scope?: Scope): ConfiguredBinder;
-}
-export interface ConfiguredBinder {
+    asScope(scope?: Scope): ScopedBinder;
 }
 export declare type BindFunction = (id: any) => Binder;

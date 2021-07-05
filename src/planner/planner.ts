@@ -19,6 +19,7 @@ import {
   InjectionData,
   ParameterInjectionData,
   IdentifierInjectionData,
+  ScopeInjectionData,
 } from "../injection/utils";
 
 import {
@@ -293,6 +294,9 @@ export class DependencyGraphPlanner {
       case "parameter": {
         return this._planParamValueInjection(injection);
       }
+      case "scope": {
+        return this._planScopeInjection(injection);
+      }
       case "identifier": {
         if (injection.all) {
           return this._planAllValuesInjection(injection, childScopeInstances);
@@ -300,6 +304,13 @@ export class DependencyGraphPlanner {
         return this._planSingleValueInjection(injection, childScopeInstances);
       }
     }
+  }
+
+  private _planScopeInjection(injection: ScopeInjectionData): InjectedValue {
+    return {
+      type: "scope",
+      scope: injection.scope,
+    };
   }
 
   private _planParamValueInjection(

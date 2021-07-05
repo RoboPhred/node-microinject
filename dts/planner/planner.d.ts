@@ -32,6 +32,7 @@ export declare class DependencyGraphPlanner {
     private _createFactoryNode;
     private _createConstructorNode;
     private _planInjection;
+    private _planScopeInjection;
     private _planParamValueInjection;
     private _planAllValuesInjection;
     private _planSingleValueInjection;

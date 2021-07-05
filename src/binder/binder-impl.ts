@@ -9,7 +9,7 @@ import { getAsScope, getInScope } from "../scope/utils";
 import {
   getConstructorInjections,
   isInjectable,
-  getPropertyInjections
+  getPropertyInjections,
 } from "../injection/utils";
 
 import { SelfIdentifiedScopeSymbol } from "../scope/symbols";
@@ -18,7 +18,7 @@ import { identifierToString } from "../utils";
 
 import { BindingConfigurationError } from "./errors";
 
-import { Binder, ScopedBinder, ConfiguredBinder } from "./interfaces";
+import { Binder, ScopedBinder } from "./interfaces";
 
 import { getProvidedIdentifiers } from "./utils";
 
@@ -28,7 +28,7 @@ import {
   FactoryBinding,
   BindingFactoryFunction,
   ConstructorBinding,
-  ConstBinding
+  ConstBinding,
 } from "./binding";
 
 /**
@@ -39,11 +39,10 @@ import {
  *
  * Care must be taken to ensure members of this class cannot be called in a contradictory manner.
  */
-export class BinderImpl<T = any>
-  implements Binder<T>, ScopedBinder, ConfiguredBinder {
+export class BinderImpl<T = any> implements Binder<T>, ScopedBinder {
   private _isFinalized = false;
 
-  private _identifiers: Identifier[] = [];
+  private _identifiers = new Set<Identifier>();
   private _bindingId: string = uuidv4();
   private _type: BindingType | undefined;
   private _ctor: Newable | undefined;
@@ -57,14 +56,14 @@ export class BinderImpl<T = any>
       throw new TypeError("Identifier must not be null or undefined.");
     }
 
-    this._identifiers.push(_primaryIdentifier);
+    this._identifiers.add(_primaryIdentifier);
 
     const aliases = getProvidedIdentifiers(_primaryIdentifier);
-    this._identifiers.push(...aliases);
+    aliases.forEach((alias) => this._identifiers.add(alias));
   }
 
   get identifiers(): Identifier[] {
-    return this._identifiers;
+    return Array.from(this._identifiers);
   }
 
   to(ctor: Newable): ScopedBinder {
@@ -183,7 +182,7 @@ export class BinderImpl<T = any>
   }
 
   provides(identifier: Identifier): any {
-    this._identifiers.push(identifier);
+    this._identifiers.add(identifier);
     return this;
   }
 
@@ -294,33 +293,33 @@ export class BinderImpl<T = any>
       case "constructor": {
         const binding: ConstructorBinding = {
           type: "constructor",
-          identifiers: this._identifiers,
+          identifiers: this.identifiers,
           bindingId: this._bindingId,
           ctor: this._ctor!,
           ctorInjections: getConstructorInjections(this._ctor),
           propInjections: getPropertyInjections(this._ctor),
           createInScope: this._createInScope,
-          definesScope: this._definesScope
+          definesScope: this._definesScope,
         };
         return binding;
       }
       case "factory": {
         const binding: FactoryBinding = {
           type: "factory",
-          identifiers: this._identifiers,
+          identifiers: this.identifiers,
           bindingId: this._bindingId,
           factory: this._factory!,
           createInScope: this._createInScope,
-          definesScope: this._definesScope
+          definesScope: this._definesScope,
         };
         return binding;
       }
       case "value": {
         const binding: ConstBinding = {
           type: "value",
-          identifiers: this._identifiers,
+          identifiers: this.identifiers,
           bindingId: this._bindingId,
-          value: this._value
+          value: this._value,
         };
         return binding;
       }

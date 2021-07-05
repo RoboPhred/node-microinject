@@ -1,4 +1,5 @@
 import { Identifier } from "./interfaces";
+import { Scope } from "./scope";
 /**
  * Indicates an error that occured while resolving a dependency.
  */
@@ -29,5 +30,24 @@ export declare class ParameterNotSuppliedError extends Error {
      * The parameter key that failed to resolve.
      */
     paramKey: string | symbol;
-    constructor(paramKey: string | symbol, message?: string);
+    /**
+     * The path from the root requested object to the failing identifier.
+     */
+    path: Identifier[];
+    constructor(paramKey: string | symbol, path: Identifier[], message?: string);
+}
+export declare class ScopeNotFoundError extends Error {
+    /**
+     * The error code.
+     */
+    code: string;
+    /**
+     * The missing scope.
+     */
+    scope: Scope;
+    /**
+     * The path from the root requested object to the failing identifier.
+     */
+    path: Identifier[];
+    constructor(scope: any, path: Identifier[], message?: string);
 }

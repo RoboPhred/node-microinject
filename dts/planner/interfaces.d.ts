@@ -25,6 +25,10 @@ export interface DependencyNodeBase {
      */
     nodeId: string;
 }
+export interface ScopeDependencyNode {
+    type: "scope";
+    scope: Scope;
+}
 export interface ParamDependencyNode {
     type: "param";
     optional: boolean;
@@ -84,8 +88,8 @@ export interface ConstructorDependencyNode extends ScopedBindingDependencyNodeBa
     propInjectionNodes: Map<string, InjectedValue>;
 }
 export declare type InjectedValue = DependencyNode | DependencyNode[] | null;
-export declare type DependencyNode = ParamDependencyNode | ParentDependencyNode | ConstDependencyNode | FactoryDependencyNode | ConstructorDependencyNode;
+export declare type DependencyNode = ParamDependencyNode | ScopeDependencyNode | ParentDependencyNode | ConstDependencyNode | FactoryDependencyNode | ConstructorDependencyNode;
 export declare type BindingDependencyNode = ConstDependencyNode | FactoryDependencyNode | ConstructorDependencyNode;
 export declare type ScopedDependenencyNode = FactoryDependencyNode | ConstructorDependencyNode;
 export declare function isBindingDependencyNode(node: DependencyNode): node is BindingDependencyNode;
-export declare function getDependencyNodeIdentifier(node: DependencyNode): Identifier<any>;
+export declare function getDependencyNodeIdentifier(node: DependencyNode): any;

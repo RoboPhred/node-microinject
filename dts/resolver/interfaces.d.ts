@@ -1,4 +1,5 @@
 import { DependencyNode } from "../planner";
+import { Scope } from "../scope";
 /**
  * A map of parameters to provide when resolving param injections.
  */
@@ -43,4 +44,5 @@ export interface DependencyGraphResolver {
      * @param node The dependency graph node representing the object to resolve.
      */
     resolveInstance<T = any>(node: DependencyNode, opts?: ResolveOpts): T;
+    getScopeRoot(scope: Scope): any;
 }

@@ -1,9 +1,10 @@
 import { Identifier } from "../interfaces";
+import { Scope } from "../scope";
 import { IdentifierInjectionOptions, ParameterInjectionOptions } from "./interfaces";
 /**
  * Data associated with an injection.
  */
-export declare type InjectionData = IdentifierInjectionData | ParameterInjectionData;
+export declare type InjectionData = IdentifierInjectionData | ParameterInjectionData | ScopeInjectionData;
 export interface IdentifierInjectionData extends IdentifierInjectionOptions {
     type: "identifier";
     identifier: Identifier;
@@ -11,6 +12,10 @@ export interface IdentifierInjectionData extends IdentifierInjectionOptions {
 export interface ParameterInjectionData extends ParameterInjectionOptions {
     type: "parameter";
     paramKey: string | symbol;
+}
+export interface ScopeInjectionData {
+    type: "scope";
+    scope: Scope;
 }
 /**
  * Returns a value indicating whether the target has been marked as injectable.

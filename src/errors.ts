@@ -1,6 +1,7 @@
 import { Identifier } from "./interfaces";
+import { Scope } from "./scope";
 
-import { identifierToString } from "./utils";
+import { identifierToString, scopeToString } from "./utils";
 
 /**
  * Indicates an error that occured while resolving a dependency.
@@ -49,15 +50,51 @@ export class ParameterNotSuppliedError extends Error {
    */
   paramKey: string | symbol;
 
-  constructor(paramKey: string | symbol, message?: string) {
+  /**
+   * The path from the root requested object to the failing identifier.
+   */
+  path: Identifier[];
+
+  constructor(paramKey: string | symbol, path: Identifier[], message?: string) {
     message = `Failed to resolve value for parameter "${identifierToString(
       paramKey
     )}"${message ? ": " + message : "."}`;
     super(message);
     Object.setPrototypeOf(this, ParameterNotSuppliedError.prototype);
     this.paramKey = paramKey;
+    this.path = path;
     this.message = message;
     this.name = "ParameterNotSuppliedError";
     this.code = "PARAMETER_RESOLUTION_FAILED";
+  }
+}
+
+export class ScopeNotFoundError extends Error {
+  /**
+   * The error code.
+   */
+  code: string;
+
+  /**
+   * The missing scope.
+   */
+  scope: Scope;
+
+  /**
+   * The path from the root requested object to the failing identifier.
+   */
+  path: Identifier[];
+
+  constructor(scope: any, path: Identifier[], message?: string) {
+    message = `Failed to resolve value for parameter "${scopeToString(scope)}"${
+      message ? ": " + message : "."
+    }`;
+    super(message);
+    Object.setPrototypeOf(this, ScopeNotFoundError.prototype);
+    this.scope = scope;
+    this.path = path;
+    this.message = message;
+    this.name = "ScopeNotFoundError";
+    this.code = "SCOPE_RESOLUTION_FAILED";
   }
 }

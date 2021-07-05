@@ -14,29 +14,29 @@ import {
   ConstDependencyNode,
   FactoryDependencyNode,
   ConstructorDependencyNode,
-  BindingDependencyNode
+  BindingDependencyNode,
 } from "../planner";
 
 import { DependencyGraphResolver } from "./interfaces";
 
 import { defaultComponentResolvers } from "./component-resolver";
 
-type StubDependencyGraphResolver = SinonStubbedInstance<
-  DependencyGraphResolver
->;
+type StubDependencyGraphResolver =
+  SinonStubbedInstance<DependencyGraphResolver>;
 
-describe("defaultComponentResolvers", function() {
+describe("defaultComponentResolvers", function () {
   const stubResolver: StubDependencyGraphResolver = {
     isInstantiating: stub(),
     getResolveStack: stub(),
-    resolveInstance: stub()
+    resolveInstance: stub(),
+    getScopeRoot: stub(),
   };
 
-  beforeEach(function() {
-    values(stubResolver).forEach(x => x.reset());
+  beforeEach(function () {
+    values(stubResolver).forEach((x) => x.reset());
   });
 
-  describe(".factory", function() {
+  describe(".factory", function () {
     const identifier: Identifier = Symbol("factory-identifier");
     const factoryReturnValue = Symbol("factory-return-value");
     const factoryStub = stub().returns(factoryReturnValue);
@@ -47,11 +47,11 @@ describe("defaultComponentResolvers", function() {
       bindingId: "factory-binding-id",
       nodeId: "factory-component-id",
       factory: factoryStub,
-      planner: {} as any
+      planner: {} as any,
     };
 
     let resolvedValue: any;
-    before(function() {
+    before(function () {
       resolvedValue = defaultComponentResolvers.factory(
         factoryNode,
         stubResolver as DependencyGraphResolver,
@@ -59,16 +59,16 @@ describe("defaultComponentResolvers", function() {
       );
     });
 
-    it("invokes the factory", function() {
+    it("invokes the factory", function () {
       expect(factoryStub).calledOnce;
     });
 
-    it("returns the factory result", function() {
+    it("returns the factory result", function () {
       expect(resolvedValue).equals(factoryReturnValue);
     });
   });
 
-  describe(".ctor", function() {
+  describe(".ctor", function () {
     // constructors are just functions, so we can use a stub for them.
     const constructorStub: SinonStub & Newable = stub() as any;
     const identifier: Identifier = Symbol("ctor-identifier");
@@ -79,21 +79,21 @@ describe("defaultComponentResolvers", function() {
       identifier,
       bindingId: "ctor-binding-id",
       nodeId: "ctor-node-id",
-      ctor: constructorStub
+      ctor: constructorStub,
     };
 
     function invokeResolver(args: BindingDependencyNode[]) {
       const creator: ConstructorDependencyNode = {
         ...partialCtorCreator,
-        ctorInjections: args.map(arg => {
+        ctorInjections: args.map((arg) => {
           return {
             type: "identifier",
-            identifier: arg.identifier
+            identifier: arg.identifier,
           };
         }),
         propInjections: new Map(),
         ctorInjectionNodes: args,
-        propInjectionNodes: new Map()
+        propInjectionNodes: new Map(),
       };
       return defaultComponentResolvers.ctor(
         creator,
@@ -102,24 +102,24 @@ describe("defaultComponentResolvers", function() {
       );
     }
 
-    beforeEach(function() {
+    beforeEach(function () {
       constructorStub.reset();
     });
 
-    it("invokes the constructor", function() {
+    it("invokes the constructor", function () {
       invokeResolver([]);
       expect(constructorStub).calledOnce;
       expect(constructorStub).calledWithNew;
     });
 
-    it("resolves arguments", function() {
+    it("resolves arguments", function () {
       const firstArg: ConstDependencyNode = {
         type: "value",
         identifiers: ["first-arg-identifier"],
         identifier: "first-arg-identifier",
         bindingId: "first-arg-binding-id",
         nodeId: "first-arg-instance",
-        value: "first-arg-value"
+        value: "first-arg-value",
       };
       const secondArg: ConstDependencyNode = {
         type: "value",
@@ -127,7 +127,7 @@ describe("defaultComponentResolvers", function() {
         identifier: "second-arg-identifier",
         bindingId: "second-arg-binding-id",
         nodeId: "second-arg-instance",
-        value: "second-arg-value"
+        value: "second-arg-value",
       };
 
       invokeResolver([firstArg, secondArg]);
@@ -137,7 +137,7 @@ describe("defaultComponentResolvers", function() {
       expect(stubResolver.resolveInstance.secondCall).calledWith(secondArg);
     });
 
-    it("passes the resolved arguments to the constructor", function() {
+    it("passes the resolved arguments to the constructor", function () {
       const firstArgValue = "first-arg-value";
       const firstArg: DependencyNode = {
         type: "value",
@@ -145,7 +145,7 @@ describe("defaultComponentResolvers", function() {
         identifier: "first-arg-identifier",
         bindingId: "first-arg-binding-id",
         nodeId: "first-arg-instance",
-        value: firstArgValue
+        value: firstArgValue,
       };
 
       const secondArgValue = "second-arg-value";
@@ -155,7 +155,7 @@ describe("defaultComponentResolvers", function() {
         identifier: "second-arg-identifier",
         bindingId: "second-arg-binding-id",
         nodeId: "second-arg-instance",
-        value: secondArgValue
+        value: secondArgValue,
       };
 
       stubResolver.resolveInstance.withArgs(firstArg).returns(firstArgValue);
@@ -166,7 +166,7 @@ describe("defaultComponentResolvers", function() {
       expect(constructorStub).calledWith(firstArgValue, secondArgValue);
     });
 
-    it("throws on circular dependencies", function() {
+    it("throws on circular dependencies", function () {
       const IdentifierA = Symbol("class-a");
       const classA: ConstructorDependencyNode = {
         type: "constructor",
@@ -178,7 +178,7 @@ describe("defaultComponentResolvers", function() {
         ctorInjections: [],
         propInjections: new Map(),
         ctorInjectionNodes: [],
-        propInjectionNodes: new Map()
+        propInjectionNodes: new Map(),
       };
       const IdentifierB = Symbol("class-b");
       const classB: ConstructorDependencyNode = {
@@ -191,16 +191,16 @@ describe("defaultComponentResolvers", function() {
         ctorInjections: [
           {
             type: "identifier",
-            identifier: classA.identifier
-          }
+            identifier: classA.identifier,
+          },
         ],
         propInjections: new Map(),
         ctorInjectionNodes: [{ ...classA }],
-        propInjectionNodes: new Map()
+        propInjectionNodes: new Map(),
       };
       classA.ctorInjections.push({
         type: "identifier",
-        identifier: classB.identifier
+        identifier: classB.identifier,
       });
       classA.ctorInjectionNodes.push({ ...classB });
 
@@ -220,7 +220,7 @@ describe("defaultComponentResolvers", function() {
     });
   });
 
-  describe(".const", function() {
+  describe(".const", function () {
     const identifier: Identifier = Symbol("value-identifier");
     const returnValue = Symbol("return-value");
     const valueNode: ConstDependencyNode = {
@@ -229,11 +229,11 @@ describe("defaultComponentResolvers", function() {
       identifier,
       bindingId: "value-binding-id",
       nodeId: "value-instance-id",
-      value: returnValue
+      value: returnValue,
     };
 
     let resolvedValue: any;
-    before(function() {
+    before(function () {
       resolvedValue = defaultComponentResolvers.const(
         valueNode,
         stubResolver as DependencyGraphResolver,
@@ -241,15 +241,15 @@ describe("defaultComponentResolvers", function() {
       );
     });
 
-    it("returns the const result", function() {
+    it("returns the const result", function () {
       expect(resolvedValue).equals(returnValue);
     });
   });
 });
 
-function values<T, K extends keyof T>(obj: T): (T[K])[] {
+function values<T, K extends keyof T>(obj: T): T[K][] {
   // Typescript does not type Object.keys as T[K] on its own,
   //  probably because it can't be sure of it at runtime.
   const keys = Object.keys(obj) as K[];
-  return keys.map(x => obj[x]);
+  return keys.map((x) => obj[x]);
 }

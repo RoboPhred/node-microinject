@@ -1,22 +1,24 @@
 import { provides } from "../binder";
 
 import { Identifier } from "../interfaces";
+import { Scope } from "../scope";
 
 import {
   IdentifierInjectionOptions,
-  ParameterInjectionOptions
+  ParameterInjectionOptions,
 } from "./interfaces";
 
 import {
   ClassIsInjectableKey,
   ConstructorInjectionsKey,
-  PropertyInjectionsKey
+  PropertyInjectionsKey,
 } from "./symbols";
 
 import {
   InjectionData,
   ParameterInjectionData,
-  IdentifierInjectionData
+  IdentifierInjectionData,
+  ScopeInjectionData,
 } from "./utils";
 
 /**
@@ -27,7 +29,7 @@ import {
 export function injectable<TFunction extends Function>(
   identifier?: Identifier
 ): (target: TFunction) => void {
-  return function(target: any) {
+  return function (target: any) {
     target[ClassIsInjectableKey] = true;
     if (identifier) {
       provides(identifier)(target);
@@ -71,7 +73,7 @@ function getInjectionTargetData(
 }
 
 /**
- * Marks a constructor argument or object propertie as being injectable.
+ * Marks a constructor argument or object property as being injectable.
  * The object must be marked @injectable for injection to take place.
  * @param identifier The identifier of the binding to inject.
  * @param opts Additional injection options.
@@ -80,28 +82,43 @@ export function inject(
   identifier: Identifier,
   opts?: IdentifierInjectionOptions
 ) {
-  return function(target: any, targetKey: string | symbol, index?: number) {
+  return function (target: any, targetKey: string | symbol, index?: number) {
     const data = getInjectionTargetData(target, targetKey, index);
     Object.assign(data, opts, {
       type: "identifier",
-      identifier
+      identifier,
     } as IdentifierInjectionData);
   };
 }
 
 /**
- * Marks a constructor argument as receiving a param when created from `ServiceLocator.create()`.
+ * Marks a constructor argument or object property as receiving a param when created from `ServiceLocator.create()`.
  * @param paramName The identifier of the parameter to use.
  */
 export function injectParam(
   paramKey: string | number | symbol,
   opts?: ParameterInjectionOptions
 ) {
-  return function(target: any, targetKey: string | symbol, index?: number) {
+  return function (target: any, targetKey: string | symbol, index?: number) {
     const data = getInjectionTargetData(target, targetKey, index);
     Object.assign(data, opts, {
       type: "parameter",
-      paramKey: paramKey
+      paramKey: paramKey,
     } as ParameterInjectionData);
+  };
+}
+
+/**
+ * Marks an object property as receiving a scope provider object.
+ * Because the scope must be fully constructed to be injected, this can only be done to an object property.
+ * @param paramName The identifier of the parameter to use.
+ */
+export function injectScope(scope: Scope) {
+  return function (target: any, targetKey: string | symbol, index?: number) {
+    const data = getInjectionTargetData(target, targetKey, index);
+    Object.assign(data, {
+      type: "scope",
+      scope,
+    } as ScopeInjectionData);
   };
 }

@@ -1,3 +1,4 @@
+import { Scope } from "../scope";
 import { DependencyNode } from "../planner";
 import { DependencyGraphResolver, ResolveOpts } from "./interfaces";
 import { ComponentResolvers } from "./component-resolver";
@@ -33,6 +34,18 @@ export declare class BasicDependencyGraphResolver implements DependencyGraphReso
      */
     private _resolutionStack;
     /**
+     * The scope which we are the owner of.
+     *
+     * This is set internally by the parent BasicDependencyGraphResolver,
+     * as typescript grumbles about using the private ScopedDependencyNode
+     * in the public constructor, and re-exporting it causes trouble down the line.
+     */
+    private _ownedScope?;
+    /**
+     * The root object that created the scope this resolver is responsible for.
+     */
+    private _scopeRoot;
+    /**
      * Map of instance IDs to their instances.
      * The instances contained in here should all be owned by our _ownedScope.
      * That is, their scopeOwnerInstance should be equal to _ownedScope.instance
@@ -47,14 +60,6 @@ export declare class BasicDependencyGraphResolver implements DependencyGraphReso
      * to keep it out of the public constructor.
      */
     private _parent?;
-    /**
-     * The scope which we are the owner of.
-     *
-     * This is set internally by the parent BasicDependencyGraphResolver,
-     * as typescript grumbles about using the private ScopedDependencyNode
-     * in the public constructor, and re-exporting it causes trouble down the line.
-     */
-    private _ownedScope?;
     constructor(resolvers?: Partial<ComponentResolvers>);
     /**
      * Returns a value indicating whether we are presently trying to create an
@@ -86,6 +91,7 @@ export declare class BasicDependencyGraphResolver implements DependencyGraphReso
      * @param node The dependency graph node representing the object to resolve.
      */
     resolveInstance<T = any>(node: DependencyNode, opts?: ResolveOpts): T;
+    getScopeRoot(scope: Scope): any;
     private _getNodeInstance;
     private _getScopedNodeInstance;
     private _createNodeInstance;

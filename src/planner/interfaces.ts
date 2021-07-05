@@ -6,7 +6,7 @@ import {
   ConstBinding,
   ConstructorBinding,
   FactoryBinding,
-  ParentBinding
+  ParentBinding,
 } from "../binder/binding";
 
 import { Scope } from "../scope";
@@ -37,6 +37,11 @@ export interface DependencyNodeBase {
    * as a plan may be executed several times.
    */
   nodeId: string;
+}
+
+export interface ScopeDependencyNode {
+  type: "scope";
+  scope: Scope;
 }
 
 export interface ParamDependencyNode {
@@ -121,6 +126,7 @@ export type InjectedValue = DependencyNode | DependencyNode[] | null;
 
 export type DependencyNode =
   | ParamDependencyNode
+  | ScopeDependencyNode
   | ParentDependencyNode
   | ConstDependencyNode
   | FactoryDependencyNode
@@ -152,6 +158,8 @@ export function getDependencyNodeIdentifier(node: DependencyNode) {
   switch (node.type) {
     case "param":
       return node.paramKey;
+    case "scope":
+      return node.scope;
     case "parent":
       return node.identifier;
   }

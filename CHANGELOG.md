@@ -1,6 +1,8 @@
-# next
+# 0.10.0
 
 - Throw BindingResolutionError when unresolvable circular dependencies are encountered.
+- Prevent multiple identical aliases on a binding from binding the alias multiple times.
+- Allow injection of scope root on properties with @injectScope
 
 # 0.9.3
 
