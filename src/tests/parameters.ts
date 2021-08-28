@@ -38,9 +38,9 @@ describe("Parameters", function () {
       expect(create).throws(ParameterNotSuppliedError, /Param1/);
     });
 
-    it("when an optional parameter is not supplied it injects null", function () {
+    it("when an optional parameter is not supplied it injects undefined", function () {
       const instance = container.get(OptionalParamReceiver);
-      expect(instance.param).to.be.null;
+      expect(instance.param).to.be.undefined;
     });
   });
 
@@ -77,9 +77,9 @@ describe("Parameters", function () {
       expect(create).throws(ParameterNotSuppliedError, /Param1/);
     });
 
-    it("when an optional parameter is not supplied it injects null", function () {
+    it("when an optional parameter is not supplied it injects undefined", function () {
       const instance = container.create(OptionalParamReceiver);
-      expect(instance.param1).to.be.null;
+      expect(instance.param1).to.be.undefined;
     });
   });
 

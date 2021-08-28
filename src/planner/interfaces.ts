@@ -122,7 +122,7 @@ export interface ConstructorDependencyNode
   propInjectionNodes: Map<string, InjectedValue>;
 }
 
-export type InjectedValue = DependencyNode | DependencyNode[] | null;
+export type InjectedValue = DependencyNode | DependencyNode[] | undefined;
 
 export type DependencyNode =
   | ParamDependencyNode

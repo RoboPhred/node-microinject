@@ -87,7 +87,7 @@ export interface ConstructorDependencyNode extends ScopedBindingDependencyNodeBa
      */
     propInjectionNodes: Map<string, InjectedValue>;
 }
-export declare type InjectedValue = DependencyNode | DependencyNode[] | null;
+export declare type InjectedValue = DependencyNode | DependencyNode[] | undefined;
 export declare type DependencyNode = ParamDependencyNode | ScopeDependencyNode | ParentDependencyNode | ConstDependencyNode | FactoryDependencyNode | ConstructorDependencyNode;
 export declare type BindingDependencyNode = ConstDependencyNode | FactoryDependencyNode | ConstructorDependencyNode;
 export declare type ScopedDependenencyNode = FactoryDependencyNode | ConstructorDependencyNode;

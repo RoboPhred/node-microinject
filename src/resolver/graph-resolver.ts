@@ -350,7 +350,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
           const params = opts.parameters ?? {};
           if (!has(params, node.paramKey)) {
             if (node.optional) {
-              return null;
+              return undefined;
             }
             throw new ParameterNotSuppliedError(
               node.paramKey,

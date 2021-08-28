@@ -1,6 +1,7 @@
-# next
+# 0.11.0
 
 - Carry container instantiation parameters through factory context instantiation.
+- Return `undefined` instead of `null` for single optional injections.
 
 # 0.10.0
 

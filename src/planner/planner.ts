@@ -369,8 +369,8 @@ export class DependencyGraphPlanner {
         );
       }
 
-      // We are not an all / array, so the return value for optional is null.
-      return null;
+      // We are not an all / array, so the return value for optional is undefuned.
+      return undefined;
     }
 
     if (dependencyBindings.length > 1) {
