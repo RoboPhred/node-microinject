@@ -139,7 +139,12 @@ export class DependencyGraphPlanner {
       if (!node) {
         // If the binding is in a scope, this will register the resulting ComponentCreator with that scope.
         //  This is to support reference loops during dependency lookup.
-        node = this._createDependencyNode(identifier, binding, scopeInstances);
+        node = this._createDependencyNode(
+          identifier,
+          binding,
+          scopeInstances,
+          opts
+        );
       }
       dependencyNode = node;
 
@@ -156,7 +161,8 @@ export class DependencyGraphPlanner {
   private _createDependencyNode(
     identifier: Identifier,
     binding: Binding,
-    scopeInstances: ScopeInstanceMap
+    scopeInstances: ScopeInstanceMap,
+    opts: GetPlanOptions
   ): DependencyNode {
     if (binding.type === "value") {
       return {
@@ -171,7 +177,12 @@ export class DependencyGraphPlanner {
         return this._createFactoryNode(identifier, binding, scopeInstances);
       }
       case "constructor": {
-        return this._createConstructorNode(identifier, binding, scopeInstances);
+        return this._createConstructorNode(
+          identifier,
+          binding,
+          scopeInstances,
+          opts
+        );
       }
       case "parent": {
         return {
@@ -217,7 +228,8 @@ export class DependencyGraphPlanner {
   private _createConstructorNode(
     identifier: Identifier,
     binding: ConstructorBinding,
-    scopeInstances: ScopeInstanceMap
+    scopeInstances: ScopeInstanceMap,
+    opts: GetPlanOptions
   ): ConstructorDependencyNode {
     // If we have tried to resolve this constructor previously, we are circular.
     if (this._stack.indexOf(identifier) !== this._stack.length - 1) {
@@ -257,7 +269,8 @@ export class DependencyGraphPlanner {
       try {
         injectedValue = this._planInjection(
           ctorInjections[i],
-          childScopeInstances
+          childScopeInstances,
+          opts
         );
       } catch (err) {
         if (typeof err.message === "string") {
@@ -272,7 +285,11 @@ export class DependencyGraphPlanner {
     for (let [propName, injection] of binding.propInjections) {
       let injectedValue: InjectedValue;
       try {
-        injectedValue = this._planInjection(injection, childScopeInstances);
+        injectedValue = this._planInjection(
+          injection,
+          childScopeInstances,
+          opts
+        );
       } catch (err) {
         if (typeof err.message === "string") {
           err.message = `Error injecting property ${propName} of bound constructor "${ctor.name}": ${err.message}`;
@@ -288,7 +305,8 @@ export class DependencyGraphPlanner {
 
   private _planInjection(
     injection: InjectionData,
-    childScopeInstances: ScopeInstanceMap
+    childScopeInstances: ScopeInstanceMap,
+    opts: GetPlanOptions
   ): InjectedValue {
     switch (injection.type) {
       case "parameter": {
@@ -299,9 +317,17 @@ export class DependencyGraphPlanner {
       }
       case "identifier": {
         if (injection.all) {
-          return this._planAllValuesInjection(injection, childScopeInstances);
+          return this._planAllValuesInjection(
+            injection,
+            childScopeInstances,
+            opts
+          );
         }
-        return this._planSingleValueInjection(injection, childScopeInstances);
+        return this._planSingleValueInjection(
+          injection,
+          childScopeInstances,
+          opts
+        );
       }
     }
   }
@@ -326,7 +352,8 @@ export class DependencyGraphPlanner {
 
   private _planAllValuesInjection(
     injection: IdentifierInjectionData,
-    childScopeInstances: ScopeInstanceMap
+    childScopeInstances: ScopeInstanceMap,
+    opts: GetPlanOptions
   ): InjectedValue {
     const { optional, identifier: dependencyIdentifier } = injection;
 
@@ -344,7 +371,8 @@ export class DependencyGraphPlanner {
       this._getDependencyNode(
         dependencyIdentifier,
         dependencyBinding,
-        childScopeInstances
+        childScopeInstances,
+        opts
       )
     );
 
@@ -353,7 +381,8 @@ export class DependencyGraphPlanner {
 
   private _planSingleValueInjection(
     injection: IdentifierInjectionData,
-    childScopeInstances: ScopeInstanceMap
+    childScopeInstances: ScopeInstanceMap,
+    opts: GetPlanOptions
   ): InjectedValue {
     const { optional, identifier: dependencyIdentifier } = injection;
 
@@ -386,7 +415,8 @@ export class DependencyGraphPlanner {
     const injectedArg = this._getDependencyNode(
       dependencyIdentifier,
       dependencyBindings[0],
-      childScopeInstances
+      childScopeInstances,
+      opts
     );
 
     return injectedArg;
