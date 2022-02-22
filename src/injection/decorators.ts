@@ -82,6 +82,10 @@ export function inject(
   identifier: Identifier,
   opts?: IdentifierInjectionOptions
 ) {
+  if (identifier == null) {
+    throw new Error("Identifier must not be null or undefined.");
+  }
+
   return function (target: any, targetKey: string | symbol, index?: number) {
     const data = getInjectionTargetData(target, targetKey, index);
     Object.assign(data, opts, {
@@ -99,6 +103,10 @@ export function injectParam(
   paramKey: string | number | symbol,
   opts?: ParameterInjectionOptions
 ) {
+  if (paramKey == null) {
+    throw new Error("Param must not be null or undefined.");
+  }
+
   return function (target: any, targetKey: string | symbol, index?: number) {
     const data = getInjectionTargetData(target, targetKey, index);
     Object.assign(data, opts, {
@@ -114,6 +122,10 @@ export function injectParam(
  * @param paramName The identifier of the parameter to use.
  */
 export function injectScope(scope: Scope) {
+  if (scope == null) {
+    throw new Error("Scope must not be null or undefined.");
+  }
+
   return function (target: any, targetKey: string | symbol, index?: number) {
     const data = getInjectionTargetData(target, targetKey, index);
     Object.assign(data, {

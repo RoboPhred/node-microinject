@@ -298,7 +298,7 @@ export class BasicDependencyGraphResolver implements DependencyGraphResolver {
 
         // We are certain that we want to create a new node, rather than resolving
         //  an existing one.
-        instance = resolver._createNodeInstance(node, opts);
+        return resolver._createNodeInstance(node, opts, register);
       }
     } else {
       // Not defining a scope, or we own the scope.  No special handling.
