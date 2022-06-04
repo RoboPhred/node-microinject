@@ -30,6 +30,7 @@ import {
   ScopeInstanceMap,
   isBindingDependencyNode,
 } from "./interfaces";
+import { error } from "console";
 
 export type BindingResolver = (identifier: Identifier) => Binding[];
 
@@ -208,21 +209,26 @@ export class DependencyGraphPlanner {
       planner: this,
     };
 
-    const childScopeInstances = this._tryApplyScoping(
+    const [childScopeInstances, rollback] = this._tryApplyScoping(
       identifier,
       node,
       scopeInstances
     );
 
-    node.planner = new DependencyGraphPlanner(
-      this._bindingResolver,
-      this._stack,
-      childScopeInstances
-    );
+    try {
+      node.planner = new DependencyGraphPlanner(
+        this._bindingResolver,
+        this._stack,
+        childScopeInstances
+      );
 
-    // We cannot plan for anything inside a factory, as the user will
-    //  look stuff up at resolution time.
-    return node;
+      // We cannot plan for anything inside a factory, as the user will
+      //  look stuff up at resolution time.
+      return node;
+    } catch (err) {
+      rollback();
+      throw err;
+    }
   }
 
   private _createConstructorNode(
@@ -257,47 +263,52 @@ export class DependencyGraphPlanner {
     // If we are part of a scope, add it before resolving the dependencies.
     //  This may allow for cyclic graphs, but that is the resolver's problem.
     // We need to add it to the current scope set, not the child scope set.
-    const childScopeInstances = this._tryApplyScoping(
+    const [childScopeInstances, rollback] = this._tryApplyScoping(
       identifier,
       node,
       scopeInstances
     );
 
-    // Now we can recurse and resolve our dependencies.
-    for (let i = 0; i < ctorInjections.length; i++) {
-      let injectedValue: InjectedValue;
-      try {
-        injectedValue = this._planInjection(
-          ctorInjections[i],
-          childScopeInstances,
-          opts
-        );
-      } catch (err) {
-        if (typeof err.message === "string") {
-          err.message = `Error injecting argument ${i} of bound constructor "${ctor.name}": ${err.message}`;
+    try {
+      // Now we can recurse and resolve our dependencies.
+      for (let i = 0; i < ctorInjections.length; i++) {
+        let injectedValue: InjectedValue;
+        try {
+          injectedValue = this._planInjection(
+            ctorInjections[i],
+            childScopeInstances,
+            opts
+          );
+        } catch (err) {
+          if (typeof err.message === "string") {
+            err.message = `Error injecting argument ${i} of bound constructor "${ctor.name}": ${err.message}`;
+          }
+          throw err;
         }
-        throw err;
+
+        ctorInjectionNodes.push(injectedValue);
       }
 
-      ctorInjectionNodes.push(injectedValue);
-    }
-
-    for (let [propName, injection] of binding.propInjections) {
-      let injectedValue: InjectedValue;
-      try {
-        injectedValue = this._planInjection(
-          injection,
-          childScopeInstances,
-          opts
-        );
-      } catch (err) {
-        if (typeof err.message === "string") {
-          err.message = `Error injecting property ${propName} of bound constructor "${ctor.name}": ${err.message}`;
+      for (let [propName, injection] of binding.propInjections) {
+        let injectedValue: InjectedValue;
+        try {
+          injectedValue = this._planInjection(
+            injection,
+            childScopeInstances,
+            opts
+          );
+        } catch (err) {
+          if (typeof err.message === "string") {
+            err.message = `Error injecting property ${propName} of bound constructor "${ctor.name}": ${err.message}`;
+          }
+          throw err;
         }
-        throw err;
-      }
 
-      propInjectionNodes.set(propName, injectedValue);
+        propInjectionNodes.set(propName, injectedValue);
+      }
+    } catch (err) {
+      rollback();
+      throw err;
     }
 
     return node;
@@ -477,13 +488,15 @@ export class DependencyGraphPlanner {
     identifier: Identifier,
     node: DependencyNode,
     scopeInstances: ScopeInstanceMap
-  ): ScopeInstanceMap {
+  ): [ScopeInstanceMap, () => void] {
     // A node that cannot be placed in a scope also cannot serve as a scope.
     if (!isBindingDependencyNode(node) || !isScopeableBinding(node)) {
-      return scopeInstances;
+      return [scopeInstances, () => {}];
     }
 
     const { createInScope, definesScope } = node;
+
+    let rollback = () => {};
 
     // Check to see if the component is in a scope.
     if (createInScope) {
@@ -503,6 +516,9 @@ export class DependencyGraphPlanner {
       // Set instance by bindingId, as multiple identifiers
       //  may be aliases of a scoped binding.
       instanceData.instances.set(node.bindingId, node);
+      rollback = () => {
+        instanceData.instances.delete(node.bindingId);
+      };
 
       // We might be being defined by a special case symbol, such as SingletonSymbol.
       if (typeof instanceData.scopeDefiner !== "symbol") {
@@ -517,14 +533,14 @@ export class DependencyGraphPlanner {
       // We need to create a new outer map as new child scopes within a scope should only be accessible within that scope.
       //  We still need to copy the outer scopes, however.  A scope is available to all children unless overrode with another
       //  object defining the same scope.
-      return new Map(scopeInstances).set(definesScope, {
+      scopeInstances = new Map(scopeInstances).set(definesScope, {
         scopeDefiner: node,
         instances: new Map(),
       });
     }
 
     // We are not defining a new scope, so keep passing the existing scope instance map.
-    return scopeInstances;
+    return [scopeInstances, rollback];
   }
 }
 

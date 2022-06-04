@@ -1,3 +1,7 @@
+# 0.11.4
+
+- Fix singleton and scoped values returning broken objects after their first resolution fails.
+
 # 0.11.1
 
 - Return `undefined` instead of `null` for single optional injections.
