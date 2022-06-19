@@ -7,6 +7,7 @@ import {
   inject,
   DependencyResolutionError,
 } from "..";
+import { getConstructorInjections } from "../injection/utils";
 
 describe("Class Constructor Injection", function () {
   @injectable()
@@ -213,5 +214,47 @@ describe("Class Constructor Injection", function () {
         expect(createTarget).throws(DependencyResolutionError, /FirstArg/);
       });
     });
+  });
+
+  it("does not pollute base classes", () => {
+    const Injectable1 = "s1";
+    const Injectable2 = "s2";
+    const InjectableB = "sb";
+    class Base {
+      constructor(@inject(InjectableB) public sb: string) {}
+    }
+
+    class C1 extends Base {
+      constructor(
+        @inject(InjectableB) sb: string,
+        @inject(Injectable1) public s1: string
+      ) {
+        super(sb);
+      }
+    }
+
+    class C2 extends Base {
+      constructor(
+        @inject(InjectableB) sb: string,
+        @inject(Injectable2) public s2: string
+      ) {
+        super(sb);
+      }
+    }
+
+    const bCtorData = getConstructorInjections(Base);
+
+    expect(bCtorData.length).to.equal(1);
+
+    const container = new Container();
+    container.bind(InjectableB).toConstantValue(InjectableB);
+    container.bind(Injectable1).toConstantValue(Injectable1);
+    container.bind(Injectable2).toConstantValue(Injectable2);
+
+    const c1 = container.create(C1);
+    expect(c1.s1).to.equal(Injectable1);
+
+    const c2 = container.create(C2);
+    expect(c2.s2).to.equal(Injectable2);
   });
 });

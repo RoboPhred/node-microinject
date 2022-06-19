@@ -44,8 +44,12 @@ function getInjectionTargetData(
 ): InjectionData {
   if (index != null) {
     // Constructor arguments
-    let dependencies = target[ConstructorInjectionsKey] as InjectionData[];
-    if (dependencies == null) {
+    let dependencies: InjectionData[];
+    if (
+      Object.prototype.hasOwnProperty.call(target, ConstructorInjectionsKey)
+    ) {
+      dependencies = target[ConstructorInjectionsKey] as InjectionData[];
+    } else {
       dependencies = [];
       target[ConstructorInjectionsKey] = dependencies;
     }

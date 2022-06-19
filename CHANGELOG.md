@@ -1,3 +1,7 @@
+# 0.11.5
+
+- Fix injections in child class constructors leaking into base classes.
+
 # 0.11.4
 
 - Fix singleton and scoped values returning broken objects after their first resolution fails.
