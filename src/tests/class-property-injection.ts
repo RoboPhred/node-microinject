@@ -129,11 +129,11 @@ describe("Class Property Injection", function () {
     });
 
     describe("when injected identifier is not bound", function () {
-      it("sets the property to null", function () {
+      it("sets the property to undefined", function () {
         const container = new Container();
         container.bind(TestTarget).to(TestTarget);
         const instance = container.get(TestTarget);
-        expect(instance.injectedValueProp).to.be.null;
+        expect(instance.injectedValueProp).to.be.undefined;
       });
     });
   });

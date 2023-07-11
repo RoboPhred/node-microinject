@@ -231,6 +231,30 @@ describe("Scopes", function () {
         }
       });
     });
+
+    describe("property injection", function () {
+      const Scope = "ScopeRoot";
+
+      @injectable()
+      @inScope(Scope)
+      class Child {
+        constructor(@injectScope(Scope) public parent: any) {}
+      }
+      @injectable()
+      @asScope(Scope)
+      class Root {
+        @inject(Child) public child!: Child;
+      }
+
+      it("successfully instantiates the child", function () {
+        const container = new Container();
+        container.bind(Child);
+        container.bind(Root);
+
+        const root = container.get(Root);
+        expect(root.child.parent).to.equal(root);
+      });
+    });
   });
 
   it("@injectScope injects the scope root", function () {

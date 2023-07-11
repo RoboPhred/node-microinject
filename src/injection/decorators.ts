@@ -44,8 +44,12 @@ function getInjectionTargetData(
 ): InjectionData {
   if (targetKey === undefined && index != null) {
     // Constructor arguments
-    let dependencies = target[ConstructorInjectionsKey] as InjectionData[];
-    if (dependencies == null) {
+    let dependencies: InjectionData[];
+    if (
+      Object.prototype.hasOwnProperty.call(target, ConstructorInjectionsKey)
+    ) {
+      dependencies = target[ConstructorInjectionsKey] as InjectionData[];
+    } else {
       dependencies = [];
       target[ConstructorInjectionsKey] = dependencies;
     }
@@ -89,6 +93,10 @@ export function inject(
     targetKey: string | symbol | undefined,
     index?: number
   ) {
+    if (identifier == null) {
+      throw new Error("Identifier must not be null or undefined.");
+    }
+
     const data = getInjectionTargetData(target, targetKey, index);
     Object.assign(data, opts, {
       type: "identifier",
@@ -110,6 +118,10 @@ export function injectParam(
     targetKey: string | symbol | undefined,
     index?: number
   ) {
+    if (paramKey == null) {
+      throw new Error("Param must not be null or undefined.");
+    }
+
     const data = getInjectionTargetData(target, targetKey, index);
     Object.assign(data, opts, {
       type: "parameter",
@@ -129,6 +141,10 @@ export function injectScope(scope: Scope) {
     targetKey: string | symbol | undefined,
     index?: number
   ) {
+    if (scope == null) {
+      throw new Error("Scope must not be null or undefined.");
+    }
+
     const data = getInjectionTargetData(target, targetKey, index);
     Object.assign(data, {
       type: "scope",

@@ -11,6 +11,10 @@ import { AutobindIdentifiersKey } from "./symbols";
 export function provides<TIdentifier, TFunction extends Newable<TIdentifier>>(
   identifier: Identifier<TIdentifier>
 ): (target: TFunction) => void {
+  if (identifier == null) {
+    throw new Error("Identifier must not be null or undefined.");
+  }
+  
   return function(target: any) {
     if (target[AutobindIdentifiersKey] == null) {
       target[AutobindIdentifiersKey] = [];

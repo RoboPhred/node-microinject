@@ -165,8 +165,8 @@ function resolveInjectedArg(
   injection: InjectedValue,
   opts: ResolveOpts
 ): any {
-  if (injection == null) {
-    return null;
+  if (injection === undefined) {
+    return undefined;
   } else if (Array.isArray(injection)) {
     return injection.map((inj) =>
       resolveInjectionInstance(resolver, inj, opts)

@@ -10,7 +10,7 @@ import {
 import { singleton } from "../scope";
 
 describe("Error Conditions", function () {
-  it("missing injections are handled", function () {
+  it("missing injections throw a DependencyResolutionError", function () {
     const IdentifierA = Symbol("IdentifierA");
     const IdentifierB = Symbol("IdentifierB");
 
@@ -23,6 +23,35 @@ describe("Error Conditions", function () {
     const container = new Container();
     container.bind(ClassA);
 
+    expect(() => {
+      container.get(IdentifierA);
+    }).to.throw(DependencyResolutionError);
+
+    // Ensure it happens twice, so the cache doesn't interfere.
+    expect(() => {
+      container.get(IdentifierA);
+    }).to.throw(DependencyResolutionError);
+  });
+
+  it("missing singleton injections throw a DependencyResolutionError", function () {
+    const IdentifierA = Symbol("IdentifierA");
+    const IdentifierB = Symbol("IdentifierB");
+
+    @injectable()
+    @singleton()
+    @provides(IdentifierA)
+    class ClassA {
+      constructor(@inject(IdentifierB) public b: any) {}
+    }
+
+    const container = new Container();
+    container.bind(ClassA);
+
+    expect(() => {
+      container.get(IdentifierA);
+    }).to.throw(DependencyResolutionError);
+
+    // Ensure it happens twice, so the cache doesn't interfere.
     expect(() => {
       container.get(IdentifierA);
     }).to.throw(DependencyResolutionError);

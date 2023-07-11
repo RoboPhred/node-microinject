@@ -7,7 +7,7 @@ import { Scope } from "./interfaces";
 export function singleton<TFunction extends Function>(): (
   target: TFunction
 ) => void {
-  return function(target: any) {
+  return function (target: any) {
     target[AutoBindInScopeKey] = SingletonScope;
   };
 }
@@ -15,7 +15,11 @@ export function singleton<TFunction extends Function>(): (
 export function inScope<TFunction extends Function>(
   scope: Scope
 ): (target: TFunction) => void {
-  return function(target: any) {
+  if (scope == null) {
+    throw new Error("Scope must not be null or undefined.");
+  }
+
+  return function (target: any) {
     target[AutoBindInScopeKey] = scope;
   };
 }
@@ -27,7 +31,11 @@ export function inScope<TFunction extends Function>(
 export function asScope<TFunction extends Function>(
   scope?: Scope
 ): (target: TFunction) => void {
-  return function(target: any) {
+  if (scope == null) {
+    throw new Error("Scope must not be null or undefined.");
+  }
+
+  return function (target: any) {
     target[AutoBindAsScopeKey] =
       scope !== undefined ? scope : SelfIdentifiedScope;
   };
