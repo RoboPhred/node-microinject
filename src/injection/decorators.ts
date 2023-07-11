@@ -39,10 +39,10 @@ export function injectable<TFunction extends Function>(
 
 function getInjectionTargetData(
   target: any,
-  targetKey: string | symbol,
+  targetKey: string | symbol | undefined,
   index?: number
 ): InjectionData {
-  if (index != null) {
+  if (targetKey === undefined && index != null) {
     // Constructor arguments
     let dependencies = target[ConstructorInjectionsKey] as InjectionData[];
     if (dependencies == null) {
@@ -53,7 +53,7 @@ function getInjectionTargetData(
       dependencies[index] = {} as InjectionData;
     }
     return dependencies[index];
-  } else {
+  } else if (targetKey) {
     // Properties
     let properties = target[PropertyInjectionsKey] as Map<
       string | symbol,
@@ -69,6 +69,8 @@ function getInjectionTargetData(
       properties.set(targetKey, data);
     }
     return data;
+  } else {
+    throw new Error("Invalid injection target");
   }
 }
 
@@ -82,7 +84,11 @@ export function inject(
   identifier: Identifier,
   opts?: IdentifierInjectionOptions
 ) {
-  return function (target: any, targetKey: string | symbol, index?: number) {
+  return function (
+    target: any,
+    targetKey: string | symbol | undefined,
+    index?: number
+  ) {
     const data = getInjectionTargetData(target, targetKey, index);
     Object.assign(data, opts, {
       type: "identifier",
@@ -99,7 +105,11 @@ export function injectParam(
   paramKey: string | number | symbol,
   opts?: ParameterInjectionOptions
 ) {
-  return function (target: any, targetKey: string | symbol, index?: number) {
+  return function (
+    target: any,
+    targetKey: string | symbol | undefined,
+    index?: number
+  ) {
     const data = getInjectionTargetData(target, targetKey, index);
     Object.assign(data, opts, {
       type: "parameter",
@@ -114,7 +124,11 @@ export function injectParam(
  * @param paramName The identifier of the parameter to use.
  */
 export function injectScope(scope: Scope) {
-  return function (target: any, targetKey: string | symbol, index?: number) {
+  return function (
+    target: any,
+    targetKey: string | symbol | undefined,
+    index?: number
+  ) {
     const data = getInjectionTargetData(target, targetKey, index);
     Object.assign(data, {
       type: "scope",
