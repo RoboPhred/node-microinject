@@ -1,3 +1,7 @@
+# 0.12.0
+
+- Update decorator typings for Typescript@5
+
 # 0.11.5
 
 - Fix injections in child class constructors leaking into base classes.
