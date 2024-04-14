@@ -30,7 +30,7 @@
     "dependency injection",
     "node"
   ],
-  "author": "William Matthews",
+  "author": "RoboPhred",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/RoboPhred/node-microinject/issues"
